@@ -1197,10 +1197,9 @@ function briefRules(){
 function bannerHTML(){
   let h="";
   if(briefing()){
-    const secs=Math.max(0, Math.ceil((LIVE.startAt-now())/1000));
     h+='<div class="banner info"><span class="t">🔔 Kickoff briefing — read fast</span><br>'+
        briefRules().map(x=>"• "+x).join("<br>")+
-       '<br><b style="font-size:16px">Market opens in <span id="briefSecs">'+secs+'</span>s</b></div>';
+       '<br><b>Market opens when the timer above hits zero.</b></div>';
   }
   if(shockFlash && Date.now()<shockFlash.until){
     const s=shockFlash.s;
@@ -1399,14 +1398,6 @@ function tickLoop(){
   const scr=document.querySelector(".screen.active");
   const b=briefing();
   if(b!==wasBrief){ wasBrief=b; render(true); }
-  if(b && scr && scr.id==="scr-play"){
-    const bh=$("bannerHost");
-    if(bh){
-      const sp=$("briefSecs");
-      if(sp) sp.textContent=Math.max(0, Math.ceil((LIVE.startAt-now())/1000));
-      else bh.innerHTML=bannerHTML();
-    }
-  }
   if(scr&&(scr.id==="scr-play"||scr.id==="scr-admin")) render(false);
   if(isAdmin && !endingLatch && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
     endingLatch=true;
