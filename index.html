@@ -1200,7 +1200,7 @@ function bannerHTML(){
     const secs=Math.max(0, Math.ceil((LIVE.startAt-now())/1000));
     h+='<div class="banner info"><span class="t">🔔 Kickoff briefing — read fast</span><br>'+
        briefRules().map(x=>"• "+x).join("<br>")+
-       '<br><b style="font-size:16px">Market opens in '+secs+'s</b></div>';
+       '<br><b style="font-size:16px">Market opens in <span id="briefSecs">'+secs+'</span>s</b></div>';
   }
   if(shockFlash && Date.now()<shockFlash.until){
     const s=shockFlash.s;
@@ -1385,7 +1385,7 @@ function updateTimerChips(){
   chips.forEach(([id])=>{
     const el=$(id); if(!el) return;
     if(!CFG||!LIVE||!LIVE.startAt){ el.textContent="–"; el.className="timerchip"; return; }
-    if(briefing()){ const r=Math.ceil((LIVE.startAt-now())/1000); el.textContent="T–"+r+"s"; el.className="timerchip hot"; return; }
+    if(briefing()){ const r=Math.ceil((LIVE.startAt-now())/1000); el.textContent="T–"+r+"s"; el.className="timerchip"; return; }
     if(LIVE.pauseAt){ el.textContent="PAUSED"; el.className="timerchip paused"; return; }
     const r=Math.ceil(remainMs()/1000);
     el.textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0");
@@ -1399,7 +1399,14 @@ function tickLoop(){
   const scr=document.querySelector(".screen.active");
   const b=briefing();
   if(b!==wasBrief){ wasBrief=b; render(true); }
-  if(b && scr && scr.id==="scr-play"){ const bh=$("bannerHost"); if(bh) bh.innerHTML=bannerHTML(); }
+  if(b && scr && scr.id==="scr-play"){
+    const bh=$("bannerHost");
+    if(bh){
+      const sp=$("briefSecs");
+      if(sp) sp.textContent=Math.max(0, Math.ceil((LIVE.startAt-now())/1000));
+      else bh.innerHTML=bannerHTML();
+    }
+  }
   if(scr&&(scr.id==="scr-play"||scr.id==="scr-admin")) render(false);
   if(isAdmin && !endingLatch && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
     endingLatch=true;
