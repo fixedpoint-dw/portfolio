@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Frontier — Classroom Portfolio Game</title>
+<title>Frontier II — Crash Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -178,8 +178,8 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 
 <!-- ============ LANDING ============ -->
 <div class="screen" id="scr-landing">
-  <div class="brand"><h1>Frontier</h1><span class="tag">portfolio game</span></div>
-  <p class="sub">You manage $100 across a money-market account and five stocks with known risk and return. Build the portfolio that survives what the market throws at it.</p>
+  <div class="brand"><h1>Frontier</h1><span class="tag">crash edition</span></div>
+  <p class="sub">You manage $100 across a money-market account and five stocks. Markets can jump without warning. Whoever holds the most money at the final bell wins — that simple.</p>
   <div class="card">
     <h3>Join the game</h3>
     <label for="nameInput">Your name</label>
@@ -259,6 +259,11 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <h3>Prices (growth of $100)</h3>
       <div class="chartbox tall"><canvas id="mktChart"></canvas></div>
     </div>
+    <div class="card" id="crashCard" style="display:none">
+      <h3>⚡ Crash risk this game</h3>
+      <div class="notice" id="crashInfo" style="margin-top:6px"></div>
+      <table class="tbl" id="crashTable"></table>
+    </div>
     <div class="card" id="paramCard">
       <h3>What you're choosing between</h3>
       <table class="tbl" id="assetTable"></table>
@@ -324,28 +329,28 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <div><label>T-bill rate (%/yr)</label><input type="number" id="cfgRf" step="0.5" value="4"></div>
       <div><label>Trading fee (bps)</label><input type="number" id="cfgFee" step="1" min="0" value="10"></div>
     </div>
-    <label>Ranking metric (what wins)</label>
-    <select id="cfgMetric">
-      <option value="score" selected>Risk-adjusted score: growth − (γ/2)·vol² (Markowitz)</option>
-      <option value="sharpe">Sharpe ratio</option>
-      <option value="wealth">Final wealth (no risk penalty)</option>
-    </select>
-    <div class="row" style="margin-top:2px">
-      <div><label>Risk aversion γ</label><input type="number" id="cfgGamma" step="0.5" min="0" value="3"></div>
-      <div><label>&nbsp;</label><div class="notice" style="margin:0">Used by the score metric.</div></div>
-    </div>
+    <label style="margin-top:6px">Ranking</label>
+    <div class="notice" style="margin-top:2px">Most money when the final bell rings. The live leaderboard is always sorted by current wealth — no risk adjustment, no excuses.</div>
 
-    <label style="margin-top:16px">Shocks (the risk-management teeth)</label>
+    <label style="margin-top:16px">Surprises (revealed to the class for 30s at kickoff)</label>
     <div class="row">
-      <div><label style="margin-top:4px">Random liquidity shocks</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
-      <div><label style="margin-top:4px">Random market crashes</label><input type="number" id="cfgNCrash" min="0" max="4" value="0"></div>
+      <div><label>Expected crashes per game</label><input type="number" id="cfgCrashFreq" min="0" max="5" step="0.5" value="1"></div>
+      <div><label>Crash magnitude</label>
+        <select id="cfgCrashMag">
+          <option value="mix" selected>Historic mix (random each time)</option>
+          <option value="correction">Correction (blue chips −7…12%)</option>
+          <option value="blackmonday">Black Monday '87 (−18…23%)</option>
+          <option value="covid">COVID '20 (−25…35%)</option>
+        </select>
+      </div>
     </div>
-    <div class="row3">
-      <div><label style="margin-top:4px">Cash call: % of wealth</label><input type="number" id="cfgExpPct" min="1" max="60" value="20"></div>
+    <div class="notice">A crash is a one-tick <b>jump</b> hitting every stock at once. The % is the blue-chip drop; each stock falls in proportion to its own risk (wilder stocks fall much harder, gold tends to pop <i>up</i>). Arrivals are random — expecting 1 sometimes means 0, sometimes 2. Each crash draws its own size from the chosen menu.</div>
+    <label class="chklabel"><input type="checkbox" id="cfgExpOn"> Liquidity calls (cash-on-demand stress tests)</label>
+    <div class="row3" id="expRow" style="display:none">
+      <div><label style="margin-top:4px"># random calls</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
+      <div><label style="margin-top:4px">Call: % of wealth</label><input type="number" id="cfgExpPct" min="1" max="60" value="20"></div>
       <div><label style="margin-top:4px">Fire-sale haircut %</label><input type="number" id="cfgHaircut" min="0" max="60" value="25"></div>
-      <div><label style="margin-top:4px">Crash severity</label><input type="number" id="cfgCrashSev" step="0.1" min="0.1" max="1.5" value="0.6"></div>
     </div>
-    <div class="notice">Liquidity shock: everyone must instantly <b>show a % of wealth in cash</b> (think margin call). Covered? No harm done. Short? The shortfall is fire-sold at the haircut — and the seller is left stranded in cash. Crash: all stocks gap down in proportion to their risk (gold tends to rise). Set both to 0 for a pure Markowitz sandbox; you can also fire either one manually, any time.</div>
 
     <label class="chklabel"><input type="checkbox" id="cfgPublic" checked> Public portfolios (anyone can see anyone's weights)</label>
     <label class="chklabel"><input type="checkbox" id="cfgShowParams" checked> Show true means, vols &amp; correlations to students</label>
@@ -382,12 +387,6 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <input type="text" id="bannerInput" maxlength="90" placeholder="e.g. Rumor: trouble in tech…">
       <button class="btn-small btn-primary" style="flex:none; width:90px" id="bannerSend">Send</button>
     </div>
-    <label style="margin-top:14px">Ranking metric (live)</label>
-    <select id="liveMetric">
-      <option value="score">Risk-adjusted score</option>
-      <option value="sharpe">Sharpe ratio</option>
-      <option value="wealth">Final wealth</option>
-    </select>
   </div>
 
   <div class="card">
@@ -501,9 +500,25 @@ const CORR_PRESETS = {
   zero:[[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1]],
   high:[[1,.80,.75,-.20,.70],[.80,1,.65,-.20,.75],[.75,.65,1,-.20,.60],[-.20,-.20,-.20,1,-.20],[.70,.75,.60,-.20,1]]
 };
+const CRASH_MAGS = {
+  correction:  {name:"Correction",        lo:0.07, hi:0.12},
+  blackmonday: {name:"Black Monday '87",  lo:0.18, hi:0.23},
+  covid:       {name:"COVID crash '20",   lo:0.25, hi:0.35},
+  mix:         {name:"Historic mix",      pool:["correction","correction","blackmonday","covid"]}
+};
+function drawMag(rng, key){
+  let k=key||"mix";
+  if(k==="mix"){ const pool=CRASH_MAGS.mix.pool; k=pool[Math.floor(rng()*pool.length)]; }
+  const pr=CRASH_MAGS[k]||CRASH_MAGS.correction;
+  return { m: pr.lo + rng()*(pr.hi-pr.lo), label: pr.name };
+}
+function sevFromMag(cfg, m){
+  const a0=cfg.assets[0];   /* anchored so the blue chip drops exactly m */
+  return -Math.log(1-m)/((a0.beta==null?1:a0.beta)*a0.sigma);
+}
 function defaultConfig(){ return {
   seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:3000, totalTicks:240,
-  gamma:3, metric:"score", nExp:2, nCrash:0, expPct:0.20, haircut:0.25, crashSev:0.6,
+  gamma:3, metric:"wealth", expOn:false, nExp:2, expPct:0.20, haircut:0.25, crashFreq:1, crashMag:"mix",
   publicPf:true, showParams:true, corr:"realistic", assets: defaultAssets()
 };}
 
@@ -563,14 +578,24 @@ function rawNormals(seed,K,upTo){
 /* deterministic pre-scheduled shocks derived from the seed */
 function scheduledShocks(cfg){
   const T=cfg.totalTicks, out=[];
-  const lo=Math.max(2,Math.floor(T*0.15)), hi=Math.max(lo+1,Math.floor(T*0.95));
-  function pick(n,salt){
-    const rng=mulberry32(((cfg.seed>>>0)^salt)>>>0), set=new Set(); let guard=0;
-    while(set.size<n && guard++<800) set.add(lo+Math.floor(rng()*(hi-lo)));
-    return [...set];
+  if(cfg.expOn && (cfg.nExp||0)>0){
+    const lo=Math.max(2,Math.floor(T*0.15)), hi=Math.max(lo+1,Math.floor(T*0.95));
+    const rng=mulberry32(((cfg.seed>>>0)^0x51ED27)>>>0), set=new Set(); let guard=0;
+    while(set.size<cfg.nExp && guard++<800) set.add(lo+Math.floor(rng()*(hi-lo)));
+    [...set].forEach(t=>out.push({tick:t, type:"exp", pct:cfg.expPct, hc:cfg.haircut, auto:true}));
   }
-  pick(cfg.nExp||0, 0x51ED27).forEach(t=>out.push({tick:t, type:"exp", pct:cfg.expPct, hc:cfg.haircut, auto:true}));
-  pick(cfg.nCrash||0, 0x9E3779).forEach(t=>out.push({tick:t, type:"crash", sev:cfg.crashSev, auto:true}));
+  /* crashes: seeded Poisson arrivals; each draws its own historic magnitude */
+  const freq=cfg.crashFreq||0;
+  if(freq>0){
+    const rng=mulberry32(((cfg.seed>>>0)^0x9E3779)>>>0), pr=freq/T;
+    const first=Math.max(2, Math.floor(T*0.05));
+    for(let t=first;t<=T;t++){
+      if(rng()<pr){
+        const d=drawMag(rng, cfg.crashMag);
+        out.push({tick:t, type:"crash", sev:sevFromMag(cfg,d.m), m:d.m, label:d.label, auto:true});
+      }
+    }
+  }
   return out;
 }
 function allShocks(cfg, manual){ // manual = array from DB
@@ -679,13 +704,14 @@ function tangency(cfg){ // from true params: max-Sharpe line and weights
    APP STATE + FIREBASE
    ===================================================================== */
 let db=null, roomRef=null;
-let me={ id:store.get("pf_pid"), name:store.get("pf_name") };
-let isAdmin = store.get("pf_admin")==="1";
+let me={ id:store.get("pfw_pid"), name:store.get("pfw_name") };
+let isAdmin = store.get("pfw_admin")==="1";
 let CFG=null, LIVE=null, PLAYERS={}, MANUAL=[];
 let serverOffset=0, charts={}, lastHeavyTick=-1, lastAnnTick=null, uiBuiltFor=null, dismissedBanner=0;
 
 function now(){ return Date.now()+serverOffset; }
-function running(){ return LIVE && (LIVE.phase==="running"); }
+function running(){ return LIVE && LIVE.phase==="running" && LIVE.startAt && now()>=LIVE.startAt; }
+function briefing(){ return LIVE && LIVE.phase==="running" && LIVE.startAt && now()<LIVE.startAt; }
 function elapsedMs(){
   if(!LIVE||!LIVE.startAt) return 0;
   const end=LIVE.pauseAt||now();
@@ -716,7 +742,7 @@ function boot(){
   if(!configured()){ show("scr-setup"); return; }
   firebase.initializeApp(firebaseConfig);
   db=firebase.database();
-  roomRef=db.ref("pf/"+ROOM);
+  roomRef=db.ref("pf/w-"+ROOM);
   db.ref(".info/serverTimeOffset").on("value",s=>{ serverOffset=s.val()||0; });
   roomRef.child("config").on("value",s=>{ CFG=s.val(); render(true); });
   roomRef.child("live").on("value",s=>{ LIVE=s.val(); render(true); });
@@ -743,13 +769,13 @@ async function join(){
   const rec={ name, joinedAt:firebase.database.ServerValue.TIMESTAMP, joinTick: running()? currentTick() : 0 };
   try{
     await roomRef.child("players/"+pid).set(rec);
-    me={id:pid,name}; store.set("pf_pid",pid); store.set("pf_name",name);
+    me={id:pid,name}; store.set("pfw_pid",pid); store.set("pfw_name",name);
     if(running()) toast("You're in — starting with "+fmt$(CFG.startCash)+" cash");
     render(true);
   }catch(e){ toast("Couldn't join — try again."); }
 }
 function adminLogin(){
-  if($("pwInput").value===ADMIN_PASSWORD){ isAdmin=true; store.set("pf_admin","1"); toast("Welcome, instructor"); render(true); }
+  if($("pwInput").value===ADMIN_PASSWORD){ isAdmin=true; store.set("pfw_admin","1"); toast("Welcome, instructor"); render(true); }
   else toast("Wrong password");
 }
 
@@ -848,13 +874,13 @@ function readCfgInputs(){
     dt: 1/ppy,
     tickMs: Math.round(tickSec*1000),
     totalTicks: Math.max(20, Math.round(mins*60/tickSec)),
-    gamma: Math.max(0, parseFloat($("cfgGamma").value)||3),
-    metric: $("cfgMetric").value,
+    gamma:3, metric:"wealth",
+    expOn: $("cfgExpOn").checked,
     nExp: Math.max(0, parseInt($("cfgNExp").value)||0),
-    nCrash: Math.max(0, parseInt($("cfgNCrash").value)||0),
     expPct: Math.min(.6, Math.max(.01,(parseFloat($("cfgExpPct").value)||20)/100)),
     haircut: Math.min(.6, Math.max(0,(parseFloat($("cfgHaircut").value)||25)/100)),
-    crashSev: Math.min(1.5, Math.max(.1, parseFloat($("cfgCrashSev").value)||0.6)),
+    crashFreq: Math.min(5, Math.max(0, parseFloat($("cfgCrashFreq").value)||0)),
+    crashMag: $("cfgCrashMag").value,
     publicPf: $("cfgPublic").checked,
     showParams: $("cfgShowParams").checked,
     corr: $("cfgCorr").value,
@@ -864,14 +890,16 @@ function readCfgInputs(){
 async function startGame(){
   if(!Object.keys(PLAYERS).length && !confirm("No students have joined yet — start anyway?")) return;
   const cfg=readCfgInputs();
+  const hasExtras = cfg.expOn || (cfg.crashFreq||0)>0;
   const ups={ config:cfg, shocks:null,
-    live:{ phase:"running", startAt:now(), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
+    live:{ phase:"running", startAt:now()+(hasExtras?30000:5000), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
   for(const pid of Object.keys(PLAYERS)) ups["players/"+pid+"/trades"]=null, ups["players/"+pid+"/joinTick"]=0;
   await roomRef.update(ups);
-  toast("Market open — good luck to them");
+  toast(hasExtras? "Briefing on every phone — market opens in 30s" : "Market opens in 5 seconds");
 }
 async function togglePause(){
   if(!LIVE) return;
+  if(briefing()){ toast("Wait for kickoff."); return; }
   if(LIVE.pauseAt){
     const extra=now()-LIVE.pauseAt;
     await roomRef.child("live").update({pausedMs:(LIVE.pausedMs||0)+extra, pauseAt:null});
@@ -884,12 +912,13 @@ async function togglePause(){
 async function fireShock(type){
   if(!running()||gameOver()){ toast("No live market."); return; }
   if(LIVE.pauseAt){ toast("Resume before firing a shock."); return; }
+  if(type==="exp" && !CFG.expOn){ toast("Liquidity calls are off this game."); return; }
   const t=currentTick()+1;
-  const rec = type==="exp"
-    ? {tick:t, type:"exp", pct:CFG.expPct, hc:CFG.haircut}
-    : {tick:t, type:"crash", sev:CFG.crashSev};
+  let rec;
+  if(type==="exp") rec={tick:t, type:"exp", pct:CFG.expPct, hc:CFG.haircut};
+  else { const d=drawMag(Math.random, CFG.crashMag); rec={tick:t, type:"crash", sev:sevFromMag(CFG,d.m), m:d.m, label:d.label}; }
   await roomRef.child("shocks").push(rec);
-  toast(type==="exp"?"Liquidity shock fired":"Crash fired");
+  toast(type==="exp"?"Liquidity call fired":"Crash fired — "+rec.label+" (−"+Math.round(rec.m*100)+"% blue chips)");
 }
 async function sendBanner(){
   const text=$("bannerInput").value.trim(); if(!text) return;
@@ -935,13 +964,13 @@ function wireUI(){
   $("fireExpBtn").onclick=()=>fireShock("exp");
   $("fireCrashBtn").onclick=()=>fireShock("crash");
   $("bannerSend").onclick=sendBanner;
-  $("liveMetric").onchange=()=>roomRef.child("config/metric").set($("liveMetric").value);
   $("againBtn").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
   $("wipeBtn").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
   $("againBtn2").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
   $("wipeBtn2").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
   buildAssetEditor();
-  ["cfgMin","cfgTickSec","cfgFreq","cfgNExp","cfgNCrash"].forEach(id=>$(id).addEventListener("input",cfgPreview));
+  ["cfgMin","cfgTickSec","cfgFreq","cfgCrashFreq"].forEach(id=>$(id).addEventListener("input",cfgPreview));
+  $("cfgExpOn").addEventListener("change",()=>{ $("expRow").style.display=$("cfgExpOn").checked?"":"none"; cfgPreview(); });
   cfgPreview();
 }
 function buildAssetEditor(){
@@ -957,7 +986,7 @@ function cfgPreview(){
   const ppy=parseInt($("cfgFreq").value)||52;
   const ticks=Math.round(mins*60/sec), yrs=(ticks/ppy).toFixed(1);
   $("cfgPreview").innerHTML="That's <b>"+ticks+" ticks</b> ≈ <b>"+yrs+" market-years</b> in "+mins+" minutes. "+
-    ($("cfgNExp").value>0||$("cfgNCrash").value>0 ? "Shock timing is random — students can't see it coming." : "No random shocks; you can still fire them manually.");
+    ($("cfgExpOn").checked||parseFloat($("cfgCrashFreq").value)>0 ? "Chosen surprises get a 30-second on-screen briefing at kickoff, then the market opens." : "No surprises configured — the market opens after a 5-second countdown. (You can still fire a crash manually.)");
 }
 
 /* build the per-game trade UI once */
@@ -1032,8 +1061,8 @@ function buildPlayUI(){
     "You start with "+fmt$(CFG.startCash)+" in a money-market account earning "+fmtPct(CFG.rf)+"/yr. It never loses value.",
     "Trade the five stocks any time. Prices come from the market — your trades don't move them. Each trade costs "+(CFG.feeBps||0)+" bps.",
     "Each tick of the clock is "+(Math.round(1/CFG.dt)===252?"one trading day":Math.round(1/CFG.dt)===12?"one month":"one week")+" of market time.",
-    (CFG.nExp>0||CFG.nCrash>0 ? "Surprises are armed: liquidity calls ("+fmtPct(CFG.expPct,0)+" of your wealth must be sitting in cash on demand — come up short and the difference is fire-sold at a "+fmtPct(CFG.haircut,0)+" haircut) and market crashes can hit without warning." : "The instructor can trigger liquidity calls and crashes at any moment."),
-    "Ranking: "+metricExplain()+" Everyone can watch the standings live — there are no restarts."
+    "Winner = "+metricExplain()+" The leaderboard is live and sorted by wealth. No restarts.",
+    "Any surprise rules the instructor has chosen will flash on every phone for 30 seconds right before the market opens — read fast."
   ];
   $("rulesList").innerHTML=rules.map(r=>"<li>"+r+"</li>").join("");
   $("rulesList2").innerHTML=$("rulesList").innerHTML;
@@ -1043,10 +1072,7 @@ function buildPlayUI(){
   Object.values(charts).forEach(c=>{ try{c.destroy();}catch(e){} }); charts={};
 }
 function metricExplain(){
-  if(!CFG) return "";
-  if(CFG.metric==="wealth") return "highest final wealth wins — no risk penalty (good luck, gamblers).";
-  if(CFG.metric==="sharpe") return "highest Sharpe ratio wins: excess growth per unit of volatility.";
-  return "highest risk-adjusted score wins: annualized growth − (γ/2)·volatility², with γ = "+(CFG.gamma||3)+". Volatility costs you points.";
+  return "the most money when the final bell rings — pure wealth, no risk adjustment.";
 }
 function syncSlidersToHoldings(){
   const acct=myAccount(); if(!acct||!CFG) return;
@@ -1077,6 +1103,21 @@ function corrTableHTML(){
 }
 function buildParamTables(){
   if(!CFG) return;
+  const cf=CFG.crashFreq||0;
+  $("crashCard").style.display=cf>0?"":"none";
+  if(cf>0){
+    const pr=CRASH_MAGS[CFG.crashMag]||CRASH_MAGS.mix;
+    const magTxt= CFG.crashMag==="mix"
+      ? "drawn from history each time — usually a correction (−7…12%), sometimes Black Monday scale (−18…23%), occasionally COVID scale (−25…35%), quoted as the blue-chip drop"
+      : pr.name+": blue chips drop "+Math.round(pr.lo*100)+"–"+Math.round(pr.hi*100)+"% in a single tick";
+    $("crashInfo").innerHTML="Expected <b>"+cf+"</b> crash"+(cf==1?"":"es")+" this game — arrivals are random, so it could be none or several, at any moment. Magnitude "+magTxt+". Every stock falls in the same instant, each in proportion to its own risk; gold usually jumps <i>up</i>. The instructor can also trigger one manually.";
+    const mMid = CFG.crashMag==="mix"? 0.15 : (pr.lo+pr.hi)/2;
+    const sv=sevFromMag(CFG,mMid);
+    $("crashTable").innerHTML="<tr><th>If a "+Math.round(mMid*100)+"% event hits</th><th>One-tick move</th></tr>"+
+      CFG.assets.map(a=>{ const d=1-Math.exp(-sv*(a.beta==null?1:a.beta)*a.sigma);
+        return '<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+"</td><td>"+(d>0?"−":"+")+fmtPct(Math.abs(d),0)+"</td></tr>";}).join("")+
+      '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>Cash</td><td>0%</td></tr>';
+  }
   $("paramCard").style.display=CFG.showParams?"":"none";
   $("corrCard").style.display=CFG.showParams?"":"none";
   if(!CFG.showParams) return;
@@ -1092,7 +1133,7 @@ function buildParamTables(){
 function render(dataChanged){
   if(!$("scr-landing")) return;
   if(me.id && playersLoaded && Object.keys(PLAYERS).length && !PLAYERS[me.id] && !isAdmin){
-    me={id:null, name:me.name}; store.del("pf_pid");   // removed by instructor
+    me={id:null, name:me.name}; store.del("pfw_pid");   // removed by instructor
   }
   const over = CFG && LIVE && gameOver();
   let target;
@@ -1123,8 +1164,8 @@ function renderLobby(){
     const d=defaultConfig();
     $("rulesList").innerHTML=["You start with $100 in a money-market account earning the T-bill rate.",
       "Trade five stocks in real time; prices are the market's, not yours.",
-      "Watch for surprise liquidity calls and crashes — cash and diversification are your armor.",
-      "Ranking is risk-adjusted by default: raw gambling gets penalized.",
+      "Winner = the most money when the final bell rings. Simple.",
+      "Any extra rules the instructor picks will be revealed for 30 seconds at kickoff.",
       "No restarts. Everyone sees the same market and the same standings."].map(r=>"<li>"+r+"</li>").join("");
   }
 }
@@ -1135,17 +1176,37 @@ function announceShocks(cap){
   sh.filter(s=>s.tick>lastAnnTick).forEach(s=>{
     shockFlash={s, until:Date.now()+15000};
     if(navigator.vibrate) navigator.vibrate([80,60,80]);
-    toast(s.type==="exp"?"💸 Liquidity shock!":"📉 Market crash!");
+    toast(s.type==="exp"?"💸 Liquidity call!":"📉 "+(s.label||"Market crash")+"!");
   });
   lastAnnTick=cap;
 }
+function briefRules(){
+  const r=[];
+  if((CFG.crashFreq||0)>0){
+    const pr=CRASH_MAGS[CFG.crashMag]||CRASH_MAGS.mix;
+    const magTxt = CFG.crashMag==="mix"
+      ? "sizes drawn from history — anywhere from a correction to a COVID-scale panic (blue chips −7% to −35%)"
+      : pr.name+" scale (blue chips −"+Math.round(pr.lo*100)+"% to −"+Math.round(pr.hi*100)+"%)";
+    r.push("⚡ <b>Crash risk is ON</b>: about "+CFG.crashFreq+" jump"+(CFG.crashFreq==1?"":"s")+" expected this game (the actual count is random). When one hits, every stock gaps down in the same instant — "+magTxt+". Riskier stocks fall harder; gold tends to jump <i>up</i>.");
+  }
+  if(CFG.expOn) r.push("💸 <b>Liquidity calls are ON</b>: at random moments you must be holding "+fmtPct(CFG.expPct,0)+" of your wealth in cash. Come up short and the gap is fire-sold at a "+fmtPct(CFG.haircut,0)+" haircut.");
+  if(!r.length) r.push("No surprises this game — a pure market. May the best portfolio win.");
+  r.push("Full details are in the <b>Market</b> tab. Ranking: most money at the bell.");
+  return r;
+}
 function bannerHTML(){
   let h="";
+  if(briefing()){
+    const secs=Math.max(0, Math.ceil((LIVE.startAt-now())/1000));
+    h+='<div class="banner info"><span class="t">🔔 Kickoff briefing — read fast</span><br>'+
+       briefRules().map(x=>"• "+x).join("<br>")+
+       '<br><b style="font-size:16px">Market opens in '+secs+'s</b></div>';
+  }
   if(shockFlash && Date.now()<shockFlash.until){
     const s=shockFlash.s;
     h+= s.type==="exp"
       ? '<div class="banner"><span class="t">💸 Liquidity call at '+fmtClock(s.tick)+':</span> show '+fmtPct(s.pct,0)+' of your wealth in cash. Anyone short just got fire-sold at a '+fmtPct(s.hc,0)+' haircut.</div>'
-      : '<div class="banner"><span class="t">📉 Market crash at '+fmtClock(s.tick)+':</span> stocks gapped down in proportion to their risk.</div>';
+      : '<div class="banner"><span class="t">📉 '+esc(s.label||"Market crash")+' at '+fmtClock(s.tick)+':</span> blue chips −'+Math.round((s.m||0)*100)+'% in one tick. Risk got punished; gold popped.</div>';
   }
   if(LIVE&&LIVE.banner&&LIVE.banner.ts>dismissedBanner){
     h+='<div class="banner info"><span class="t">📣 '+esc(LIVE.banner.text)+'</span> <button class="btn-small btn-ghost" style="float:right" onclick="dismissB('+LIVE.banner.ts+')">ok</button></div>';
@@ -1205,10 +1266,12 @@ function renderPlay(dataChanged){
 }
 function renderMyStats(acct){
   const m=acct.metrics;
+  const rows=rankAll(), ri=rows.findIndex(r=>r.pid===me.id);
   const cells=[
+    [ri>=0? "#"+(ri+1)+" of "+rows.length : "–","rank (by wealth)"],
     [fmtSign(m.ret),"return"], [fmtPct(m.sig,1),"volatility"],
     [m.ok? m.sharpe.toFixed(2):"–","sharpe"],
-    [fmtPct(m.mdd,1),"max drawdown"], [m.ok? fmtSign(m.score):"–","score"],
+    [fmtPct(m.mdd,1),"max drawdown"],
     [fmt$(acct.fees+acct.firesale),"fees + fire-sales"]
   ];
   $("myStats").innerHTML=cells.map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
@@ -1219,8 +1282,7 @@ function rankAll(){
     const acct=accountOf(pid); if(!acct) continue;
     rows.push({pid, name:p.name, acct, m:acct.metrics, W:acct.W[acct.W.length-1]||CFG.startCash});
   }
-  const key=CFG.metric==="wealth"? r=>r.W : CFG.metric==="sharpe"? r=>r.m.sharpe : r=>r.m.score;
-  rows.sort((a,b)=>key(b)-key(a));
+  rows.sort((a,b)=>b.W-a.W);
   return rows;
 }
 let openPf=null;
@@ -1234,13 +1296,11 @@ function pfBarHTML(acct){
 }
 function renderLeaderboard(tableId, adminMode){
   const rows=rankAll();
-  const mLabel=CFG.metric==="wealth"?"Wealth":CFG.metric==="sharpe"?"Sharpe":"Score";
-  let html="<tr><th>#</th><th>Investor</th><th>Wealth</th><th>Ret</th><th>Vol</th><th class='hi'>"+mLabel+"</th></tr>";
+  let html="<tr><th>#</th><th>Investor</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th></tr>";
   rows.forEach((r,i)=>{
-    const mv=CFG.metric==="wealth"? fmt$(r.W) : CFG.metric==="sharpe"? (r.m.ok?r.m.sharpe.toFixed(2):"–") : (r.m.ok?fmtSign(r.m.score):"–");
     html+="<tr class='metric-col"+(r.pid===me.id?" me":"")+"' "+(CFG.publicPf?'onclick="togglePf(\''+r.pid+'\')" style="cursor:pointer"':"")+">"+
-      "<td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td class='hi'>"+mv+"</td></tr>";
-    if(CFG.publicPf && openPf===r.pid) html+="<tr><td colspan='6' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
+      "<td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td class='hi'>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td></tr>";
+    if(CFG.publicPf && openPf===r.pid) html+="<tr><td colspan='5' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
   });
   $(tableId).innerHTML=html||"";
 }
@@ -1248,7 +1308,7 @@ function renderLeaderboard(tableId, adminMode){
 /* ---------- admin render ---------- */
 function renderAdmin(dataChanged){
   const inLobby=!LIVE||LIVE.phase==="lobby"||!LIVE.startAt;
-  $("aPhase").textContent=inLobby?"Lobby":(LIVE.pauseAt?"Paused":"Live");
+  $("aPhase").textContent=inLobby?"Lobby":(briefing()?"Briefing":(LIVE.pauseAt?"Paused":"Live"));
   $("aCount").textContent=Object.keys(PLAYERS).length;
   $("admCfg").style.display=inLobby?"":"none";
   $("admLive").style.display=inLobby?"none":"";
@@ -1266,8 +1326,8 @@ function renderAdmin(dataChanged){
   announceShocks(cap);
   buildPlayUI();
   $("aClock").textContent=fmtClock(cap);
-  $("liveMetric").value=CFG.metric;
   $("pauseBtn").textContent=LIVE.pauseAt?"Resume":"Pause";
+  $("fireExpBtn").style.display=CFG.expOn?"":"none";
   renderLeaderboard("aLbTable",true);
   drawScatter("aScatter",false);
   const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
@@ -1294,13 +1354,13 @@ function renderResults(){
       '<div class="stat"><div class="v">'+bestSharpe.m.sharpe.toFixed(2)+'</div><div class="k">best sharpe ('+esc(bestSharpe.name)+')</div></div>'+
       '<div class="stat"><div class="v">'+fmtSign(med? med.m.ret:0)+'</div><div class="k">median return</div></div>';
   }
-  let html="<tr><th>#</th><th>Investor</th><th>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th><th class='hi'>Score</th></tr>";
+  let html="<tr><th>#</th><th>Investor</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th></tr>";
   rows.forEach((r,i)=>{
-    html+="<tr"+(r.pid===me.id?" class='me'":"")+"><td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td>"+(r.m.ok?r.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(r.m.mdd,0)+"</td><td class='hi'>"+(r.m.ok?fmtSign(r.m.score):"–")+"</td></tr>";
-    if(CFG.publicPf) html+="<tr><td colspan='8' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
+    html+="<tr"+(r.pid===me.id?" class='me'":"")+"><td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td class='hi'>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td>"+(r.m.ok?r.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(r.m.mdd,0)+"</td></tr>";
+    if(CFG.publicPf) html+="<tr><td colspan='7' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
   });
   $("resTable").innerHTML=html;
-  $("resNote").textContent="Score = growth − (γ/2)·vol², γ = "+(CFG.gamma||3)+". Fire-sale losses and fees are already inside these numbers.";
+  $("resNote").textContent="Ranking is pure final wealth. Sharpe, volatility and drawdown are shown for the debrief — ask who WOULD have won under a risk-adjusted rule. Fire-sale losses and fees are already inside these numbers.";
   drawScatter("resScatter",true);
   /* theory corner */
   const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
@@ -1325,17 +1385,21 @@ function updateTimerChips(){
   chips.forEach(([id])=>{
     const el=$(id); if(!el) return;
     if(!CFG||!LIVE||!LIVE.startAt){ el.textContent="–"; el.className="timerchip"; return; }
+    if(briefing()){ const r=Math.ceil((LIVE.startAt-now())/1000); el.textContent="T–"+r+"s"; el.className="timerchip hot"; return; }
     if(LIVE.pauseAt){ el.textContent="PAUSED"; el.className="timerchip paused"; return; }
     const r=Math.ceil(remainMs()/1000);
     el.textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0");
     el.className="timerchip"+(r<=30?" hot":"");
   });
 }
-let endingLatch=false;
+let endingLatch=false, wasBrief=false;
 function tickLoop(){
   if(!CFG||!LIVE) { updateTimerChips(); return; }
   updateTimerChips();
   const scr=document.querySelector(".screen.active");
+  const b=briefing();
+  if(b!==wasBrief){ wasBrief=b; render(true); }
+  if(b && scr && scr.id==="scr-play"){ const bh=$("bannerHost"); if(bh) bh.innerHTML=bannerHTML(); }
   if(scr&&(scr.id==="scr-play"||scr.id==="scr-admin")) render(false);
   if(isAdmin && !endingLatch && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
     endingLatch=true;
@@ -1401,7 +1465,7 @@ function drawScatter(id, withAssets){
 function renderEventLog(cap){
   const evs=allShocks(CFG,MANUAL).filter(s=>s.tick<=cap).map(s=>({
     when:fmtClock(s.tick),
-    txt: s.type==="exp"? "💸 Liquidity call: show "+fmtPct(s.pct,0)+" of wealth in cash; shortfalls fire-sold at "+fmtPct(s.hc,0)+" haircut" : "📉 Crash: stocks gapped down in proportion to their risk (gold hedged)"
+    txt: s.type==="exp"? "💸 Liquidity call: show "+fmtPct(s.pct,0)+" of wealth in cash; shortfalls fire-sold at "+fmtPct(s.hc,0)+" haircut" : "📉 "+(s.label||"Crash")+": blue chips −"+Math.round((s.m||0)*100)+"% in one tick"
   }));
   if(LIVE&&LIVE.banner) evs.push({when:"📣", txt:esc(LIVE.banner.text)});
   $("eventLog").innerHTML=evs.reverse().map(e=>'<li><span class="when">'+e.when+'</span><span>'+e.txt+'</span></li>').join("")||"<li><span style='color:var(--muted)'>Quiet so far. It won't last.</span></li>";
