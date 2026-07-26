@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Frontier — Classroom Portfolio Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+:root{
+  --paper:#EEF1F4; --card:#FFFFFF; --ink:#131A24; --muted:#5B6B7C;
+  --line:#D7DEE6; --navy:#1E3A5F; --navy-dark:#152C4A;
+  --gain:#0E7C4F; --gain-bg:#E6F4EC; --loss:#C03A2B; --loss-bg:#FBEAE7;
+  --amber:#C77F00; --chip:#E8EDF2;
+  --radius:14px; --shadow:0 1px 3px rgba(19,26,36,.08), 0 4px 14px rgba(19,26,36,.06);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; padding:0}
+body{background:var(--paper); color:var(--ink); font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding-bottom:44px}
+h1,h2,h3,.display{font-family:"Space Grotesk",sans-serif; letter-spacing:-.01em}
+.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+.screen{display:none; max-width:560px; margin:0 auto; padding:16px}
+.screen.active{display:block}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
+.card h3{margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+button{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:17px; border:none; border-radius:12px; padding:14px 18px; cursor:pointer; touch-action:manipulation; color:var(--ink); background:var(--chip)}
+button:disabled{opacity:.4; cursor:default}
+.btn-primary{background:var(--navy); color:#fff; width:100%}
+.btn-primary:active{background:var(--navy-dark)}
+.btn-ghost{background:var(--chip); color:var(--ink); width:100%}
+.btn-danger{background:var(--loss); color:#fff}
+.btn-buy{background:var(--gain); color:#fff}
+.btn-sell{background:var(--loss); color:#fff}
+.btn-small{font-size:13px; padding:8px 12px; border-radius:9px; font-weight:600}
+input[type=text],input[type=password],input[type=number],select{width:100%; font-size:17px; padding:12px 13px; border:1.5px solid var(--line); border-radius:12px; background:#fff; color:var(--ink); font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--navy); border-color:var(--navy)}
+label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin:12px 0 5px; text-transform:uppercase; letter-spacing:.05em}
+.chklabel{display:flex; align-items:center; gap:10px; text-transform:none; font-size:15px; font-weight:500; color:var(--ink); letter-spacing:0; margin-top:12px}
+.chklabel input{width:22px; height:22px; flex:none}
+.row{display:flex; gap:10px}
+.row>*{flex:1}
+.row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
+
+/* sticky ticker */
+.tape{position:sticky; top:0; z-index:50; background:var(--ink); color:#E8EEF5; margin:-16px -16px 12px; padding:10px 16px calc(10px + env(safe-area-inset-top,0)); display:flex; justify-content:space-between; align-items:center; gap:6px}
+.tape .cell{text-align:center; min-width:0}
+.tape .lbl{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8FA3B8}
+.tape .val{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px; white-space:nowrap}
+.tape .val.up{color:#6FE3A5}.tape .val.down{color:#FF9C8A}
+.timerchip{background:#2A3A4C; border-radius:999px; padding:4px 12px; font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
+.timerchip.hot{background:var(--loss); animation:pulse 1s infinite}
+.timerchip.paused{background:var(--amber); color:#fff}
+@keyframes pulse{50%{opacity:.6}}
+@keyframes flashUp{0%{background:var(--gain-bg)}100%{background:transparent}}
+@keyframes flashDown{0%{background:var(--loss-bg)}100%{background:transparent}}
+@keyframes slideIn{0%{transform:translateY(-8px);opacity:0}100%{transform:none;opacity:1}}
+
+.brand{display:flex; align-items:baseline; gap:8px; margin:22px 0 4px}
+.brand h1{font-size:30px; margin:0}
+.brand .tag{color:var(--muted); font-size:13px}
+.sub{color:var(--muted); font-size:14px; margin:0 0 18px}
+
+/* signature: allocation bar */
+.allocwrap{margin:0 0 12px}
+.allocbar{display:flex; height:26px; border-radius:9px; overflow:hidden; border:1px solid var(--line); background:#fff}
+.allocbar .seg{height:100%; transition:width .35s ease; min-width:0}
+.alloccap{display:flex; justify-content:space-between; font-size:11.5px; color:var(--muted); margin-top:4px; letter-spacing:.02em}
+.alloccap b{color:var(--ink)}
+
+/* tab bar */
+.tabbar{position:sticky; top:calc(50px + env(safe-area-inset-top,0px)); z-index:40; display:flex; background:var(--chip); border-radius:12px; padding:4px; margin-bottom:14px; box-shadow:var(--shadow)}
+.tabbar button{flex:1; padding:9px 4px; font-size:14px; border-radius:9px; background:transparent; font-weight:700; color:var(--muted)}
+.tabbar button.on{background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(19,26,36,.12)}
+.tabpane{display:none}
+.tabpane.on{display:block}
+
+/* holdings rows */
+.hrow{border-bottom:1px solid var(--line); padding:10px 0}
+.hrow:last-child{border-bottom:none}
+.hmain{display:flex; align-items:center; gap:10px; cursor:pointer}
+.dotc{width:10px; height:10px; border-radius:3px; flex:none}
+.hname{flex:1; min-width:0}
+.hname .nm{font-weight:700; font-size:15px}
+.hname .sub2{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.hpx{text-align:right}
+.hpx .p{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
+.hpx .d{font-size:12px; font-family:"IBM Plex Mono",monospace}
+.hmy{text-align:right; min-width:86px}
+.hmy .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
+.hmy .w{font-size:12px; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+.up{color:var(--gain)} .down{color:var(--loss)}
+.tradepanel{display:none; margin-top:10px; background:var(--chip); border-radius:12px; padding:12px}
+.tradepanel.open{display:block; animation:slideIn .18s ease}
+.chiprow{display:flex; gap:8px; margin:8px 0 10px}
+.chiprow button{flex:1; font-size:13px; padding:8px 4px; border-radius:9px; background:#fff; font-weight:600}
+.bs{display:flex; gap:10px}
+.bs button{flex:1; font-size:16px; padding:12px}
+
+/* sliders */
+.sl{margin-bottom:12px}
+.sl .top{display:flex; justify-content:space-between; font-size:14px; margin-bottom:2px}
+.sl .top .w{font-family:"IBM Plex Mono",monospace; font-weight:600}
+input[type=range]{width:100%; accent-color:var(--navy); height:30px}
+.cashleft{display:flex; justify-content:space-between; font-size:14px; padding:8px 2px; border-top:1px dashed var(--line); margin-top:4px}
+.cashleft .w{font-family:"IBM Plex Mono",monospace; font-weight:700}
+.cashleft.bad .w{color:var(--loss)}
+
+.pill{display:inline-block; background:var(--chip); border-radius:999px; padding:3px 10px; font-size:12px; font-weight:600; color:var(--muted)}
+.pill.ok{background:var(--gain-bg); color:var(--gain)}
+.pill.warn{background:var(--loss-bg); color:var(--loss)}
+.pill.gold{background:#FBF3E0; color:var(--amber)}
+
+.banner{border-left:4px solid var(--loss); background:var(--loss-bg); border-radius:10px; padding:10px 12px; font-size:14px; margin-bottom:12px; animation:slideIn .25s ease}
+.banner.info{border-color:var(--amber); background:#FFF7E8}
+.banner .t{font-weight:700}
+.notice{background:var(--chip); border-radius:10px; padding:10px 12px; font-size:13.5px; color:var(--muted); margin-top:10px}
+.chartbox{position:relative; width:100%; height:220px}
+.chartbox.tall{height:280px}
+
+.statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:4px}
+.stat{background:var(--chip); border-radius:10px; padding:9px 6px; text-align:center}
+.stat .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px}
+.stat .k{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:1px}
+
+table.tbl{width:100%; border-collapse:collapse; font-size:13.5px}
+table.tbl th{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:right; padding:6px 4px; border-bottom:1px solid var(--line)}
+table.tbl th:first-child,table.tbl td:first-child{text-align:left}
+table.tbl td{padding:7px 4px; border-bottom:1px solid var(--line); text-align:right; font-family:"IBM Plex Mono",monospace}
+table.tbl td.nm{font-family:inherit; font-weight:600; text-align:left}
+table.tbl tr:last-child td{border-bottom:none}
+tr.metric-col td.hi, th.hi{background:#F4F7FB}
+tr.me td{background:#FBF3E0}
+.minibar{display:flex; height:10px; border-radius:5px; overflow:hidden; margin-top:5px; background:var(--chip)}
+.minibar .seg{height:100%}
+
+.plist{list-style:none; margin:0; padding:0}
+.plist li{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:15px; gap:8px}
+.plist li:last-child{border-bottom:none}
+.plist .nm{font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.eventlog{list-style:none; margin:0; padding:0; font-size:13.5px}
+.eventlog li{padding:7px 0; border-bottom:1px solid var(--line); display:flex; gap:10px}
+.eventlog li:last-child{border-bottom:none}
+.eventlog .when{font-family:"IBM Plex Mono",monospace; color:var(--muted); flex:none}
+.q{margin:0 0 6px; padding-left:20px}
+.q li{margin-bottom:9px; font-size:14.5px}
+code{background:var(--chip); padding:2px 6px; border-radius:6px; font-size:14px}
+.setupstep{display:flex; gap:12px; margin-bottom:14px; font-size:15px}
+.setupstep .n{flex:none; width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px}
+.admin-link{display:block; text-align:center; margin-top:26px; color:var(--muted); font-size:13px; text-decoration:underline; background:none; border:none; width:100%; padding:8px; font-family:inherit; font-weight:400; cursor:pointer}
+.toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:999px; font-size:14px; opacity:0; transition:opacity .25s; pointer-events:none; z-index:99; max-width:90vw; text-align:center}
+.toast.show{opacity:1}
+details.adv{border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-top:12px}
+details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
+.assetedit{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:8px; align-items:center; margin-top:8px}
+.assetedit .an{font-size:13.5px; font-weight:600}
+.assetedit input{padding:8px 10px; font-size:15px}
+.gridhead{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+.flash-up{animation:flashUp 1s} .flash-down{animation:flashDown 1s}
+@media (prefers-reduced-motion:reduce){ .timerchip.hot{animation:none} .banner,.tradepanel.open{animation:none} .allocbar .seg{transition:none} }
+</style>
+</head>
+<body>
+
+<!-- ============ SETUP (shown only if firebaseConfig is missing) ============ -->
+<div class="screen" id="scr-setup">
+  <div class="brand"><h1>Frontier</h1><span class="tag">setup</span></div>
+  <p class="sub">One-time setup for the instructor: connect this page to a free Firebase database so students' phones can sync.</p>
+  <div class="card">
+    <div class="setupstep"><div class="n">1</div><div>Go to <b>console.firebase.google.com</b> → Add project.</div></div>
+    <div class="setupstep"><div class="n">2</div><div><b>Build → Realtime Database → Create database</b> → test mode.</div></div>
+    <div class="setupstep"><div class="n">3</div><div>Project settings (gear) → <b>Your apps → Web app (&lt;/&gt;)</b> → copy the <code>firebaseConfig</code>.</div></div>
+    <div class="setupstep"><div class="n">4</div><div>Paste it into the <code>firebaseConfig</code> block at the top of the script in <code>index.html</code>.</div></div>
+  </div>
+</div>
+
+<!-- ============ LANDING ============ -->
+<div class="screen" id="scr-landing">
+  <div class="brand"><h1>Frontier</h1><span class="tag">portfolio game</span></div>
+  <p class="sub">You manage $100 across a money-market account and five stocks with known risk and return. Build the portfolio that survives what the market throws at it.</p>
+  <div class="card">
+    <h3>Join the game</h3>
+    <label for="nameInput">Your name</label>
+    <input type="text" id="nameInput" maxlength="18" placeholder="e.g. Minji" autocomplete="off">
+    <div style="height:12px"></div>
+    <button class="btn-primary" id="joinBtn">Open my account</button>
+    <div class="notice" id="joinNotice" style="display:none"></div>
+  </div>
+  <button class="admin-link" id="showAdminBtn">Instructor login</button>
+  <div class="card" id="adminLoginCard" style="display:none">
+    <h3>Instructor</h3>
+    <label for="pwInput">Password</label>
+    <input type="password" id="pwInput" autocomplete="off">
+    <div style="height:12px"></div>
+    <button class="btn-primary" id="adminLoginBtn">Open control room</button>
+  </div>
+</div>
+
+<!-- ============ PLAYER LOBBY ============ -->
+<div class="screen" id="scr-lobby">
+  <div class="brand"><h1>Market opens soon</h1></div>
+  <p class="sub">Your account is ready, <b id="lobbyName"></b>. Waiting for the instructor to start the clock.</p>
+  <div class="card">
+    <h3>How this game works</h3>
+    <ul class="q" id="rulesList"></ul>
+  </div>
+  <div class="card">
+    <h3>Investors in the room (<span id="lobbyCount">0</span>)</h3>
+    <ul class="plist" id="lobbyList"></ul>
+  </div>
+</div>
+
+<!-- ============ PLAYER: PLAY ============ -->
+<div class="screen" id="scr-play">
+  <div class="tape">
+    <div class="cell"><div class="lbl">Clock</div><div class="val" id="tClock">–</div></div>
+    <div class="cell"><div class="lbl">My wealth</div><div class="val" id="tWealth">–</div></div>
+    <div class="cell"><div class="lbl">Last tick</div><div class="val" id="tChange">–</div></div>
+    <div class="cell"><div class="timerchip" id="tTimer">–</div></div>
+  </div>
+
+  <div id="bannerHost"></div>
+
+  <div class="allocwrap">
+    <div class="allocbar" id="allocBar"></div>
+    <div class="alloccap"><span>Your allocation</span><span id="allocCap"></span></div>
+  </div>
+
+  <div class="tabbar" id="tabbar">
+    <button data-tab="trade" class="on">Trade</button>
+    <button data-tab="market">Market</button>
+    <button data-tab="ranks">Ranks</button>
+  </div>
+
+  <!-- --- TAB: TRADE --- -->
+  <div class="tabpane on" id="tab-trade">
+    <div class="card">
+      <h3>Holdings</h3>
+      <div id="holdList"></div>
+    </div>
+    <div class="card">
+      <h3>Rebalance to target weights</h3>
+      <div id="rbHost"></div>
+      <div class="cashleft" id="rbCashRow"><span>Money market (the rest)</span><span class="w" id="rbCash">100%</span></div>
+      <div class="allocbar" id="rbBar" style="height:14px; margin:8px 0 12px"></div>
+      <div class="row">
+        <button class="btn-ghost btn-small" id="rbSync" style="flex:0 0 42%">Load my current mix</button>
+        <button class="btn-primary" id="rbApply" style="padding:10px 12px; font-size:15px">Trade to these weights</button>
+      </div>
+      <div class="notice" id="rbNote"></div>
+    </div>
+  </div>
+
+  <!-- --- TAB: MARKET --- -->
+  <div class="tabpane" id="tab-market">
+    <div class="card">
+      <h3>Prices (growth of $100)</h3>
+      <div class="chartbox tall"><canvas id="mktChart"></canvas></div>
+    </div>
+    <div class="card" id="paramCard">
+      <h3>What you're choosing between</h3>
+      <table class="tbl" id="assetTable"></table>
+      <div class="notice">These are the true annual parameters generating prices. Your job: combine them well — not just pick the biggest number.</div>
+    </div>
+    <div class="card" id="corrCard">
+      <h3>Correlations</h3>
+      <table class="tbl" id="corrTable"></table>
+    </div>
+    <div class="card">
+      <h3>Event log</h3>
+      <ul class="eventlog" id="eventLog"></ul>
+    </div>
+    <div class="card">
+      <h3>Rules of the road</h3>
+      <ul class="q" id="rulesList2"></ul>
+    </div>
+  </div>
+
+  <!-- --- TAB: RANKS --- -->
+  <div class="tabpane" id="tab-ranks">
+    <div class="card">
+      <h3>Your performance</h3>
+      <div class="statgrid" id="myStats"></div>
+      <div class="chartbox"><canvas id="meChart"></canvas></div>
+      <div class="notice">Dashed line = parking everything in the money market. Beat it — without blowing up.</div>
+    </div>
+    <div class="card">
+      <h3>Standings</h3>
+      <table class="tbl" id="lbTable"></table>
+      <div class="notice" id="lbNote"></div>
+    </div>
+    <div class="card">
+      <h3>Risk–return map (live)</h3>
+      <div class="chartbox tall"><canvas id="scatterChart"></canvas></div>
+      <div class="notice">Every investor is a dot: realized volatility (x) vs realized growth (y), annualized. The gold line is the best risk–return trade-off theoretically available. Up and to the left is skill; far right is gambling.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div class="screen" id="scr-admin">
+  <div class="tape">
+    <div class="cell"><div class="lbl">Phase</div><div class="val" id="aPhase">–</div></div>
+    <div class="cell"><div class="lbl">Clock</div><div class="val" id="aClock">–</div></div>
+    <div class="cell"><div class="lbl">Investors</div><div class="val" id="aCount">–</div></div>
+    <div class="cell"><div class="timerchip" id="aTimer">–</div></div>
+  </div>
+
+  <div class="notice" style="margin:0 0 14px">Prices are generated from a shared seed, so every phone computes the identical market — you can even close this page mid-game and nothing breaks. Come back to trigger shocks or end early.</div>
+
+  <div class="card" id="admCfg">
+    <h3>Game setup</h3>
+    <div class="row">
+      <div><label>Game length (min)</label><input type="number" id="cfgMin" inputmode="numeric" min="3" max="60" value="12"></div>
+      <div><label>Seconds per tick</label><input type="number" id="cfgTickSec" inputmode="numeric" min="1" max="15" value="3"></div>
+    </div>
+    <div class="row">
+      <div><label>One tick equals</label><select id="cfgFreq"><option value="52" selected>1 week</option><option value="252">1 day</option><option value="12">1 month</option></select></div>
+      <div><label>Start cash ($)</label><input type="number" id="cfgCash" min="10" value="100"></div>
+    </div>
+    <div class="row">
+      <div><label>T-bill rate (%/yr)</label><input type="number" id="cfgRf" step="0.5" value="4"></div>
+      <div><label>Trading fee (bps)</label><input type="number" id="cfgFee" step="1" min="0" value="10"></div>
+    </div>
+    <label>Ranking metric (what wins)</label>
+    <select id="cfgMetric">
+      <option value="score" selected>Risk-adjusted score: growth − (γ/2)·vol² (Markowitz)</option>
+      <option value="sharpe">Sharpe ratio</option>
+      <option value="wealth">Final wealth (no risk penalty)</option>
+    </select>
+    <div class="row" style="margin-top:2px">
+      <div><label>Risk aversion γ</label><input type="number" id="cfgGamma" step="0.5" min="0" value="3"></div>
+      <div><label>&nbsp;</label><div class="notice" style="margin:0">Used by the score metric.</div></div>
+    </div>
+
+    <label style="margin-top:16px">Shocks (the risk-management teeth)</label>
+    <div class="row">
+      <div><label style="margin-top:4px">Random liquidity shocks</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
+      <div><label style="margin-top:4px">Random market crashes</label><input type="number" id="cfgNCrash" min="0" max="4" value="0"></div>
+    </div>
+    <div class="row3">
+      <div><label style="margin-top:4px">Cash call: % of wealth</label><input type="number" id="cfgExpPct" min="1" max="60" value="20"></div>
+      <div><label style="margin-top:4px">Fire-sale haircut %</label><input type="number" id="cfgHaircut" min="0" max="60" value="25"></div>
+      <div><label style="margin-top:4px">Crash severity</label><input type="number" id="cfgCrashSev" step="0.1" min="0.1" max="1.5" value="0.6"></div>
+    </div>
+    <div class="notice">Liquidity shock: everyone must instantly <b>show a % of wealth in cash</b> (think margin call). Covered? No harm done. Short? The shortfall is fire-sold at the haircut — and the seller is left stranded in cash. Crash: all stocks gap down in proportion to their risk (gold tends to rise). Set both to 0 for a pure Markowitz sandbox; you can also fire either one manually, any time.</div>
+
+    <label class="chklabel"><input type="checkbox" id="cfgPublic" checked> Public portfolios (anyone can see anyone's weights)</label>
+    <label class="chklabel"><input type="checkbox" id="cfgShowParams" checked> Show true means, vols &amp; correlations to students</label>
+
+    <details class="adv">
+      <summary>Assets (annual %, edit if you like)</summary>
+      <div id="assetEditor"></div>
+      <label>Correlation structure</label>
+      <select id="cfgCorr">
+        <option value="realistic" selected>Realistic (equities co-move, gold hedges)</option>
+        <option value="zero">Independent (all correlations 0)</option>
+        <option value="high">Crisis-like (equities highly correlated)</option>
+      </select>
+    </details>
+
+    <div class="notice" id="cfgPreview"></div>
+    <div style="height:12px"></div>
+    <button class="btn-primary" id="startBtn">Start the market</button>
+  </div>
+
+  <div class="card" id="admLive" style="display:none">
+    <h3>Live controls</h3>
+    <div class="row">
+      <button class="btn-ghost" id="pauseBtn">Pause</button>
+      <button class="btn-danger" id="endBtn">End game → results</button>
+    </div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn-ghost" id="fireExpBtn">💸 Liquidity shock now</button>
+      <button class="btn-ghost" id="fireCrashBtn">📉 Crash now</button>
+    </div>
+    <label>Announcement to all phones</label>
+    <div class="row">
+      <input type="text" id="bannerInput" maxlength="90" placeholder="e.g. Rumor: trouble in tech…">
+      <button class="btn-small btn-primary" style="flex:none; width:90px" id="bannerSend">Send</button>
+    </div>
+    <label style="margin-top:14px">Ranking metric (live)</label>
+    <select id="liveMetric">
+      <option value="score">Risk-adjusted score</option>
+      <option value="sharpe">Sharpe ratio</option>
+      <option value="wealth">Final wealth</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h3>Standings</h3>
+    <table class="tbl" id="aLbTable"></table>
+  </div>
+
+  <div class="card">
+    <h3>Risk–return map</h3>
+    <div class="chartbox tall"><canvas id="aScatter"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>Market</h3>
+    <div class="chartbox"><canvas id="aMktChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <h3>Roster</h3>
+    <ul class="plist" id="aRoster"></ul>
+  </div>
+
+  <div class="card">
+    <h3>Danger zone</h3>
+    <button class="btn-ghost" id="againBtn">New game, same class (fresh market, keep everyone)</button>
+    <div style="height:10px"></div>
+    <button class="btn-ghost" id="wipeBtn">Full reset (clear players too)</button>
+  </div>
+</div>
+
+<!-- ============ RESULTS ============ -->
+<div class="screen" id="scr-results">
+  <div class="brand"><h1>Closing bell</h1><span class="tag">what the market taught</span></div>
+  <p class="sub" id="resSub"></p>
+
+  <div class="statgrid" id="resStats" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:14px"></div>
+
+  <div class="card">
+    <h3>Final standings</h3>
+    <table class="tbl" id="resTable"></table>
+    <div class="notice" id="resNote"></div>
+  </div>
+
+  <div class="card">
+    <h3>Risk–return map</h3>
+    <div class="chartbox tall"><canvas id="resScatter"></canvas></div>
+    <div class="notice">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best trade-off theory allowed. Diversified portfolios should plot above and left of single stocks.</div>
+  </div>
+
+  <div class="card">
+    <h3>Theory corner — the reveal</h3>
+    <table class="tbl" id="theoryTable"></table>
+    <div class="notice" id="theoryNote"></div>
+  </div>
+
+  <div class="card">
+    <h3>Discussion</h3>
+    <ol class="q">
+      <li>Compare the <b>wealth</b> ranking with the <b>risk-adjusted</b> ranking. Who swaps places, and why?</li>
+      <li>MoonShot had the highest expected return on the menu. Look at its geometric growth in Theory corner. Where did the difference go? (Hint: this is the same volatility drag you met in the Kelly game.)</li>
+      <li>Gold's expected return barely beat T-bills, yet good portfolios held it. What was it being paid for?</li>
+      <li>Find your dot on the map. What mix of the menu would have moved you up and to the left, toward the gold line?</li>
+      <li>When the liquidity call hit, who was covered and who got fire-sold? What does that say about holding "lazy" cash?</li>
+      <li>If everyone's risk aversion γ doubled, how should the winning portfolio change — and which part of it stays exactly the same? (Two-fund separation.)</li>
+    </ol>
+  </div>
+
+  <div class="card" id="resAdminCard" style="display:none">
+    <h3>Instructor</h3>
+    <button class="btn-primary" id="againBtn2">New game, same class</button>
+    <div style="height:10px"></div>
+    <button class="btn-ghost" id="wipeBtn2">Full reset</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   INSTRUCTOR: FIREBASE CONFIG — same project as Bubble Lab works fine;
+   this game lives under its own "pf/" branch of the database.
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDjH0oMe07iiv94pYuuAg1FOe4YwREdNAI",
+  authDomain: "bubblelab0715.firebaseapp.com",
+  databaseURL: "https://bubblelab0715-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bubblelab0715",
+  storageBucket: "bubblelab0715.firebasestorage.app",
+  messagingSenderId: "823611830309",
+  appId: "1:823611830309:web:ac9cf1ad32309fc4c98fcc",
+  measurementId: "G-G9NT9KHH4N"
+};
+/* ===================================================================== */
+
+const ADMIN_PASSWORD = "efficientfrontier";           // change me
+const ROOM = new URLSearchParams(location.search).get("room") || "classroom";
+const CASH_COLOR = "#93A3B4";
+
+/* ---------- default asset menu ---------- */
+function defaultAssets(){ return [
+  {key:"BLU", name:"BlueChip Industrials", mu:0.08, sigma:0.16, beta:1.0,  color:"#2E6FB8"},
+  {key:"TEC", name:"TechNova Growth",      mu:0.14, sigma:0.32, beta:1.0,  color:"#7C4DBE"},
+  {key:"UTL", name:"Steady Utilities",     mu:0.06, sigma:0.11, beta:1.0,  color:"#3E8E75"},
+  {key:"GLD", name:"Gold Reserve ETF",     mu:0.05, sigma:0.17, beta:-0.3, color:"#C79A2A"},
+  {key:"MSV", name:"MoonShot Ventures",    mu:0.22, sigma:0.75, beta:1.25, color:"#D0563B"}
+];}
+const CORR_PRESETS = {
+  realistic:[[1,.60,.50,-.15,.35],[.60,1,.30,-.10,.50],[.50,.30,1,.05,.15],[-.15,-.10,.05,1,-.05],[.35,.50,.15,-.05,1]],
+  zero:[[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1]],
+  high:[[1,.80,.75,-.20,.70],[.80,1,.65,-.20,.75],[.75,.65,1,-.20,.60],[-.20,-.20,-.20,1,-.20],[.70,.75,.60,-.20,1]]
+};
+function defaultConfig(){ return {
+  seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:3000, totalTicks:240,
+  gamma:3, metric:"score", nExp:2, nCrash:0, expPct:0.20, haircut:0.25, crashSev:0.6,
+  publicPf:true, showParams:true, corr:"realistic", assets: defaultAssets()
+};}
+
+/* ---------- tiny helpers ---------- */
+const $ = id => document.getElementById(id);
+const fmt$ = v => (v==null||isNaN(v)) ? "–" : "$"+Number(v).toFixed(2);
+const fmtPct = (v,dp=1) => (v==null||isNaN(v)) ? "–" : (v*100).toFixed(dp)+"%";
+const fmtSign = (v,dp=1) => (v==null||isNaN(v)) ? "–" : (v>=0?"+":"")+(v*100).toFixed(dp)+"%";
+function esc(s){ return String(s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k]||null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+};
+let toastTimer=null;
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2800); }
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); }
+function configured(){ return firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith("PASTE"); }
+
+/* =====================================================================
+   PURE MARKET ENGINE — everything below is deterministic given the
+   config seed, so every phone computes the identical market.
+   ===================================================================== */
+function mulberry32(seed){ let a=seed>>>0; return function(){ a|=0; a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function cholesky(C){
+  const n=C.length, L=Array.from({length:n},()=>new Array(n).fill(0));
+  for(let i=0;i<n;i++)for(let j=0;j<=i;j++){
+    let s=C[i][j]||0; for(let k=0;k<j;k++)s-=L[i][k]*L[j][k];
+    if(i===j){ L[i][j]=Math.sqrt(Math.max(s,1e-10)); } else { L[i][j]=s/L[j][j]; }
+  } return L;
+}
+function solveLin(Ain,bin){ // gaussian elimination w/ partial pivoting (small n)
+  const n=bin.length, A=Ain.map(r=>r.slice()), b=bin.slice();
+  for(let c=0;c<n;c++){
+    let p=c; for(let r=c+1;r<n;r++) if(Math.abs(A[r][c])>Math.abs(A[p][c])) p=r;
+    [A[c],A[p]]=[A[p],A[c]]; [b[c],b[p]]=[b[p],b[c]];
+    if(Math.abs(A[c][c])<1e-12) continue;
+    for(let r=c+1;r<n;r++){ const f=A[r][c]/A[c][c]; for(let k=c;k<n;k++)A[r][k]-=f*A[c][k]; b[r]-=f*b[c]; }
+  }
+  const x=new Array(n).fill(0);
+  for(let r=n-1;r>=0;r--){ let s=b[r]; for(let k=r+1;k<n;k++)s-=A[r][k]*x[k]; x[r]=Math.abs(A[r][r])>1e-12? s/A[r][r] : 0; }
+  return x;
+}
+/* raw normal cache: one stream per (seed,K), extended but never regenerated */
+const NOISE={key:null, rng:null, z:[]};
+function rawNormals(seed,K,upTo){
+  const key=seed+"|"+K;
+  if(NOISE.key!==key){ NOISE.key=key; NOISE.rng=mulberry32(seed); NOISE.z=[]; }
+  while(NOISE.z.length<upTo){
+    const v=new Array(K);
+    for(let k=0;k<K;k++){ const u1=Math.max(NOISE.rng(),1e-12), u2=NOISE.rng(); v[k]=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2); }
+    NOISE.z.push(v);
+  }
+  return NOISE.z;
+}
+/* deterministic pre-scheduled shocks derived from the seed */
+function scheduledShocks(cfg){
+  const T=cfg.totalTicks, out=[];
+  const lo=Math.max(2,Math.floor(T*0.15)), hi=Math.max(lo+1,Math.floor(T*0.95));
+  function pick(n,salt){
+    const rng=mulberry32(((cfg.seed>>>0)^salt)>>>0), set=new Set(); let guard=0;
+    while(set.size<n && guard++<800) set.add(lo+Math.floor(rng()*(hi-lo)));
+    return [...set];
+  }
+  pick(cfg.nExp||0, 0x51ED27).forEach(t=>out.push({tick:t, type:"exp", pct:cfg.expPct, hc:cfg.haircut, auto:true}));
+  pick(cfg.nCrash||0, 0x9E3779).forEach(t=>out.push({tick:t, type:"crash", sev:cfg.crashSev, auto:true}));
+  return out;
+}
+function allShocks(cfg, manual){ // manual = array from DB
+  const s=[...scheduledShocks(cfg), ...(manual||[])];
+  s.sort((a,b)=>a.tick-b.tick);
+  return s;
+}
+/* price path: P[t][i], all assets start at 100; crashes are jumps in the path */
+const PRICE={sig:null, P:null};
+function pricePath(cfg, shocks, upTo){
+  const K=cfg.assets.length;
+  const crash=shocks.filter(s=>s.type==="crash");
+  const sig=JSON.stringify([cfg.seed,cfg.dt,cfg.corr,cfg.assets.map(a=>[a.mu,a.sigma,a.beta]),crash.map(c=>[c.tick,c.sev]),upTo]);
+  if(PRICE.sig===sig) return PRICE.P;
+  const L=cholesky(CORR_PRESETS[cfg.corr]||CORR_PRESETS.realistic);
+  const z=rawNormals(cfg.seed,K,upTo);
+  const crashBy={}; crash.forEach(c=>{ (crashBy[c.tick]=crashBy[c.tick]||[]).push(c); });
+  const P=[new Array(K).fill(100)];
+  const dt=cfg.dt, sdt=Math.sqrt(dt);
+  for(let t=1;t<=upTo;t++){
+    const zi=z[t-1], prev=P[t-1], row=new Array(K);
+    for(let i=0;i<K;i++){
+      let e=0; for(let k=0;k<=i;k++) e+=L[i][k]*zi[k];
+      const a=cfg.assets[i];
+      let lr=(a.mu - a.sigma*a.sigma/2)*dt + a.sigma*sdt*e;
+      (crashBy[t]||[]).forEach(c=>{ lr += -c.sev*(a.beta==null?1:a.beta)*a.sigma; });
+      row[i]=prev[i]*Math.exp(lr);
+    }
+    P.push(row);
+  }
+  PRICE.sig=sig; PRICE.P=P;
+  return P;
+}
+/* replay one player's account from their trade log */
+function reconstruct(cfg, P, shocks, tradesRaw, joinTick, capTick){
+  const K=cfg.assets.length, fee=(cfg.feeBps||0)/10000, g=Math.exp(cfg.rf*cfg.dt);
+  const trades=(tradesRaw||[]).map(tr=>({t:Math.min(Math.max(tr.t,joinTick),capTick), a:tr.a, s:tr.s, k:tr.k||""}))
+                              .sort((x,y)=> x.t-y.t || (x.k<y.k?-1:x.k>y.k?1:0));
+  const expBy={}; shocks.filter(s=>s.type==="exp").forEach(s=>{ (expBy[s.tick]=expBy[s.tick]||[]).push(s); });
+  let cash=cfg.startCash, sh=new Array(K).fill(0), fees=0, firesale=0, ti=0;
+  const W=[];
+  for(let t=joinTick;t<=capTick;t++){
+    if(t>joinTick) cash*=g;
+    const px=P[t];
+    (expBy[t]||[]).forEach(s=>{
+      /* liquidity cash call: you must SHOW pct of wealth in cash. Covered from
+         cash → no loss (the call is returned). Short → the shortfall is raised
+         by fire-selling holdings at the haircut; only the haircut is lost, and
+         you're left holding the raised cash. */
+      let H=0; for(let i=0;i<K;i++)H+=sh[i]*px[i];
+      const due=s.pct*(cash+H);
+      if(cash<due && H>1e-12){
+        const need=due-cash;
+        const gross=Math.min(H, need/(1-s.hc));   // market value force-sold
+        const frac=gross/H;
+        for(let i=0;i<K;i++)sh[i]*=(1-frac);
+        firesale += gross*s.hc;
+        cash += gross*(1-s.hc);
+      }
+    });
+    while(ti<trades.length && trades[ti].t===t){
+      const tr=trades[ti++]; const i=tr.a;
+      if(i==null||i<0||i>=K||!isFinite(tr.s)) continue;
+      const p=px[i]; let s=tr.s;
+      if(s>0){
+        const maxS=cash/(p*(1+fee));
+        if(s>maxS) s=maxS;
+        cash-=s*p*(1+fee); fees+=s*p*fee; sh[i]+=s;
+      } else if(s<0){
+        s=Math.max(s,-sh[i]);
+        cash+=(-s)*p*(1-fee); fees+=(-s)*p*fee; sh[i]+=s;
+      }
+    }
+    let H2=0; for(let i=0;i<K;i++)H2+=sh[i]*px[i];
+    W.push(cash+H2);
+  }
+  return {W, cash, sh, fees, firesale, nTrades:trades.length};
+}
+function metricsOf(W, cfg){
+  const n=W.length;
+  if(n<2) return {ret:0, mu:cfg.rf, sig:0, sharpe:0, mdd:0, score:cfg.rf, ok:false};
+  const PPY=1/cfg.dt, r=[];
+  for(let k=1;k<n;k++) r.push(Math.log(Math.max(W[k],1e-9)/Math.max(W[k-1],1e-9)));
+  const m=r.reduce((a,b)=>a+b,0)/r.length;
+  const v=r.length>1? r.reduce((a,b)=>a+(b-m)*(b-m),0)/(r.length-1) : 0;
+  const mu=m*PPY, sg=Math.sqrt(Math.max(v,0))*Math.sqrt(PPY);
+  let peak=W[0], mdd=0;
+  for(const w of W){ if(w>peak)peak=w; const d=1-w/peak; if(d>mdd)mdd=d; }
+  const sharpe = sg>1e-4 ? (mu-cfg.rf)/sg : 0;
+  const score = mu - (cfg.gamma||3)/2*sg*sg;
+  return {ret:W[n-1]/W[0]-1, mu, sig:sg, sharpe, mdd, score, ok:r.length>=8};
+}
+function tangency(cfg){ // from true params: max-Sharpe line and weights
+  const K=cfg.assets.length, C=CORR_PRESETS[cfg.corr]||CORR_PRESETS.realistic;
+  const ex=cfg.assets.map(a=>a.mu-cfg.rf);
+  const Sg=Array.from({length:K},(_,i)=>Array.from({length:K},(_,j)=>C[i][j]*cfg.assets[i].sigma*cfg.assets[j].sigma));
+  const w=solveLin(Sg,ex);
+  const S2=ex.reduce((s,e,i)=>s+e*w[i],0);
+  const Sstar=Math.sqrt(Math.max(S2,0));
+  const tot=w.reduce((a,b)=>a+b,0);
+  const wt=Math.abs(tot)>1e-9? w.map(x=>x/tot) : w;
+  return {Sstar, wt};
+}
+
+/* =====================================================================
+   APP STATE + FIREBASE
+   ===================================================================== */
+let db=null, roomRef=null;
+let me={ id:store.get("pf_pid"), name:store.get("pf_name") };
+let isAdmin = store.get("pf_admin")==="1";
+let CFG=null, LIVE=null, PLAYERS={}, MANUAL=[];
+let serverOffset=0, charts={}, lastHeavyTick=-1, lastAnnTick=null, uiBuiltFor=null, dismissedBanner=0;
+
+function now(){ return Date.now()+serverOffset; }
+function running(){ return LIVE && (LIVE.phase==="running"); }
+function elapsedMs(){
+  if(!LIVE||!LIVE.startAt) return 0;
+  const end=LIVE.pauseAt||now();
+  return Math.max(0, end-LIVE.startAt-(LIVE.pausedMs||0));
+}
+function currentTick(){
+  if(!CFG||!LIVE||!LIVE.startAt) return 0;
+  return Math.min(CFG.totalTicks, Math.floor(elapsedMs()/CFG.tickMs));
+}
+function capTick(){
+  if(!CFG) return 0;
+  const end = (LIVE&&LIVE.endTick!=null)? LIVE.endTick : CFG.totalTicks;
+  return Math.min(end, currentTick());
+}
+function gameOver(){ return LIVE && (LIVE.phase==="done" || (LIVE.startAt && currentTick()>=CFG.totalTicks)); }
+function fmtClock(t){
+  if(!CFG) return "–";
+  const ppy=Math.round(1/CFG.dt);
+  const unit=ppy===252?"D":ppy===12?"M":"W";
+  return "Y"+(Math.floor(t/ppy)+1)+"·"+unit+((t%ppy)+1);
+}
+function remainMs(){
+  if(!CFG||!LIVE||!LIVE.startAt) return 0;
+  return Math.max(0, CFG.totalTicks*CFG.tickMs - elapsedMs());
+}
+
+function boot(){
+  if(!configured()){ show("scr-setup"); return; }
+  firebase.initializeApp(firebaseConfig);
+  db=firebase.database();
+  roomRef=db.ref("pf/"+ROOM);
+  db.ref(".info/serverTimeOffset").on("value",s=>{ serverOffset=s.val()||0; });
+  roomRef.child("config").on("value",s=>{ CFG=s.val(); render(true); });
+  roomRef.child("live").on("value",s=>{ LIVE=s.val(); render(true); });
+  roomRef.child("players").on("value",s=>{ PLAYERS=s.val()||{}; playersLoaded=true; render(true); });
+  roomRef.child("shocks").on("value",s=>{
+    const v=s.val()||{}; MANUAL=Object.keys(v).sort().map(k=>v[k]); render(true);
+  });
+  ensureDefaults(); wireUI();
+  setInterval(tickLoop,500);
+  show("scr-landing");
+}
+async function ensureDefaults(){
+  try{
+    const l=await roomRef.child("live").get();
+    if(!l.exists()||!l.val()||!l.val().phase) await roomRef.child("live").set({phase:"lobby"});
+  }catch(e){ toast("Can't reach the database — check your connection."); }
+}
+
+/* ---------- actions: join / login ---------- */
+async function join(){
+  const name=$("nameInput").value.trim();
+  if(!name){ toast("Pick a name first"); return; }
+  const pid="p"+Math.random().toString(36).slice(2,10);
+  const rec={ name, joinedAt:firebase.database.ServerValue.TIMESTAMP, joinTick: running()? currentTick() : 0 };
+  try{
+    await roomRef.child("players/"+pid).set(rec);
+    me={id:pid,name}; store.set("pf_pid",pid); store.set("pf_name",name);
+    if(running()) toast("You're in — starting with "+fmt$(CFG.startCash)+" cash");
+    render(true);
+  }catch(e){ toast("Couldn't join — try again."); }
+}
+function adminLogin(){
+  if($("pwInput").value===ADMIN_PASSWORD){ isAdmin=true; store.set("pf_admin","1"); toast("Welcome, instructor"); render(true); }
+  else toast("Wrong password");
+}
+
+/* ---------- actions: trading ---------- */
+function myAccount(){
+  if(!CFG||!me.id||!PLAYERS[me.id]) return null;
+  return accountOf(me.id);
+}
+let RECON_CACHE={};
+function accountOf(pid){
+  if(Object.keys(RECON_CACHE).length>600) RECON_CACHE={};
+  const p=PLAYERS[pid]; if(!p||!CFG||!LIVE||!LIVE.startAt) return null;
+  const cap=capTick();
+  const shocks=allShocks(CFG,MANUAL);
+  const P=pricePath(CFG,shocks,cap);
+  const trades=Object.entries(p.trades||{}).map(([k,v])=>({...v,k}));
+  const sigKey=pid+"|"+cap+"|"+trades.length+"|"+shocks.length+"|"+(LIVE.endTick||"");
+  if(RECON_CACHE[sigKey]) return RECON_CACHE[sigKey];
+  const jt=Math.min(p.joinTick||0, cap);
+  const acct=reconstruct(CFG,P,shocks,trades,jt,cap);
+  acct.joinTick=jt; acct.metrics=metricsOf(acct.W,CFG);
+  RECON_CACHE[sigKey]=acct;
+  return acct;
+}
+async function submitTrades(list){ // [{a, s}] at current tick
+  if(!running()||gameOver()){ toast("The market is closed."); return false; }
+  if(LIVE.pauseAt){ toast("Trading is paused."); return false; }
+  const t=currentTick();
+  const up={};
+  list.forEach(tr=>{
+    if(!isFinite(tr.s)||Math.abs(tr.s)<1e-9) return;
+    const k=roomRef.child("x").push().key;
+    up["players/"+me.id+"/trades/"+k]={t, a:tr.a, s:tr.s};
+  });
+  if(!Object.keys(up).length) return false;
+  try{ await roomRef.update(up); return true; }
+  catch(e){ toast("Order didn't go through — try again."); return false; }
+}
+async function quickTrade(i, dollars, side){
+  const acct=myAccount(); if(!acct){ toast("Join first."); return; }
+  const P=pricePath(CFG,allShocks(CFG,MANUAL),capTick());
+  const px=P[capTick()][i], fee=(CFG.feeBps||0)/10000;
+  let s;
+  if(side>0){
+    const maxD=acct.cash/(1+fee);
+    const d=Math.min(dollars, maxD);
+    if(d<0.01){ toast("Not enough cash."); return; }
+    s=d/px;
+  } else {
+    const have=acct.sh[i]*px;
+    const d=Math.min(dollars, have);
+    if(d<0.01){ toast("Nothing to sell."); return; }
+    s=-d/px;
+  }
+  const ok=await submitTrades([{a:i, s}]);
+  if(ok){ toast((side>0?"Bought ":"Sold ")+fmt$(Math.abs(s)*px)+" of "+CFG.assets[i].key); if(navigator.vibrate)navigator.vibrate(25); }
+}
+async function applyRebalance(){
+  const acct=myAccount(); if(!acct) return;
+  const t=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),t), px=P[t];
+  const fee=(CFG.feeBps||0)/10000;
+  const K=CFG.assets.length;
+  let W=acct.cash; for(let i=0;i<K;i++)W+=acct.sh[i]*px[i];
+  const targets=CFG.assets.map((a,i)=>({i, w:(sliderVals[i]||0)/100}));
+  const sumW=targets.reduce((s,x)=>s+x.w,0);
+  if(sumW>1.0001){ toast("Weights exceed 100% — lower something."); return; }
+  const sells=[], buys=[];
+  targets.forEach(({i,w})=>{
+    const cur=acct.sh[i]*px[i], tgt=w*W, d=tgt-cur;
+    if(d<-0.05) sells.push({a:i, s:d/px[i]});
+    else if(d>0.05) buys.push({i, d});
+  });
+  let cashAfter=acct.cash + sells.reduce((s,x)=>s+(-x.s)*px[x.a]*(1-fee),0);
+  const need=buys.reduce((s,b)=>s+b.d*(1+fee),0);
+  const scale=need>cashAfter? Math.max(0,cashAfter/need)*0.999 : 1;
+  const orders=[...sells, ...buys.map(b=>({a:b.i, s:(b.d*scale)/px[b.i]}))];
+  if(!orders.length){ toast("Already at those weights."); return; }
+  const ok=await submitTrades(orders);
+  if(ok){ toast("Rebalanced ("+orders.length+" orders)"); if(navigator.vibrate)navigator.vibrate([20,40,20]); }
+}
+
+/* ---------- actions: admin ---------- */
+function readCfgInputs(){
+  const mins=Math.min(60,Math.max(3,parseFloat($("cfgMin").value)||12));
+  const tickSec=Math.min(15,Math.max(1,parseFloat($("cfgTickSec").value)||3));
+  const ppy=parseInt($("cfgFreq").value)||52;
+  const assets=defaultAssets().map((a,i)=>{
+    const mu=parseFloat($("mu_"+i).value), sg=parseFloat($("sg_"+i).value);
+    return {...a, mu:isFinite(mu)? mu/100 : a.mu, sigma:isFinite(sg)&&sg>0? sg/100 : a.sigma};
+  });
+  return {
+    seed: (Math.floor(Math.random()*0xFFFFFFFF))>>>0,
+    startCash: Math.max(10, parseFloat($("cfgCash").value)||100),
+    rf: (parseFloat($("cfgRf").value)||0)/100,
+    feeBps: Math.max(0, parseFloat($("cfgFee").value)||0),
+    dt: 1/ppy,
+    tickMs: Math.round(tickSec*1000),
+    totalTicks: Math.max(20, Math.round(mins*60/tickSec)),
+    gamma: Math.max(0, parseFloat($("cfgGamma").value)||3),
+    metric: $("cfgMetric").value,
+    nExp: Math.max(0, parseInt($("cfgNExp").value)||0),
+    nCrash: Math.max(0, parseInt($("cfgNCrash").value)||0),
+    expPct: Math.min(.6, Math.max(.01,(parseFloat($("cfgExpPct").value)||20)/100)),
+    haircut: Math.min(.6, Math.max(0,(parseFloat($("cfgHaircut").value)||25)/100)),
+    crashSev: Math.min(1.5, Math.max(.1, parseFloat($("cfgCrashSev").value)||0.6)),
+    publicPf: $("cfgPublic").checked,
+    showParams: $("cfgShowParams").checked,
+    corr: $("cfgCorr").value,
+    assets
+  };
+}
+async function startGame(){
+  if(!Object.keys(PLAYERS).length && !confirm("No students have joined yet — start anyway?")) return;
+  const cfg=readCfgInputs();
+  const ups={ config:cfg, shocks:null,
+    live:{ phase:"running", startAt:now(), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
+  for(const pid of Object.keys(PLAYERS)) ups["players/"+pid+"/trades"]=null, ups["players/"+pid+"/joinTick"]=0;
+  await roomRef.update(ups);
+  toast("Market open — good luck to them");
+}
+async function togglePause(){
+  if(!LIVE) return;
+  if(LIVE.pauseAt){
+    const extra=now()-LIVE.pauseAt;
+    await roomRef.child("live").update({pausedMs:(LIVE.pausedMs||0)+extra, pauseAt:null});
+    toast("Resumed");
+  } else {
+    await roomRef.child("live").update({pauseAt:now()});
+    toast("Paused — clock frozen");
+  }
+}
+async function fireShock(type){
+  if(!running()||gameOver()){ toast("No live market."); return; }
+  if(LIVE.pauseAt){ toast("Resume before firing a shock."); return; }
+  const t=currentTick()+1;
+  const rec = type==="exp"
+    ? {tick:t, type:"exp", pct:CFG.expPct, hc:CFG.haircut}
+    : {tick:t, type:"crash", sev:CFG.crashSev};
+  await roomRef.child("shocks").push(rec);
+  toast(type==="exp"?"Liquidity shock fired":"Crash fired");
+}
+async function sendBanner(){
+  const text=$("bannerInput").value.trim(); if(!text) return;
+  await roomRef.child("live/banner").set({text, ts:now()});
+  $("bannerInput").value=""; toast("Announcement sent");
+}
+async function endGame(){
+  await roomRef.child("live").update({phase:"done", endTick:currentTick(), pauseAt:null});
+}
+async function resetGame(keepPlayers){
+  const ups={ shocks:null, live:{phase:"lobby"} };
+  if(keepPlayers){ for(const pid of Object.keys(PLAYERS)){ ups["players/"+pid+"/trades"]=null; ups["players/"+pid+"/joinTick"]=0; } }
+  else ups["players"]=null;
+  await roomRef.update(ups);
+  toast(keepPlayers? "New game — same class" : "Full reset");
+}
+async function removePlayer(pid){
+  if(!confirm("Remove "+(PLAYERS[pid]?PLAYERS[pid].name:"this player")+"?")) return;
+  await roomRef.child("players/"+pid).remove();
+}
+window.removePlayer=removePlayer;
+
+/* =====================================================================
+   UI WIRING
+   ===================================================================== */
+let sliderVals=[0,0,0,0,0], playersLoaded=false, shockFlash=null;
+function wireUI(){
+  $("joinBtn").onclick=join;
+  $("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") join(); });
+  $("showAdminBtn").onclick=()=>{ const c=$("adminLoginCard"); c.style.display=c.style.display==="none"?"":"none"; };
+  $("adminLoginBtn").onclick=adminLogin;
+  $("pwInput").addEventListener("keydown",e=>{ if(e.key==="Enter") adminLogin(); });
+  document.querySelectorAll("#tabbar button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll("#tabbar button").forEach(x=>x.classList.toggle("on",x===b));
+    document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on",p.id==="tab-"+b.dataset.tab));
+    render(true);
+  });
+  $("rbApply").onclick=applyRebalance;
+  $("rbSync").onclick=syncSlidersToHoldings;
+  $("startBtn").onclick=startGame;
+  $("pauseBtn").onclick=togglePause;
+  $("endBtn").onclick=()=>{ if(confirm("End the game and show results?")) endGame(); };
+  $("fireExpBtn").onclick=()=>fireShock("exp");
+  $("fireCrashBtn").onclick=()=>fireShock("crash");
+  $("bannerSend").onclick=sendBanner;
+  $("liveMetric").onchange=()=>roomRef.child("config/metric").set($("liveMetric").value);
+  $("againBtn").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
+  $("wipeBtn").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
+  $("againBtn2").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
+  $("wipeBtn2").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
+  buildAssetEditor();
+  ["cfgMin","cfgTickSec","cfgFreq","cfgNExp","cfgNCrash"].forEach(id=>$(id).addEventListener("input",cfgPreview));
+  cfgPreview();
+}
+function buildAssetEditor(){
+  const rows=defaultAssets().map((a,i)=>
+    '<div class="an" style="grid-column:1"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.name)+'</div>'+
+    '<input id="mu_'+i+'" type="number" step="0.5" value="'+(a.mu*100)+'">'+
+    '<input id="sg_'+i+'" type="number" step="1" value="'+(a.sigma*100)+'">'
+  ).join("");
+  $("assetEditor").innerHTML='<div class="assetedit"><div class="gridhead">Asset</div><div class="gridhead">E[return] %</div><div class="gridhead">Vol %</div>'+rows+'</div>';
+}
+function cfgPreview(){
+  const mins=parseFloat($("cfgMin").value)||12, sec=parseFloat($("cfgTickSec").value)||3;
+  const ppy=parseInt($("cfgFreq").value)||52;
+  const ticks=Math.round(mins*60/sec), yrs=(ticks/ppy).toFixed(1);
+  $("cfgPreview").innerHTML="That's <b>"+ticks+" ticks</b> ≈ <b>"+yrs+" market-years</b> in "+mins+" minutes. "+
+    ($("cfgNExp").value>0||$("cfgNCrash").value>0 ? "Shock timing is random — students can't see it coming." : "No random shocks; you can still fire them manually.");
+}
+
+/* build the per-game trade UI once */
+function buildPlayUI(){
+  const key=CFG? CFG.seed+"|"+CFG.assets.map(a=>a.key).join("") : null;
+  if(uiBuiltFor===key||!CFG) return;
+  uiBuiltFor=key;
+  const K=CFG.assets.length;
+  /* holdings rows */
+  $("holdList").innerHTML =
+    '<div class="hrow"><div class="hmain" style="cursor:default">'+
+      '<span class="dotc" style="background:'+CASH_COLOR+'"></span>'+
+      '<div class="hname"><div class="nm">Money market</div><div class="sub2">T-bills · '+fmtPct(CFG.rf)+'/yr · safe</div></div>'+
+      '<div class="hmy"><div class="v" id="h_cash">–</div><div class="w" id="h_cashw">–</div></div>'+
+    '</div></div>' +
+    CFG.assets.map((a,i)=>
+    '<div class="hrow">'+
+      '<div class="hmain" id="hm_'+i+'">'+
+        '<span class="dotc" style="background:'+a.color+'"></span>'+
+        '<div class="hname"><div class="nm">'+esc(a.key)+' · '+esc(a.name)+'</div>'+
+        '<div class="sub2">'+(CFG.showParams? 'E[r] '+fmtPct(a.mu)+' · vol '+fmtPct(a.sigma,0) : 'tap to trade')+'</div></div>'+
+        '<div class="hpx"><div class="p" id="h_px_'+i+'">–</div><div class="d" id="h_d_'+i+'">–</div></div>'+
+        '<div class="hmy"><div class="v" id="h_v_'+i+'">–</div><div class="w" id="h_w_'+i+'">–</div></div>'+
+      '</div>'+
+      '<div class="tradepanel" id="tp_'+i+'">'+
+        '<div class="row"><input type="number" id="ti_'+i+'" inputmode="decimal" min="0" placeholder="$ amount"></div>'+
+        '<div class="chiprow">'+
+          '<button data-i="'+i+'" data-amt="10">$10</button>'+
+          '<button data-i="'+i+'" data-amt="25">$25</button>'+
+          '<button data-i="'+i+'" data-amt="maxbuy">Max buy</button>'+
+          '<button data-i="'+i+'" data-amt="stake">My stake</button>'+
+        '</div>'+
+        '<div class="bs"><button class="btn-buy" data-buy="'+i+'">Buy</button><button class="btn-sell" data-sell="'+i+'">Sell</button></div>'+
+      '</div>'+
+    '</div>').join("");
+  CFG.assets.forEach((a,i)=>{
+    $("hm_"+i).onclick=()=>{ $("tp_"+i).classList.toggle("open"); };
+  });
+  $("holdList").querySelectorAll(".chiprow button").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i, acct=myAccount(); if(!acct) return;
+    const P=pricePath(CFG,allShocks(CFG,MANUAL),capTick()), px=P[capTick()][i];
+    const fee=(CFG.feeBps||0)/10000;
+    let v;
+    if(b.dataset.amt==="maxbuy") v=acct.cash/(1+fee);
+    else if(b.dataset.amt==="stake") v=acct.sh[i]*px;
+    else v=+b.dataset.amt;
+    $("ti_"+i).value=Math.max(0,v).toFixed(2);
+  });
+  $("holdList").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.buy, v=parseFloat($("ti_"+i).value);
+    if(!(v>0)){ toast("Enter a $ amount."); return; }
+    quickTrade(i,v,+1);
+  });
+  $("holdList").querySelectorAll("[data-sell]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.sell, v=parseFloat($("ti_"+i).value);
+    if(!(v>0)){ toast("Enter a $ amount."); return; }
+    quickTrade(i,v,-1);
+  });
+  /* rebalance sliders */
+  sliderVals=new Array(K).fill(0);
+  $("rbHost").innerHTML=CFG.assets.map((a,i)=>
+    '<div class="sl"><div class="top"><span><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</span><span class="w" id="sw_'+i+'">0%</span></div>'+
+    '<input type="range" id="sl_'+i+'" min="0" max="100" step="1" value="0"></div>').join("");
+  CFG.assets.forEach((a,i)=>{
+    $("sl_"+i).addEventListener("input",()=>{ sliderVals[i]=+$("sl_"+i).value; renderRbPreview(); });
+  });
+  $("rbNote").textContent="Sliders are target weights of your total wealth; whatever's left stays in the money market. Fee: "+(CFG.feeBps||0)+" bps per trade.";
+  /* prefill sliders from current weights once account exists */
+  setTimeout(syncSlidersToHoldings, 300);
+  /* rules text */
+  const rules=[
+    "You start with "+fmt$(CFG.startCash)+" in a money-market account earning "+fmtPct(CFG.rf)+"/yr. It never loses value.",
+    "Trade the five stocks any time. Prices come from the market — your trades don't move them. Each trade costs "+(CFG.feeBps||0)+" bps.",
+    "Each tick of the clock is "+(Math.round(1/CFG.dt)===252?"one trading day":Math.round(1/CFG.dt)===12?"one month":"one week")+" of market time.",
+    (CFG.nExp>0||CFG.nCrash>0 ? "Surprises are armed: liquidity calls ("+fmtPct(CFG.expPct,0)+" of your wealth must be sitting in cash on demand — come up short and the difference is fire-sold at a "+fmtPct(CFG.haircut,0)+" haircut) and market crashes can hit without warning." : "The instructor can trigger liquidity calls and crashes at any moment."),
+    "Ranking: "+metricExplain()+" Everyone can watch the standings live — there are no restarts."
+  ];
+  $("rulesList").innerHTML=rules.map(r=>"<li>"+r+"</li>").join("");
+  $("rulesList2").innerHTML=$("rulesList").innerHTML;
+  /* static market tables */
+  buildParamTables();
+  /* reset chart instances for the new game */
+  Object.values(charts).forEach(c=>{ try{c.destroy();}catch(e){} }); charts={};
+}
+function metricExplain(){
+  if(!CFG) return "";
+  if(CFG.metric==="wealth") return "highest final wealth wins — no risk penalty (good luck, gamblers).";
+  if(CFG.metric==="sharpe") return "highest Sharpe ratio wins: excess growth per unit of volatility.";
+  return "highest risk-adjusted score wins: annualized growth − (γ/2)·volatility², with γ = "+(CFG.gamma||3)+". Volatility costs you points.";
+}
+function syncSlidersToHoldings(){
+  const acct=myAccount(); if(!acct||!CFG) return;
+  const t=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),t), px=P[t];
+  let W=acct.cash; CFG.assets.forEach((a,i)=>W+=acct.sh[i]*px[i]);
+  if(W<=0) return;
+  CFG.assets.forEach((a,i)=>{
+    sliderVals[i]=Math.round(100*acct.sh[i]*px[i]/W);
+    if($("sl_"+i)){ $("sl_"+i).value=sliderVals[i]; }
+  });
+  renderRbPreview();
+}
+function renderRbPreview(){
+  if(!CFG) return;
+  let sum=0;
+  CFG.assets.forEach((a,i)=>{ sum+=sliderVals[i]||0; if($("sw_"+i))$("sw_"+i).textContent=(sliderVals[i]||0)+"%"; });
+  const cashW=100-sum;
+  $("rbCash").textContent=cashW+"%";
+  $("rbCashRow").classList.toggle("bad",cashW<0);
+  $("rbApply").disabled=cashW<0;
+  const segs=CFG.assets.map((a,i)=>'<div class="seg" style="width:'+Math.max(0,sliderVals[i]||0)+'%;background:'+a.color+'"></div>').join("");
+  $("rbBar").innerHTML=segs+'<div class="seg" style="width:'+Math.max(0,cashW)+'%;background:'+CASH_COLOR+'"></div>';
+}
+function buildParamTables(){
+  if(!CFG) return;
+  $("paramCard").style.display=CFG.showParams?"":"none";
+  $("corrCard").style.display=CFG.showParams?"":"none";
+  if(!CFG.showParams) return;
+  $("assetTable").innerHTML="<tr><th>Asset</th><th>E[return]</th><th>Volatility</th></tr>"+
+    '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>T-bills</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
+    CFG.assets.map(a=>'<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</td><td>'+fmtPct(a.mu)+'</td><td>'+fmtPct(a.sigma,0)+'</td></tr>').join("");
+  const C=CORR_PRESETS[CFG.corr]||CORR_PRESETS.realistic;
+  $("corrTable").innerHTML="<tr><th></th>"+CFG.assets.map(a=>"<th>"+esc(a.key)+"</th>").join("")+"</tr>"+
+    CFG.assets.map((a,i)=>'<tr><td class="nm">'+esc(a.key)+"</td>"+CFG.assets.map((b,j)=>"<td>"+(i===j?"1":C[i][j].toFixed(2).replace("0.",".").replace("-0.","-."))+"</td>").join("")+"</tr>").join("");
+}
+
+/* =====================================================================
+   RENDER
+   ===================================================================== */
+function render(dataChanged){
+  if(!$("scr-landing")) return;
+  if(me.id && playersLoaded && Object.keys(PLAYERS).length && !PLAYERS[me.id] && !isAdmin){
+    me={id:null, name:me.name}; store.del("pf_pid");   // removed by instructor
+  }
+  const over = CFG && LIVE && gameOver();
+  let target;
+  if(isAdmin) target = over? "scr-results" : "scr-admin";
+  else if(!me.id || !PLAYERS[me.id]) target="scr-landing";
+  else if(!LIVE || LIVE.phase==="lobby" || !LIVE.startAt) target="scr-lobby";
+  else target = over? "scr-results" : "scr-play";
+  const cur=document.querySelector(".screen.active");
+  if(!cur || cur.id!==target) show(target);
+  if(target==="scr-landing") renderLanding();
+  if(target==="scr-lobby") renderLobby();
+  if(target==="scr-play"){ buildPlayUI(); renderPlay(dataChanged); }
+  if(target==="scr-admin") renderAdmin(dataChanged);
+  if(target==="scr-results"){ buildPlayUI(); renderResults(); }
+}
+function renderLanding(){
+  const n=$("joinNotice");
+  if(LIVE && running()){ n.style.display=""; n.innerHTML="The market is already <b>live</b> — you can still join and start with fresh cash."; }
+  else n.style.display="none";
+}
+function renderLobby(){
+  $("lobbyName").textContent=me.name||"";
+  const entries=Object.entries(PLAYERS).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
+  $("lobbyCount").textContent=entries.length;
+  $("lobbyList").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+(pid===me.id?' <span class="pill ok">you</span>':"")+"</span></li>").join("")||"<li><span class='nm' style='color:var(--muted)'>Nobody yet.</span></li>";
+  if(CFG){ /* rules may not exist pre-config; build from defaults */ }
+  if(!$("rulesList").innerHTML){
+    const d=defaultConfig();
+    $("rulesList").innerHTML=["You start with $100 in a money-market account earning the T-bill rate.",
+      "Trade five stocks in real time; prices are the market's, not yours.",
+      "Watch for surprise liquidity calls and crashes — cash and diversification are your armor.",
+      "Ranking is risk-adjusted by default: raw gambling gets penalized.",
+      "No restarts. Everyone sees the same market and the same standings."].map(r=>"<li>"+r+"</li>").join("");
+  }
+}
+function announceShocks(cap){
+  if(!CFG) return;
+  const sh=allShocks(CFG,MANUAL).filter(s=>s.tick<=cap);
+  if(lastAnnTick===null){ lastAnnTick=cap; return; }
+  sh.filter(s=>s.tick>lastAnnTick).forEach(s=>{
+    shockFlash={s, until:Date.now()+15000};
+    if(navigator.vibrate) navigator.vibrate([80,60,80]);
+    toast(s.type==="exp"?"💸 Liquidity shock!":"📉 Market crash!");
+  });
+  lastAnnTick=cap;
+}
+function bannerHTML(){
+  let h="";
+  if(shockFlash && Date.now()<shockFlash.until){
+    const s=shockFlash.s;
+    h+= s.type==="exp"
+      ? '<div class="banner"><span class="t">💸 Liquidity call at '+fmtClock(s.tick)+':</span> show '+fmtPct(s.pct,0)+' of your wealth in cash. Anyone short just got fire-sold at a '+fmtPct(s.hc,0)+' haircut.</div>'
+      : '<div class="banner"><span class="t">📉 Market crash at '+fmtClock(s.tick)+':</span> stocks gapped down in proportion to their risk.</div>';
+  }
+  if(LIVE&&LIVE.banner&&LIVE.banner.ts>dismissedBanner){
+    h+='<div class="banner info"><span class="t">📣 '+esc(LIVE.banner.text)+'</span> <button class="btn-small btn-ghost" style="float:right" onclick="dismissB('+LIVE.banner.ts+')">ok</button></div>';
+  }
+  return h;
+}
+window.dismissB=ts=>{ dismissedBanner=ts; render(true); };
+
+function renderPlay(dataChanged){
+  if(!CFG||!LIVE) return;
+  const cap=capTick();
+  const heavy = dataChanged || cap!==lastHeavyTick;
+  updateTimerChips();
+  if(!heavy) return;
+  lastHeavyTick=cap;
+  announceShocks(cap);
+  $("bannerHost").innerHTML=bannerHTML();
+
+  const acct=myAccount(); if(!acct) return;
+  const P=pricePath(CFG,allShocks(CFG,MANUAL),cap), px=P[cap];
+  const K=CFG.assets.length;
+  let W=acct.cash; for(let i=0;i<K;i++)W+=acct.sh[i]*px[i];
+
+  /* tape */
+  $("tClock").textContent=fmtClock(cap);
+  const wEl=$("tWealth"), prevW=parseFloat(wEl.dataset.v||"0");
+  wEl.textContent=fmt$(W); wEl.dataset.v=W;
+  const n=acct.W.length;
+  const chg = n>=2 ? acct.W[n-1]/acct.W[n-2]-1 : 0;
+  const cEl=$("tChange"); cEl.textContent=fmtSign(chg); cEl.className="val "+(chg>0?"up":chg<0?"down":"");
+  if(prevW && Math.abs(W-prevW)>0.005){ wEl.classList.remove("flash-up","flash-down"); void wEl.offsetWidth; wEl.classList.add(W>prevW?"flash-up":"flash-down"); }
+
+  /* allocation bar */
+  const segs=CFG.assets.map((a,i)=>{ const w=W>0? acct.sh[i]*px[i]/W*100 : 0;
+    return '<div class="seg" style="width:'+w+'%;background:'+a.color+'"></div>'; }).join("");
+  const cw=W>0? acct.cash/W*100 : 100;
+  $("allocBar").innerHTML=segs+'<div class="seg" style="width:'+cw+'%;background:'+CASH_COLOR+'"></div>';
+  $("allocCap").innerHTML="cash <b>"+cw.toFixed(0)+"%</b> · stocks <b>"+(100-cw).toFixed(0)+"%</b>";
+
+  /* holdings */
+  $("h_cash").textContent=fmt$(acct.cash);
+  $("h_cashw").textContent=(W>0?(acct.cash/W*100).toFixed(0):100)+"%";
+  for(let i=0;i<K;i++){
+    const p1=px[i], p0=cap>0? P[cap-1][i] : p1, d=p1/p0-1;
+    $("h_px_"+i).textContent=fmt$(p1);
+    const dEl=$("h_d_"+i); dEl.textContent=fmtSign(d); dEl.className="d "+(d>0?"up":d<0?"down":"");
+    const v=acct.sh[i]*p1;
+    $("h_v_"+i).textContent=v>0.005? fmt$(v):"–";
+    $("h_w_"+i).textContent=v>0.005&&W>0? (v/W*100).toFixed(0)+"%":"";
+  }
+
+  const active=document.querySelector(".tabpane.on");
+  if(active&&active.id==="tab-market"){ drawMarketChart("mktChart",cap,P); renderEventLog(cap); }
+  if(active&&active.id==="tab-ranks"){ renderMyStats(acct); drawMeChart(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false); 
+    $("lbNote").textContent = CFG.publicPf? "Tap a row to see that investor's current mix." : "Portfolios are private this game — only the numbers show.";
+  }
+}
+function renderMyStats(acct){
+  const m=acct.metrics;
+  const cells=[
+    [fmtSign(m.ret),"return"], [fmtPct(m.sig,1),"volatility"],
+    [m.ok? m.sharpe.toFixed(2):"–","sharpe"],
+    [fmtPct(m.mdd,1),"max drawdown"], [m.ok? fmtSign(m.score):"–","score"],
+    [fmt$(acct.fees+acct.firesale),"fees + fire-sales"]
+  ];
+  $("myStats").innerHTML=cells.map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
+}
+function rankAll(){
+  const rows=[];
+  for(const [pid,p] of Object.entries(PLAYERS)){
+    const acct=accountOf(pid); if(!acct) continue;
+    rows.push({pid, name:p.name, acct, m:acct.metrics, W:acct.W[acct.W.length-1]||CFG.startCash});
+  }
+  const key=CFG.metric==="wealth"? r=>r.W : CFG.metric==="sharpe"? r=>r.m.sharpe : r=>r.m.score;
+  rows.sort((a,b)=>key(b)-key(a));
+  return rows;
+}
+let openPf=null;
+window.togglePf=pid=>{ openPf=openPf===pid?null:pid; render(true); };
+function pfBarHTML(acct){
+  const cap=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),cap), px=P[cap];
+  let W=acct.cash; CFG.assets.forEach((a,i)=>W+=acct.sh[i]*px[i]);
+  if(W<=0) return "";
+  const segs=CFG.assets.map((a,i)=>'<div class="seg" style="width:'+(acct.sh[i]*px[i]/W*100)+'%;background:'+a.color+'"></div>').join("");
+  return '<div class="minibar">'+segs+'<div class="seg" style="width:'+(acct.cash/W*100)+'%;background:'+CASH_COLOR+'"></div></div>';
+}
+function renderLeaderboard(tableId, adminMode){
+  const rows=rankAll();
+  const mLabel=CFG.metric==="wealth"?"Wealth":CFG.metric==="sharpe"?"Sharpe":"Score";
+  let html="<tr><th>#</th><th>Investor</th><th>Wealth</th><th>Ret</th><th>Vol</th><th class='hi'>"+mLabel+"</th></tr>";
+  rows.forEach((r,i)=>{
+    const mv=CFG.metric==="wealth"? fmt$(r.W) : CFG.metric==="sharpe"? (r.m.ok?r.m.sharpe.toFixed(2):"–") : (r.m.ok?fmtSign(r.m.score):"–");
+    html+="<tr class='metric-col"+(r.pid===me.id?" me":"")+"' "+(CFG.publicPf?'onclick="togglePf(\''+r.pid+'\')" style="cursor:pointer"':"")+">"+
+      "<td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td class='hi'>"+mv+"</td></tr>";
+    if(CFG.publicPf && openPf===r.pid) html+="<tr><td colspan='6' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
+  });
+  $(tableId).innerHTML=html||"";
+}
+
+/* ---------- admin render ---------- */
+function renderAdmin(dataChanged){
+  const inLobby=!LIVE||LIVE.phase==="lobby"||!LIVE.startAt;
+  $("aPhase").textContent=inLobby?"Lobby":(LIVE.pauseAt?"Paused":"Live");
+  $("aCount").textContent=Object.keys(PLAYERS).length;
+  $("admCfg").style.display=inLobby?"":"none";
+  $("admLive").style.display=inLobby?"none":"";
+  updateTimerChips();
+  const entries=Object.entries(PLAYERS).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
+  if(inLobby){
+    $("aClock").textContent="–";
+    $("aRoster").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+'</span><button class="btn-small btn-ghost" onclick="removePlayer(\''+pid+'\')">remove</button></li>').join("")||"<li><span class='nm' style='color:var(--muted)'>Students open this page and enter a name.</span></li>";
+    $("aLbTable").innerHTML=""; return;
+  }
+  const cap=capTick();
+  const heavy=dataChanged||cap!==lastHeavyTick;
+  if(!heavy) return;
+  lastHeavyTick=cap;
+  announceShocks(cap);
+  buildPlayUI();
+  $("aClock").textContent=fmtClock(cap);
+  $("liveMetric").value=CFG.metric;
+  $("pauseBtn").textContent=LIVE.pauseAt?"Resume":"Pause";
+  renderLeaderboard("aLbTable",true);
+  drawScatter("aScatter",false);
+  const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
+  drawMarketChart("aMktChart",cap,P);
+  $("aRoster").innerHTML=entries.map(([pid,p])=>{
+    const a=accountOf(pid), W=a? a.W[a.W.length-1] : null;
+    return '<li><span class="nm">'+esc(p.name)+'</span><span class="pill mono">'+(W!=null?fmt$(W):"–")+'</span></li>';
+  }).join("");
+}
+
+/* ---------- results ---------- */
+function renderResults(){
+  if(!CFG) return;
+  const cap=capTick();
+  const rows=rankAll();
+  $("resAdminCard").style.display=isAdmin?"":"none";
+  const yrs=(cap*CFG.dt).toFixed(1);
+  $("resSub").innerHTML="The clock ran "+cap+" ticks ≈ <b>"+yrs+" market-years</b>. Ranking metric: <b>"+metricExplain()+"</b>";
+  if(rows.length){
+    const bestSharpe=rows.slice().sort((a,b)=>b.m.sharpe-a.m.sharpe)[0];
+    const med=rows.slice().sort((a,b)=>a.m.ret-b.m.ret)[Math.floor(rows.length/2)];
+    $("resStats").innerHTML=
+      '<div class="stat"><div class="v">'+esc(rows[0].name)+'</div><div class="k">winner</div></div>'+
+      '<div class="stat"><div class="v">'+bestSharpe.m.sharpe.toFixed(2)+'</div><div class="k">best sharpe ('+esc(bestSharpe.name)+')</div></div>'+
+      '<div class="stat"><div class="v">'+fmtSign(med? med.m.ret:0)+'</div><div class="k">median return</div></div>';
+  }
+  let html="<tr><th>#</th><th>Investor</th><th>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th><th class='hi'>Score</th></tr>";
+  rows.forEach((r,i)=>{
+    html+="<tr"+(r.pid===me.id?" class='me'":"")+"><td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td>"+(r.m.ok?r.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(r.m.mdd,0)+"</td><td class='hi'>"+(r.m.ok?fmtSign(r.m.score):"–")+"</td></tr>";
+    if(CFG.publicPf) html+="<tr><td colspan='8' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
+  });
+  $("resTable").innerHTML=html;
+  $("resNote").textContent="Score = growth − (γ/2)·vol², γ = "+(CFG.gamma||3)+". Fire-sale losses and fees are already inside these numbers.";
+  drawScatter("resScatter",true);
+  /* theory corner */
+  const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
+  const T=cap*CFG.dt;
+  let th="<tr><th>Asset</th><th>E[r]</th><th>Vol</th><th>Geometric</th><th>This game</th></tr>";
+  CFG.assets.forEach((a,i)=>{
+    const geo=a.mu-a.sigma*a.sigma/2;
+    const real=T>0? Math.log(P[cap][i]/100)/T : 0;
+    th+='<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+"</td><td>"+fmtPct(a.mu)+"</td><td>"+fmtPct(a.sigma,0)+"</td><td>"+fmtSign(geo)+"</td><td>"+fmtSign(real)+"</td></tr>";
+  });
+  $("theoryTable").innerHTML=th;
+  const tg=tangency(CFG);
+  const mix=CFG.assets.map((a,i)=>a.key+" "+(tg.wt[i]*100).toFixed(0)+"%").join(" · ");
+  $("theoryNote").innerHTML="<b>Geometric</b> = μ − σ²/2: what compounding actually pays. That's where MoonShot's fat mean goes to die.<br><br>"+
+    "Best possible Sharpe with this menu: <b>"+tg.Sstar.toFixed(2)+"</b>, achieved by one specific risky mix — <b>"+mix+"</b> — blended with T-bills to taste. Every investor, whatever their γ, should hold the <i>same</i> risky mix and only vary the cash split. That's Markowitz + Tobin's two-fund separation, and it's the gold line on the map.";
+}
+
+/* ---------- clocks ---------- */
+function updateTimerChips(){
+  const chips=[["tTimer","scr-play"],["aTimer","scr-admin"]];
+  chips.forEach(([id])=>{
+    const el=$(id); if(!el) return;
+    if(!CFG||!LIVE||!LIVE.startAt){ el.textContent="–"; el.className="timerchip"; return; }
+    if(LIVE.pauseAt){ el.textContent="PAUSED"; el.className="timerchip paused"; return; }
+    const r=Math.ceil(remainMs()/1000);
+    el.textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0");
+    el.className="timerchip"+(r<=30?" hot":"");
+  });
+}
+let endingLatch=false;
+function tickLoop(){
+  if(!CFG||!LIVE) { updateTimerChips(); return; }
+  updateTimerChips();
+  const scr=document.querySelector(".screen.active");
+  if(scr&&(scr.id==="scr-play"||scr.id==="scr-admin")) render(false);
+  if(isAdmin && !endingLatch && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
+    endingLatch=true;
+    roomRef.child("live").update({phase:"done", endTick:CFG.totalTicks});
+  }
+  if(LIVE.phase!=="running") endingLatch=false;
+  if(LIVE.phase==="done" && scr && scr.id!=="scr-results") render(true);
+}
+
+/* =====================================================================
+   CHARTS
+   ===================================================================== */
+const FONT={family:"IBM Plex Mono", size:10.5};
+function baseOpts(){ return { responsive:true, maintainAspectRatio:false, animation:false,
+  plugins:{legend:{labels:{boxWidth:12, font:{size:11}}}},
+  scales:{ y:{ticks:{font:FONT}}, x:{ticks:{font:FONT, maxTicksLimit:7}} } }; }
+function drawMarketChart(id,cap,P){
+  const K=CFG.assets.length;
+  const step=Math.max(1,Math.floor(cap/300));
+  const labels=[], idx=[];
+  for(let t=0;t<=cap;t+=step){ labels.push(fmtClock(t)); idx.push(t); }
+  const data=CFG.assets.map((a,i)=>({label:a.key, data:idx.map(t=>P[t][i]), borderColor:a.color, backgroundColor:a.color, pointRadius:0, borderWidth:1.8, tension:0}));
+  if(!charts[id]){
+    charts[id]=new Chart($(id).getContext("2d"),{type:"line",data:{labels,datasets:data},options:baseOpts()});
+  } else { charts[id].data.labels=labels; charts[id].data.datasets=data; charts[id].update("none"); }
+}
+function drawMeChart(acct){
+  const id="meChart", cap=capTick();
+  const step=Math.max(1,Math.floor(acct.W.length/300));
+  const labels=[], mine=[], bench=[];
+  for(let k=0;k<acct.W.length;k+=step){
+    labels.push(fmtClock(acct.joinTick+k));
+    mine.push(acct.W[k]);
+    bench.push(CFG.startCash*Math.exp(CFG.rf*CFG.dt*k));
+  }
+  const ds=[{label:"You", data:mine, borderColor:"#1E3A5F", backgroundColor:"#1E3A5F", pointRadius:0, borderWidth:2.2, tension:0},
+            {label:"All in T-bills", data:bench, borderColor:"#C77F00", borderDash:[6,5], pointRadius:0, borderWidth:1.8, tension:0}];
+  if(!charts[id]) charts[id]=new Chart($(id).getContext("2d"),{type:"line",data:{labels,datasets:ds},options:baseOpts()});
+  else { charts[id].data.labels=labels; charts[id].data.datasets=ds; charts[id].update("none"); }
+}
+function drawScatter(id, withAssets){
+  const rows=rankAll();
+  const pts=rows.filter(r=>r.m.ok).map(r=>({x:r.m.sig*100, y:r.m.mu*100, name:r.name, me:r.pid===me.id}));
+  const cap=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),cap), T=cap*CFG.dt;
+  const assetPts=CFG.assets.map((a,i)=>({x:a.sigma*100, y:(T>0? Math.log(P[cap][i]/100)/T : a.mu)*100, name:a.key, color:a.color}));
+  const tg=tangency(CFG);
+  const xmax=Math.max(20, ...pts.map(p=>p.x), ...assetPts.map(p=>p.x))*1.08;
+  const ds=[
+    {label:"Investors", data:pts.filter(p=>!p.me), backgroundColor:"rgba(30,58,95,.55)", pointRadius:5},
+    {label:"You", data:pts.filter(p=>p.me), backgroundColor:"#C03A2B", pointRadius:7, pointStyle:"circle"},
+    {label:"T-bills", data:[{x:0,y:CFG.rf*100}], backgroundColor:"#C77F00", pointRadius:6, pointStyle:"rectRot"},
+    {label:"Best line (CML)", type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderWidth:2, borderDash:[7,5], pointRadius:0}
+  ];
+  if(withAssets) ds.splice(2,0,{label:"Single assets", data:assetPts, backgroundColor:assetPts.map(p=>p.color), pointRadius:6, pointStyle:"rect"});
+  const o=baseOpts();
+  o.parsing=false;
+  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:"volatility %/yr",font:{size:11}}, ticks:{font:FONT}},
+             y:{title:{display:true,text:"growth %/yr",font:{size:11}}, ticks:{font:FONT}} };
+  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return (d.name||c.dataset.label)+": vol "+d.x.toFixed(1)+"%, growth "+d.y.toFixed(1)+"%"; }}};
+  if(!charts[id]) charts[id]=new Chart($(id).getContext("2d"),{type:"scatter",data:{datasets:ds},options:o});
+  else { charts[id].data.datasets=ds; charts[id].options=o; charts[id].update("none"); }
+}
+function renderEventLog(cap){
+  const evs=allShocks(CFG,MANUAL).filter(s=>s.tick<=cap).map(s=>({
+    when:fmtClock(s.tick),
+    txt: s.type==="exp"? "💸 Liquidity call: show "+fmtPct(s.pct,0)+" of wealth in cash; shortfalls fire-sold at "+fmtPct(s.hc,0)+" haircut" : "📉 Crash: stocks gapped down in proportion to their risk (gold hedged)"
+  }));
+  if(LIVE&&LIVE.banner) evs.push({when:"📣", txt:esc(LIVE.banner.text)});
+  $("eventLog").innerHTML=evs.reverse().map(e=>'<li><span class="when">'+e.when+'</span><span>'+e.txt+'</span></li>').join("")||"<li><span style='color:var(--muted)'>Quiet so far. It won't last.</span></li>";
+}
+
+boot();
+</script>
+</body>
+</html>
