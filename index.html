@@ -434,12 +434,14 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   <div class="card">
     <h3>Risk–return map</h3>
     <div class="chartbox tall"><canvas id="resScatter"></canvas></div>
-    <div class="notice">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best trade-off theory allowed. Diversified portfolios should plot above and left of single stocks.</div>
+    <div class="notice">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best <b>expected</b> trade-off &mdash; a forecast, not a ceiling. In any single game, lucky assets and lucky investors can land above it; run it again and they usually won&rsquo;t. Diversified portfolios should plot above and left of single stocks.</div>
   </div>
 
   <div class="card">
     <h3>Theory corner — the reveal</h3>
     <table class="tbl" id="theoryTable"></table>
+    <h3 style="margin-top:16px">Correlations</h3>
+    <table class="tbl" id="theoryCorr"></table>
     <div class="notice" id="theoryNote"></div>
   </div>
 
@@ -1068,6 +1070,11 @@ function renderRbPreview(){
   const segs=CFG.assets.map((a,i)=>'<div class="seg" style="width:'+Math.max(0,sliderVals[i]||0)+'%;background:'+a.color+'"></div>').join("");
   $("rbBar").innerHTML=segs+'<div class="seg" style="width:'+Math.max(0,cashW)+'%;background:'+CASH_COLOR+'"></div>';
 }
+function corrTableHTML(){
+  const C=CORR_PRESETS[CFG.corr]||CORR_PRESETS.realistic;
+  return "<tr><th></th>"+CFG.assets.map(a=>"<th>"+esc(a.key)+"</th>").join("")+"</tr>"+
+    CFG.assets.map((a,i)=>'<tr><td class="nm">'+esc(a.key)+"</td>"+CFG.assets.map((b,j)=>"<td>"+(i===j?"1":C[i][j].toFixed(2).replace("0.",".").replace("-0.","-."))+"</td>").join("")+"</tr>").join("");
+}
 function buildParamTables(){
   if(!CFG) return;
   $("paramCard").style.display=CFG.showParams?"":"none";
@@ -1076,9 +1083,7 @@ function buildParamTables(){
   $("assetTable").innerHTML="<tr><th>Asset</th><th>E[return]</th><th>Volatility</th></tr>"+
     '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>T-bills</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
     CFG.assets.map(a=>'<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</td><td>'+fmtPct(a.mu)+'</td><td>'+fmtPct(a.sigma,0)+'</td></tr>').join("");
-  const C=CORR_PRESETS[CFG.corr]||CORR_PRESETS.realistic;
-  $("corrTable").innerHTML="<tr><th></th>"+CFG.assets.map(a=>"<th>"+esc(a.key)+"</th>").join("")+"</tr>"+
-    CFG.assets.map((a,i)=>'<tr><td class="nm">'+esc(a.key)+"</td>"+CFG.assets.map((b,j)=>"<td>"+(i===j?"1":C[i][j].toFixed(2).replace("0.",".").replace("-0.","-."))+"</td>").join("")+"</tr>").join("");
+  $("corrTable").innerHTML=corrTableHTML();
 }
 
 /* =====================================================================
@@ -1307,9 +1312,10 @@ function renderResults(){
     th+='<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+"</td><td>"+fmtPct(a.mu)+"</td><td>"+fmtPct(a.sigma,0)+"</td><td>"+fmtSign(geo)+"</td><td>"+fmtSign(real)+"</td></tr>";
   });
   $("theoryTable").innerHTML=th;
+  $("theoryCorr").innerHTML=corrTableHTML();
   const tg=tangency(CFG);
   const mix=CFG.assets.map((a,i)=>a.key+" "+(tg.wt[i]*100).toFixed(0)+"%").join(" · ");
-  $("theoryNote").innerHTML="<b>Geometric</b> = μ − σ²/2: what compounding actually pays. That's where MoonShot's fat mean goes to die.<br><br>"+
+  $("theoryNote").innerHTML="<b>Geometric</b> = μ − σ²/2: what compounding actually pays. That's where MoonShot's fat mean goes to die. And the correlation table is why gold earns a big portfolio weight despite a feeble return: it zigs when everything else zags.<br><br>"+
     "Best possible Sharpe with this menu: <b>"+tg.Sstar.toFixed(2)+"</b>, achieved by one specific risky mix — <b>"+mix+"</b> — blended with T-bills to taste. Every investor, whatever their γ, should hold the <i>same</i> risky mix and only vary the cash split. That's Markowitz + Tobin's two-fund separation, and it's the gold line on the map.";
 }
 
