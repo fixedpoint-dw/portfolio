@@ -332,7 +332,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
     <label style="margin-top:6px">Ranking</label>
     <div class="notice" style="margin-top:2px">Most money when the final bell rings. The live leaderboard is always sorted by current wealth — no risk adjustment, no excuses.</div>
 
-    <label style="margin-top:16px">Surprises (revealed to the class for 30s at kickoff)</label>
+    <label style="margin-top:16px">Surprises (revealed to the class at kickoff)</label>
     <div class="row">
       <div><label>Expected crashes per game</label><input type="number" id="cfgCrashFreq" min="0" max="5" step="0.5" value="1"></div>
       <div><label>Crash magnitude</label>
@@ -345,6 +345,10 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       </div>
     </div>
     <div class="notice">A crash is a one-tick <b>jump</b> hitting every stock at once. The % is the blue-chip drop; each stock falls in proportion to its own risk (wilder stocks fall much harder, gold tends to pop <i>up</i>). Arrivals are random — expecting 1 sometimes means 0, sometimes 2. Each crash draws its own size from the chosen menu.</div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Kickoff briefing (seconds)</label><input type="number" id="cfgBriefSec" min="5" max="120" step="5" value="30"></div>
+      <div><label>&nbsp;</label><div class="notice" style="margin:0">How long the chosen surprises stay on every phone before the market opens.</div></div>
+    </div>
     <label class="chklabel"><input type="checkbox" id="cfgExpOn"> Liquidity calls (cash-on-demand stress tests)</label>
     <div class="row3" id="expRow" style="display:none">
       <div><label style="margin-top:4px"># random calls</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
@@ -518,7 +522,7 @@ function sevFromMag(cfg, m){
 }
 function defaultConfig(){ return {
   seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:3000, totalTicks:240,
-  gamma:3, metric:"wealth", expOn:false, nExp:2, expPct:0.20, haircut:0.25, crashFreq:1, crashMag:"mix",
+  gamma:3, metric:"wealth", expOn:false, nExp:2, expPct:0.20, haircut:0.25, crashFreq:1, crashMag:"mix", briefSec:30,
   publicPf:true, showParams:true, corr:"realistic", assets: defaultAssets()
 };}
 
@@ -880,6 +884,7 @@ function readCfgInputs(){
     expPct: Math.min(.6, Math.max(.01,(parseFloat($("cfgExpPct").value)||20)/100)),
     haircut: Math.min(.6, Math.max(0,(parseFloat($("cfgHaircut").value)||25)/100)),
     crashFreq: Math.min(5, Math.max(0, parseFloat($("cfgCrashFreq").value)||0)),
+    briefSec: Math.min(120, Math.max(5, parseInt($("cfgBriefSec").value)||30)),
     crashMag: $("cfgCrashMag").value,
     publicPf: $("cfgPublic").checked,
     showParams: $("cfgShowParams").checked,
@@ -892,10 +897,10 @@ async function startGame(){
   const cfg=readCfgInputs();
   const hasExtras = cfg.expOn || (cfg.crashFreq||0)>0;
   const ups={ config:cfg, shocks:null,
-    live:{ phase:"running", startAt:now()+(hasExtras?30000:5000), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
+    live:{ phase:"running", startAt:now()+(hasExtras?(cfg.briefSec||30)*1000:5000), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
   for(const pid of Object.keys(PLAYERS)) ups["players/"+pid+"/trades"]=null, ups["players/"+pid+"/joinTick"]=0;
   await roomRef.update(ups);
-  toast(hasExtras? "Briefing on every phone — market opens in 30s" : "Market opens in 5 seconds");
+  toast(hasExtras? "Briefing on every phone — market opens in "+(cfg.briefSec||30)+"s" : "Market opens in 5 seconds");
 }
 async function togglePause(){
   if(!LIVE) return;
@@ -969,7 +974,7 @@ function wireUI(){
   $("againBtn2").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
   $("wipeBtn2").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
   buildAssetEditor();
-  ["cfgMin","cfgTickSec","cfgFreq","cfgCrashFreq"].forEach(id=>$(id).addEventListener("input",cfgPreview));
+  ["cfgMin","cfgTickSec","cfgFreq","cfgCrashFreq","cfgBriefSec"].forEach(id=>$(id).addEventListener("input",cfgPreview));
   $("cfgExpOn").addEventListener("change",()=>{ $("expRow").style.display=$("cfgExpOn").checked?"":"none"; cfgPreview(); });
   cfgPreview();
 }
@@ -986,7 +991,7 @@ function cfgPreview(){
   const ppy=parseInt($("cfgFreq").value)||52;
   const ticks=Math.round(mins*60/sec), yrs=(ticks/ppy).toFixed(1);
   $("cfgPreview").innerHTML="That's <b>"+ticks+" ticks</b> ≈ <b>"+yrs+" market-years</b> in "+mins+" minutes. "+
-    ($("cfgExpOn").checked||parseFloat($("cfgCrashFreq").value)>0 ? "Chosen surprises get a 30-second on-screen briefing at kickoff, then the market opens." : "No surprises configured — the market opens after a 5-second countdown. (You can still fire a crash manually.)");
+    ($("cfgExpOn").checked||parseFloat($("cfgCrashFreq").value)>0 ? "Chosen surprises get a "+(parseInt($("cfgBriefSec").value)||30)+"-second on-screen briefing at kickoff, then the market opens." : "No surprises configured — the market opens after a 5-second countdown. (You can still fire a crash manually.)");
 }
 
 /* build the per-game trade UI once */
@@ -1062,7 +1067,7 @@ function buildPlayUI(){
     "Trade the five stocks any time. Prices come from the market — your trades don't move them. Each trade costs "+(CFG.feeBps||0)+" bps.",
     "Each tick of the clock is "+(Math.round(1/CFG.dt)===252?"one trading day":Math.round(1/CFG.dt)===12?"one month":"one week")+" of market time.",
     "Winner = "+metricExplain()+" The leaderboard is live and sorted by wealth. No restarts.",
-    "Any surprise rules the instructor has chosen will flash on every phone for 30 seconds right before the market opens — read fast."
+    "Any surprise rules the instructor has chosen will flash on every phone for "+(CFG.briefSec||30)+" seconds right before the market opens — read fast."
   ];
   $("rulesList").innerHTML=rules.map(r=>"<li>"+r+"</li>").join("");
   $("rulesList2").innerHTML=$("rulesList").innerHTML;
