@@ -179,7 +179,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 <!-- ============ LANDING ============ -->
 <div class="screen" id="scr-landing">
   <div class="brand"><h1>Frontier</h1><span class="tag">crash edition</span></div>
-  <p class="sub">You manage $100 across a money-market account and five stocks. Markets can jump without warning. Whoever holds the most money at the final bell wins — that simple.</p>
+  <p class="sub">You manage $1,000 across a money-market account and five stocks. Markets can jump without warning. Whoever holds the most money at the final bell wins — that simple.</p>
   <div class="card">
     <h3>Join the game</h3>
     <label for="nameInput">Your name</label>
@@ -251,6 +251,10 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       </div>
     </div>
     <div class="card">
+      <h3>Prices (growth of $100)</h3>
+      <div class="chartbox"><canvas id="mktChart"></canvas></div>
+    </div>
+    <div class="card">
       <h3>Holdings</h3>
       <div id="holdList"></div>
     </div>
@@ -272,10 +276,6 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 
   <!-- --- TAB: MARKET --- -->
   <div class="tabpane" id="tab-market">
-    <div class="card">
-      <h3>Prices (growth of $100)</h3>
-      <div class="chartbox tall"><canvas id="mktChart"></canvas></div>
-    </div>
     <div class="card" id="crashCard" style="display:none">
       <h3>⚡ Crash risk this game</h3>
       <div class="notice" id="crashInfo" style="margin-top:6px"></div>
@@ -340,7 +340,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
     </div>
     <div class="row">
       <div><label>One tick equals</label><select id="cfgFreq"><option value="52" selected>1 week</option><option value="252">1 day</option><option value="12">1 month</option></select></div>
-      <div><label>Start cash ($)</label><input type="number" id="cfgCash" min="10" value="100"></div>
+      <div><label>Start cash ($)</label><input type="number" id="cfgCash" min="10" value="1000"></div>
     </div>
     <div class="row">
       <div><label>T-bill rate (%/yr)</label><input type="number" id="cfgRf" step="0.5" value="4"></div>
@@ -511,7 +511,7 @@ const firebaseConfig = {
 };
 /* ===================================================================== */
 
-const APP_VERSION = 5;                          // bump when redeploying breaking changes
+const APP_VERSION = 6;                          // bump when redeploying breaking changes
 const ADMIN_PASSWORD = "arbitrageur";           // change me
 const ROOM = new URLSearchParams(location.search).get("room") || "classroom";
 const CASH_COLOR = "#93A3B4";
@@ -546,7 +546,7 @@ function sevFromMag(cfg, m){
   return -Math.log(1-m)/((a0.beta==null?1:a0.beta)*a0.sigma);
 }
 function defaultConfig(){ return {
-  seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:4000, totalTicks:240,
+  seed: 1234567, startCash:1000, rf:0.04, feeBps:10, dt:1/52, tickMs:4000, totalTicks:240,
   gamma:3, metric:"wealth", expOn:false, nExp:2, expPct:0.20, haircut:0.25, crashFreq:1, crashMag:"mix", briefSec:30,
   publicPf:true, showParams:true, corr:"realistic", assets: defaultAssets()
 };}
@@ -878,7 +878,7 @@ function sliderCtx(i){
 function syncSlider(i){
   const el=$("ts_"+i); if(!el) return;
   const c=sliderCtx(i); if(!c) return;
-  el.max=(Math.floor(c.maxU*10)/10).toFixed(1);          /* cash-limited ceiling, floor at 0 */
+  el.max=String(Math.floor(c.maxU));                     /* whole shares: cash-limited ceiling, floor at 0 */
   if(STAGED[i]==null) el.value=c.cur;
   else { if(STAGED[i]>parseFloat(el.max)){ STAGED[i]=parseFloat(el.max); } el.value=STAGED[i]; }
   paintSlider(i);
@@ -952,28 +952,55 @@ async function executeOrders(){
     if(navigator.vibrate)navigator.vibrate([20,40,20]);
   }
 }
+/* whole-share rebalance: round each target to the NEAREST integer share count,
+   then, if the roundings jointly overrun cash, walk back one share at a time
+   from the positions that were rounded up the most — the closest feasible fit. */
+function intRebalanceOrders(curSh, cash, px, fee, weights){
+  const K=px.length;
+  let W=cash; for(let i=0;i<K;i++)W+=curSh[i]*px[i];
+  const raw=weights.map((w,i)=>Math.max(0, w*W/px[i]));
+  const tgt=raw.map(r=>Math.round(r));
+  function cashAfter(){
+    let c=cash;
+    for(let i=0;i<K;i++){
+      const d=tgt[i]-curSh[i];
+      if(d<0) c += -d*px[i]*(1-fee);
+      else if(d>0) c -= d*px[i]*(1+fee);
+    }
+    return c;
+  }
+  let guard=0;
+  while(cashAfter()<-1e-9 && guard++<4000){
+    /* trim the buy that overshoots its ideal the most; ties -> priciest share */
+    let pick=-1, best=-Infinity;
+    for(let i=0;i<K;i++){
+      if(tgt[i]-curSh[i]>0.049 && tgt[i]>0){
+        const over=(tgt[i]-raw[i])*1000 + px[i]/1e6;
+        if(over>best){ best=over; pick=i; }
+      }
+    }
+    if(pick<0) break;
+    tgt[pick]-=1;
+  }
+  const sells=[], buys=[];
+  for(let i=0;i<K;i++){
+    const d=tgt[i]-curSh[i];
+    if(d<-0.049) sells.push({a:i, s:d});
+    else if(d>0.049 && d*px[i]>=0.01) buys.push({a:i, s:d});
+  }
+  return {orders:[...sells,...buys], cashAfter:cashAfter(), tgt};
+}
 async function applyRebalance(){
   const acct=myAccount(); if(!acct) return;
   const t=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),t), px=P[t];
   const fee=(CFG.feeBps||0)/10000;
-  const K=CFG.assets.length;
-  let W=acct.cash; for(let i=0;i<K;i++)W+=acct.sh[i]*px[i];
-  const targets=CFG.assets.map((a,i)=>({i, w:(sliderVals[i]||0)/100}));
-  const sumW=targets.reduce((s,x)=>s+x.w,0);
+  const weights=CFG.assets.map((a,i)=>(sliderVals[i]||0)/100);
+  const sumW=weights.reduce((s,x)=>s+x,0);
   if(sumW>1.0001){ toast("Weights exceed 100% — lower something."); return; }
-  const sells=[], buys=[];
-  targets.forEach(({i,w})=>{
-    const cur=acct.sh[i]*px[i], tgt=w*W, d=tgt-cur;
-    if(d<-0.05) sells.push({a:i, s:d/px[i]});
-    else if(d>0.05) buys.push({i, d});
-  });
-  let cashAfter=acct.cash + sells.reduce((s,x)=>s+(-x.s)*px[x.a]*(1-fee),0);
-  const need=buys.reduce((s,b)=>s+b.d*(1+fee),0);
-  const scale=need>cashAfter? Math.max(0,cashAfter/need)*0.999 : 1;
-  const orders=[...sells, ...buys.map(b=>({a:b.i, s:(b.d*scale)/px[b.i]}))];
-  if(!orders.length){ toast("Already at those weights."); return; }
-  const ok=await submitTrades(orders);
-  if(ok){ toast("Rebalanced ("+orders.length+" orders)"); if(navigator.vibrate)navigator.vibrate([20,40,20]); }
+  const plan=intRebalanceOrders(acct.sh.slice(), acct.cash, px, fee, weights);
+  if(!plan.orders.length){ toast("Already as close to those weights as whole shares get."); return; }
+  const ok=await submitTrades(plan.orders);
+  if(ok){ toast("Rebalanced ("+plan.orders.length+" orders, whole shares)"); if(navigator.vibrate)navigator.vibrate([20,40,20]); }
 }
 
 /* ---------- actions: admin ---------- */
@@ -1143,7 +1170,7 @@ function buildPlayUI(){
         '<div class="hmy"><div class="v" id="h_v_'+i+'">–</div><div class="w" id="h_w_'+i+'">–</div></div>'+
       '</div>'+
       '<div class="tradepanel open" id="tp_'+i+'" style="display:block">'+
-        '<input type="range" id="ts_'+i+'" min="0" max="1" step="0.1" value="0" aria-label="shares of '+esc(a.key)+'">'+
+        '<input type="range" id="ts_'+i+'" min="0" max="1" step="1" value="0" aria-label="shares of '+esc(a.key)+'">'+
         '<div class="mono" id="tpv_'+i+'" style="font-size:13px; color:var(--muted); margin-top:2px">–</div>'+
       '</div>'+
     '</div>').join("");
@@ -1161,7 +1188,7 @@ function buildPlayUI(){
   CFG.assets.forEach((a,i)=>{
     $("sl_"+i).addEventListener("input",()=>{ sliderVals[i]=+$("sl_"+i).value; renderRbPreview(); });
   });
-  $("rbNote").textContent="This sells winners and buys laggards in one shot to hit your target weights — the rest stays in the money market. It costs "+(CFG.feeBps||0)+" bps per trade today; the payoff, if any, shows up over the long run. Nobody rebalances for you: buy-and-hold is the default.";
+  $("rbNote").textContent="This sells winners and buys laggards in one shot, rounded to whole shares — the closest fit to your target weights that your cash allows. The rest stays in the money market. It costs "+(CFG.feeBps||0)+" bps per trade today; the payoff, if any, shows up over the long run. Nobody rebalances for you: buy-and-hold is the default.";
   /* prefill sliders from current weights once account exists */
   setTimeout(syncSlidersToHoldings, 300);
   /* rules text */
@@ -1270,7 +1297,7 @@ function renderLobby(){
   if(CFG){ /* rules may not exist pre-config; build from defaults */ }
   if(!$("rulesList").innerHTML){
     const d=defaultConfig();
-    $("rulesList").innerHTML=["You start with $100 in a money-market account earning the T-bill rate.",
+    $("rulesList").innerHTML=["You start with $1,000 in a money-market account earning the T-bill rate.",
       "Trade five stocks in real time; prices are the market's, not yours.",
       "Winner = the most money when the final bell rings. Simple.",
       "Any extra rules the instructor picks will be revealed for 30 seconds at kickoff.",
@@ -1368,7 +1395,8 @@ function renderPlay(dataChanged){
   paintOrders();
 
   const active=document.querySelector(".tabpane.on");
-  if(active&&active.id==="tab-market"){ drawMarketChart("mktChart",cap,P); renderEventLog(cap); }
+  if(active&&active.id==="tab-trade"){ drawMarketChart("mktChart",cap,P); }
+  if(active&&active.id==="tab-market"){ renderEventLog(cap); }
   if(active&&active.id==="tab-ranks"){ renderMyStats(acct); drawMeChart(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false); 
     $("lbNote").textContent = CFG.publicPf? "Tap a row to see that investor's current mix." : "Portfolios are private this game — only the numbers show.";
   }
