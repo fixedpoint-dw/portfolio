@@ -463,6 +463,12 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   </div>
 
   <div class="card">
+    <h3>Could you have done better?</h3>
+    <table class="tbl" id="benchTable"></table>
+    <div class="notice" id="benchNote"></div>
+  </div>
+
+  <div class="card">
     <h3>Risk–return map</h3>
     <div class="chartbox tall"><canvas id="resScatter"></canvas></div>
     <div class="notice">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best <b>expected</b> trade-off &mdash; a forecast, not a ceiling. In any single game, lucky assets and lucky investors can land above it; run it again and they usually won&rsquo;t. Diversified portfolios should plot above and left of single stocks.</div>
@@ -686,6 +692,7 @@ function reconstruct(cfg, P, shocks, tradesRaw, joinTick, capTick){
                               .sort((x,y)=> x.t-y.t || (x.k<y.k?-1:x.k>y.k?1:0));
   const expBy={}; shocks.filter(s=>s.type==="exp").forEach(s=>{ (expBy[s.tick]=expBy[s.tick]||[]).push(s); });
   let cash=cfg.startCash, sh=new Array(K).fill(0), fees=0, firesale=0, ti=0;
+  const cost=new Array(K).fill(0), realized=new Array(K).fill(0);   /* avg-cost basis $, realized P&L $ */
   const W=[];
   for(let t=joinTick;t<=capTick;t++){
     if(t>joinTick) cash*=g;
@@ -701,7 +708,13 @@ function reconstruct(cfg, P, shocks, tradesRaw, joinTick, capTick){
         const need=due-cash;
         const gross=Math.min(H, need/(1-s.hc));   // market value force-sold
         const frac=gross/H;
-        for(let i=0;i<K;i++)sh[i]*=(1-frac);
+        for(let i=0;i<K;i++){
+          if(sh[i]>1e-12){
+            realized[i] += sh[i]*frac*(px[i]*(1-s.hc) - cost[i]/sh[i]);
+            cost[i]*=(1-frac);
+          }
+          sh[i]*=(1-frac);
+        }
         firesale += gross*s.hc;
         cash += gross*(1-s.hc);
       }
@@ -713,16 +726,24 @@ function reconstruct(cfg, P, shocks, tradesRaw, joinTick, capTick){
       if(s>0){
         const maxS=cash/(p*(1+fee));
         if(s>maxS) s=maxS;
-        cash-=s*p*(1+fee); fees+=s*p*fee; sh[i]+=s;
+        cash-=s*p*(1+fee); fees+=s*p*fee;
+        cost[i]+=s*p*(1+fee);                                  /* fees enter the basis */
+        sh[i]+=s;
       } else if(s<0){
         s=Math.max(s,-sh[i]);
-        cash+=(-s)*p*(1-fee); fees+=(-s)*p*fee; sh[i]+=s;
+        cash+=(-s)*p*(1-fee); fees+=(-s)*p*fee;
+        if(sh[i]>1e-12){
+          realized[i]+=(-s)*(p*(1-fee) - cost[i]/sh[i]);
+          cost[i]*=(sh[i]+s)/sh[i];                            /* proportional basis release */
+        }
+        sh[i]+=s;
+        if(sh[i]<1e-12){ sh[i]=Math.max(0,sh[i]); cost[i]=0; }
       }
     }
     let H2=0; for(let i=0;i<K;i++)H2+=sh[i]*px[i];
     W.push(cash+H2);
   }
-  return {W, cash, sh, fees, firesale, nTrades:trades.length};
+  return {W, cash, sh, cost, realized, fees, firesale, nTrades:trades.length};
 }
 function metricsOf(W, cfg){
   const n=W.length;
@@ -1419,7 +1440,10 @@ function renderPlay(dataChanged){
     const dEl=$("h_d_"+i); dEl.textContent=fmtSign(d); dEl.className="d "+(d>0?"up":d<0?"down":"");
     const v=acct.sh[i]*p1;
     $("h_v_"+i).textContent=v>0.005? fmt$(v):"–";
-    $("h_w_"+i).textContent=v>0.005&&W>0? trimU(acct.sh[i])+" sh · "+(v/W*100).toFixed(0)+"%":"";
+    if(v>0.005&&W>0){
+      const cb=acct.cost[i], pr= cb>1e-9 ? v/cb-1 : null;
+      $("h_w_"+i).innerHTML=trimU(acct.sh[i])+" sh"+(pr==null?"":" · <span style='color:"+(pr>=0?"var(--gain)":"var(--loss)")+";font-weight:600'>"+fmtSign(pr)+"</span>");
+    } else $("h_w_"+i).innerHTML="";
     syncSlider(i);
   }
   paintOrders();
@@ -1506,6 +1530,51 @@ function renderAdmin(dataChanged){
 }
 
 /* ---------- results ---------- */
+/* fully-invested robo strategy: rebalance to fixed weights every `every` ticks */
+function roboTrades(cfg,P,shocks,weights,every,cap){
+  const fee=(cfg.feeBps||0)/10000, K=cfg.assets.length;
+  const trades=[]; let n=0;
+  for(let t=0;t<=cap;t+=every){
+    const acct=reconstruct(cfg,P,shocks,trades,0,t);
+    const px=P[t];
+    let W=acct.cash; for(let i=0;i<K;i++)W+=acct.sh[i]*px[i];
+    const sells=[],buys=[];
+    weights.forEach((w,i)=>{ const d=Math.max(0,w)*W-acct.sh[i]*px[i];
+      if(d<-0.05) sells.push({a:i,s:d/px[i]}); else if(d>0.05) buys.push({i,d}); });
+    let cashA=acct.cash+sells.reduce((s2,x)=>s2+(-x.s)*px[x.a]*(1-fee),0);
+    const need=buys.reduce((s2,b)=>s2+b.d*(1+fee),0);
+    const sc=need>cashA? Math.max(0,cashA/need)*0.999 : 1;
+    [...sells,...buys.map(b=>({a:b.i,s:(b.d*sc)/px[b.i]}))].forEach(o=>trades.push({t,a:o.a,s:o.s,k:"b"+String(n++).padStart(4,"0")}));
+  }
+  return trades;
+}
+let BENCH={key:null, rows:null};
+function benchRows(){
+  const cap=capTick(), shocks=allShocks(CFG,MANUAL);
+  const key=CFG.seed+"|"+cap+"|"+shocks.length;
+  if(BENCH.key===key) return BENCH.rows;
+  const P=pricePath(CFG,shocks,cap);
+  const K=CFG.assets.length;
+  const tg=tangency(CFG);
+  const wTan=tg.wt.map(w=>Math.max(0,w)); const sT=wTan.reduce((a,b)=>a+b,0); const wTanN=wTan.map(w=>w/sT);
+  const inv=CFG.assets.map(a=>1/a.sigma); const sI=inv.reduce((a,b)=>a+b,0);
+  const wRP=inv.map(x=>x/sI);
+  const wEW=new Array(K).fill(1/K);
+  const defs=[
+    ["Markowitz tangency", wTanN],
+    ["Risk parity (1/σ)", wRP],
+    ["Equal weight", wEW]
+  ];
+  const rows=defs.map(([nm,w])=>{
+    const acct=reconstruct(CFG,P,shocks,roboTrades(CFG,P,shocks,w,4,cap),0,cap);
+    return {nm, w, W:acct.W[acct.W.length-1], m:metricsOf(acct.W,CFG)};
+  });
+  const idle=reconstruct(CFG,P,shocks,[],0,cap);
+  rows.push({nm:"Money market only", w:null, W:idle.W[idle.W.length-1], m:metricsOf(idle.W,CFG)});
+  rows.sort((a,b)=>b.W-a.W);
+  BENCH={key, rows};
+  return rows;
+}
 function renderResults(){
   if(!CFG) return;
   const cap=capTick();
@@ -1528,6 +1597,17 @@ function renderResults(){
   });
   $("resTable").innerHTML=html;
   $("resNote").textContent="Ranking is pure final wealth. Sharpe, volatility and drawdown are shown for the debrief — ask who WOULD have won under a risk-adjusted rule. Fire-sale losses and fees are already inside these numbers.";
+  /* robo benchmarks on the exact same market, same fees, same shocks */
+  const bch=benchRows();
+  let bh="<tr><th>Robo strategy</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th></tr>";
+  bch.forEach(b=>{
+    bh+="<tr><td class='nm'>"+esc(b.nm)+"</td><td class='hi'>"+fmt$(b.W)+"</td><td>"+fmtSign(b.m.ret)+"</td><td>"+fmtPct(b.m.sig,0)+"</td><td>"+(b.m.ok?b.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(b.m.mdd,0)+"</td></tr>";
+  });
+  $("benchTable").innerHTML=bh;
+  const wLine=bch.filter(b=>b.w).map(b=>"<b>"+esc(b.nm)+"</b>: "+CFG.assets.map((a,i)=>esc(a.key)+" "+(b.w[i]*100).toFixed(0)+"%").join(" · ")).join("<br>");
+  const beatTan=rows.filter(r=>{ const t=bch.find(x=>x.nm==="Markowitz tangency"); return t && r.W>t.W; }).length;
+  $("benchNote").innerHTML="These robots played the exact same market you did — same prices, same shocks, same fees — mechanically rebalancing to fixed weights every 4 ticks, never predicting anything.<br>"+wLine+
+    "<br>Students who beat the tangency robot on wealth: <b>"+beatTan+" of "+rows.length+"</b>. Ask them how much extra risk it took — the Vol and MaxDD columns don't lie.";
   drawScatter("resScatter",true);
   /* theory corner */
   const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
