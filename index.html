@@ -237,6 +237,20 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   <!-- --- TAB: TRADE --- -->
   <div class="tabpane on" id="tab-trade">
     <div class="card">
+      <h3>My position</h3>
+      <div class="statgrid" id="posStats"></div>
+      <div class="notice" id="posHold" style="margin-top:8px"></div>
+      <div id="ordBox" style="display:none; margin-top:10px">
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px">Staged orders</div>
+        <div class="mono" id="ordSum" style="font-size:13.5px; line-height:1.55"></div>
+        <div id="ordErr" style="display:none; margin-top:8px; color:var(--loss); font-weight:600; font-size:13.5px"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn-ghost btn-small" id="ordClear" style="flex:0 0 32%">Cancel all</button>
+          <button class="btn-primary" id="ordExec" style="flex:1; padding:11px">Execute orders</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
       <h3>Holdings</h3>
       <div id="holdList"></div>
     </div>
@@ -497,7 +511,7 @@ const firebaseConfig = {
 };
 /* ===================================================================== */
 
-const APP_VERSION = 3;                          // bump when redeploying breaking changes
+const APP_VERSION = 4;                          // bump when redeploying breaking changes
 const ADMIN_PASSWORD = "arbitrageur";           // change me
 const ROOM = new URLSearchParams(location.search).get("room") || "classroom";
 const CASH_COLOR = "#93A3B4";
@@ -853,42 +867,69 @@ function paintSlider(i){
   const c=sliderCtx(i); if(!c) return;
   const tgt = STAGED[i]==null ? c.cur : STAGED[i];
   const d = tgt - c.cur;
-  const pv=$("tpv_"+i), ex=$("tex_"+i), xc=$("txc_"+i);
-  if(!pv||!ex||!xc) return;
+  const pv=$("tpv_"+i); if(!pv) return;
   if(Math.abs(d)*c.px < 0.01 || Math.abs(d) < 0.05){
     pv.textContent="holding "+trimU(c.cur)+" sh";
-    ex.style.display="none"; xc.style.display="none";
+    pv.style.color="var(--muted)";
   } else if(d>0){
-    const cost=d*c.px*(1+c.fee);
-    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · cash left "+fmt$(Math.max(0,c.acct.cash-cost));
-    ex.textContent="Buy "+trimU(d)+" ≈ "+fmt$(d*c.px);
-    ex.className="btn-buy btn-small";
-    ex.style.display=""; xc.style.display="";
+    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · order: BUY "+trimU(d)+" ≈ "+fmt$(d*c.px);
+    pv.style.color="var(--gain)";
   } else {
-    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · frees "+fmt$(-d*c.px*(1-c.fee));
-    ex.textContent="Sell "+trimU(-d)+" ≈ "+fmt$(-d*c.px);
-    ex.className="btn-sell btn-small";
-    ex.style.display=""; xc.style.display="";
+    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · order: SELL "+trimU(-d)+" ≈ "+fmt$(-d*c.px);
+    pv.style.color="var(--loss)";
   }
+  paintOrders();
 }
-async function executeSlider(i){
-  const acct=myAccount(); if(!acct){ toast("Join first."); return; }
-  const t=capTick(), px=pricePath(CFG,allShocks(CFG,MANUAL),t)[t][i];
+/* joint plan across ALL staged sliders — sells first, then buys */
+function stagedPlan(){
+  const acct=myAccount(); if(!acct||!CFG) return null;
+  const t=capTick(), px=pricePath(CFG,allShocks(CFG,MANUAL),t)[t];
   const fee=(CFG.feeBps||0)/10000;
-  const cur=acct.sh[i];
-  /* final cross-check on the freshest account: floor at zero (no shorting),
-     ceiling at what cash actually covers right now (fees included). The same
-     clamps run inside every client's reconstruction, so an edited page still
-     can't overspend or short — other phones simply won't honor it. */
-  let tgt = STAGED[i]==null ? cur : STAGED[i];
-  tgt = Math.max(0, Math.min(tgt, cur + acct.cash/(px*(1+fee))));
-  const d = tgt - cur;
-  if(Math.abs(d)*px < 0.01 || Math.abs(d) < 0.05){ toast("Nothing to trade."); STAGED[i]=null; syncSlider(i); return; }
-  const ok=await submitTrades([{a:i, s:d}]);
+  const sells=[], buys=[]; let buyCost=0, sellGet=0;
+  CFG.assets.forEach((a,i)=>{
+    const cur=acct.sh[i];
+    const tgt = STAGED[i]==null ? cur : Math.max(0, STAGED[i]);   // floor: no shorting
+    const d = tgt-cur;
+    if(d < -0.049){ sells.push({a:i, s:d, val:-d*px[i]}); sellGet += -d*px[i]*(1-fee); }
+    else if(d > 0.049 && d*px[i] >= 0.01){ buys.push({a:i, s:d, val:d*px[i]}); buyCost += d*px[i]*(1+fee); }
+  });
+  const cashAfter = acct.cash + sellGet - buyCost;
+  return { acct, px, sells, buys, buyCost, sellGet, cashAfter,
+           any: sells.length+buys.length>0,
+           feasible: cashAfter >= -1e-9,
+           orders: [...sells, ...buys].map(o=>({a:o.a, s:o.s})) };
+}
+function paintOrders(){
+  const pl=stagedPlan(); if(!pl) return;
+  const ps=$("posStats"); if(!ps) return;
+  let W=pl.acct.cash; CFG.assets.forEach((a,i)=>W+=pl.acct.sh[i]*pl.px[i]);
+  ps.innerHTML=[[fmt$(W),"wealth"],[fmt$(pl.acct.cash),"cash"],[fmt$(W-pl.acct.cash),"in stocks"]]
+    .map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
+  const held=CFG.assets.map((a,i)=>({a,n:pl.acct.sh[i]})).filter(x=>x.n>0.049);
+  $("posHold").innerHTML = held.length
+    ? "Holding "+held.map(x=>"<b>"+trimU(x.n)+" "+esc(x.a.key)+"</b>").join(" · ")+" · cash "+(W>0?(pl.acct.cash/W*100).toFixed(0):100)+"%"
+    : "Everything is in the money market. Slide a stock to place an order.";
+  $("ordBox").style.display = pl.any ? "" : "none";
+  if(!pl.any) return;
+  const lines = pl.sells.map(o=>'<span style="color:var(--loss)">SELL '+trimU(-o.s)+" "+esc(CFG.assets[o.a].key)+"</span> ≈ +"+fmt$(o.val))
+    .concat(pl.buys.map(o=>'<span style="color:var(--gain)">BUY '+trimU(o.s)+" "+esc(CFG.assets[o.a].key)+"</span> ≈ −"+fmt$(o.val)));
+  lines.push("cash after (incl. fees): <b>"+fmt$(pl.cashAfter)+"</b>");
+  $("ordSum").innerHTML=lines.join("<br>");
+  $("ordExec").disabled = !pl.feasible;
+  $("ordErr").style.display = pl.feasible ? "none" : "";
+  if(!pl.feasible) $("ordErr").textContent="✗ Not feasible — these orders need "+fmt$(-pl.cashAfter)+" more cash than you have. Reduce a buy or add a sell.";
+}
+async function executeOrders(){
+  const pl=stagedPlan();
+  if(!pl){ toast("Join first."); return; }
+  if(!pl.any){ toast("Nothing staged — slide a stock first."); return; }
+  /* joint cross-check on the freshest account & prices; infeasible = rejected, never clamped */
+  if(!pl.feasible){ toast("Rejected — not feasible with your cash."); paintOrders(); return; }
+  const ok=await submitTrades(pl.orders);
   if(ok){
-    STAGED[i]=null;
-    toast((d>0?"Bought ":"Sold ")+trimU(Math.abs(d))+" sh "+CFG.assets[i].key+" ≈ "+fmt$(Math.abs(d)*px));
-    if(navigator.vibrate)navigator.vibrate(25);
+    STAGED=STAGED.map(()=>null);
+    toast("Executed "+pl.orders.length+" order"+(pl.orders.length>1?"s":"")+" ✓");
+    if(navigator.vibrate)navigator.vibrate([20,40,20]);
   }
 }
 async function applyRebalance(){
@@ -1018,6 +1059,8 @@ function wireUI(){
   });
   $("rbApply").onclick=applyRebalance;
   $("rbSync").onclick=syncSlidersToHoldings;
+  $("ordExec").onclick=executeOrders;
+  $("ordClear").onclick=()=>{ STAGED=STAGED.map(()=>null); if(CFG) CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); };
   $("rbToggle").onclick=()=>{
     const w=$("rbWrap"), open=w.style.display==="none";
     w.style.display=open?"":"none";
@@ -1079,23 +1122,15 @@ function buildPlayUI(){
       '</div>'+
       '<div class="tradepanel open" id="tp_'+i+'" style="display:block">'+
         '<input type="range" id="ts_'+i+'" min="0" max="1" step="0.1" value="0" aria-label="shares of '+esc(a.key)+'">'+
-        '<div class="row" style="justify-content:space-between; align-items:center; gap:8px; margin-top:2px">'+
-          '<span class="mono" id="tpv_'+i+'" style="font-size:13px; color:var(--muted)">–</span>'+
-          '<span style="white-space:nowrap">'+
-            '<button class="btn-ghost btn-small" id="txc_'+i+'" style="display:none">cancel</button> '+
-            '<button class="btn-buy btn-small" id="tex_'+i+'" style="display:none">Trade</button>'+
-          '</span>'+
-        '</div>'+
+        '<div class="mono" id="tpv_'+i+'" style="font-size:13px; color:var(--muted); margin-top:2px">–</div>'+
       '</div>'+
     '</div>').join("");
   
   STAGED=new Array(K).fill(null);
   CFG.assets.forEach((a,i)=>{
     $("ts_"+i).addEventListener("input",()=>{ STAGED[i]=parseFloat($("ts_"+i).value); paintSlider(i); });
-    $("tex_"+i).onclick=()=>executeSlider(i);
-    $("txc_"+i).onclick=()=>{ STAGED[i]=null; syncSlider(i); };
   });
-  setTimeout(()=>{ CFG.assets.forEach((a,i)=>syncSlider(i)); }, 250);
+  setTimeout(()=>{ CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); }, 250);
   /* rebalance sliders */
   sliderVals=new Array(K).fill(0);
   $("rbHost").innerHTML=CFG.assets.map((a,i)=>
@@ -1308,6 +1343,7 @@ function renderPlay(dataChanged){
     $("h_w_"+i).textContent=v>0.005&&W>0? trimU(acct.sh[i])+" sh · "+(v/W*100).toFixed(0)+"%":"";
     syncSlider(i);
   }
+  paintOrders();
 
   const active=document.querySelector(".tabpane.on");
   if(active&&active.id==="tab-market"){ drawMarketChart("mktChart",cap,P); renderEventLog(cap); }
