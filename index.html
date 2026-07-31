@@ -241,7 +241,9 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <div id="holdList"></div>
     </div>
     <div class="card">
-      <h3>Rebalance to target weights</h3>
+      <button class="btn-ghost" id="rbToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px">⚖️ Rebalancing tool <span style="float:right; color:var(--muted); font-size:13px" id="rbArrow">show ▾</span></button>
+      <div id="rbWrap" style="display:none">
+      <h3 style="margin-top:10px">Rebalance to target weights</h3>
       <div id="rbHost"></div>
       <div class="cashleft" id="rbCashRow"><span>Money market (the rest)</span><span class="w" id="rbCash">100%</span></div>
       <div class="allocbar" id="rbBar" style="height:14px; margin:8px 0 12px"></div>
@@ -250,6 +252,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
         <button class="btn-primary" id="rbApply" style="padding:10px 12px; font-size:15px">Trade to these weights</button>
       </div>
       <div class="notice" id="rbNote"></div>
+      </div>
     </div>
   </div>
 
@@ -319,7 +322,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
     <h3>Game setup</h3>
     <div class="row">
       <div><label>Game length (min)</label><input type="number" id="cfgMin" inputmode="numeric" min="3" max="60" value="12"></div>
-      <div><label>Seconds per tick</label><input type="number" id="cfgTickSec" inputmode="numeric" min="1" max="15" value="3"></div>
+      <div><label>Seconds per tick</label><input type="number" id="cfgTickSec" inputmode="numeric" min="1" max="15" value="4"></div>
     </div>
     <div class="row">
       <div><label>One tick equals</label><select id="cfgFreq"><option value="52" selected>1 week</option><option value="252">1 day</option><option value="12">1 month</option></select></div>
@@ -493,11 +496,11 @@ const CASH_COLOR = "#93A3B4";
 
 /* ---------- default asset menu ---------- */
 function defaultAssets(){ return [
-  {key:"BLU", name:"BlueChip Industrials", mu:0.08, sigma:0.16, beta:1.0,  color:"#2E6FB8"},
-  {key:"TEC", name:"TechNova Growth",      mu:0.14, sigma:0.32, beta:1.0,  color:"#7C4DBE"},
-  {key:"UTL", name:"Steady Utilities",     mu:0.06, sigma:0.11, beta:1.0,  color:"#3E8E75"},
-  {key:"GLD", name:"Gold Reserve ETF",     mu:0.05, sigma:0.17, beta:-0.3, color:"#C79A2A"},
-  {key:"MSV", name:"MoonShot Ventures",    mu:0.22, sigma:0.75, beta:1.25, color:"#D0563B"}
+  {key:"BLU", name:"BlueChip Industrials", mu:0.08, sigma:0.16, beta:1.0,  p0:25, color:"#2E6FB8"},
+  {key:"TEC", name:"TechNova Growth",      mu:0.14, sigma:0.32, beta:1.0,  p0:42, color:"#7C4DBE"},
+  {key:"UTL", name:"Steady Utilities",     mu:0.06, sigma:0.11, beta:1.0,  p0:18, color:"#3E8E75"},
+  {key:"GLD", name:"Gold Reserve ETF",     mu:0.05, sigma:0.17, beta:-0.3, p0:31, color:"#C79A2A"},
+  {key:"MSV", name:"MoonShot Ventures",    mu:0.22, sigma:0.75, beta:1.25, p0:7,  color:"#D0563B"}
 ];}
 const CORR_PRESETS = {
   realistic:[[1,.60,.50,-.15,.35],[.60,1,.30,-.10,.50],[.50,.30,1,.05,.15],[-.15,-.10,.05,1,-.05],[.35,.50,.15,-.05,1]],
@@ -521,7 +524,7 @@ function sevFromMag(cfg, m){
   return -Math.log(1-m)/((a0.beta==null?1:a0.beta)*a0.sigma);
 }
 function defaultConfig(){ return {
-  seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:3000, totalTicks:240,
+  seed: 1234567, startCash:100, rf:0.04, feeBps:10, dt:1/52, tickMs:4000, totalTicks:240,
   gamma:3, metric:"wealth", expOn:false, nExp:2, expPct:0.20, haircut:0.25, crashFreq:1, crashMag:"mix", briefSec:30,
   publicPf:true, showParams:true, corr:"realistic", assets: defaultAssets()
 };}
@@ -612,12 +615,12 @@ const PRICE={sig:null, P:null};
 function pricePath(cfg, shocks, upTo){
   const K=cfg.assets.length;
   const crash=shocks.filter(s=>s.type==="crash");
-  const sig=JSON.stringify([cfg.seed,cfg.dt,cfg.corr,cfg.assets.map(a=>[a.mu,a.sigma,a.beta]),crash.map(c=>[c.tick,c.sev]),upTo]);
+  const sig=JSON.stringify([cfg.seed,cfg.dt,cfg.corr,cfg.assets.map(a=>[a.mu,a.sigma,a.beta,a.p0]),crash.map(c=>[c.tick,c.sev]),upTo]);
   if(PRICE.sig===sig) return PRICE.P;
   const L=cholesky(CORR_PRESETS[cfg.corr]||CORR_PRESETS.realistic);
   const z=rawNormals(cfg.seed,K,upTo);
   const crashBy={}; crash.forEach(c=>{ (crashBy[c.tick]=crashBy[c.tick]||[]).push(c); });
-  const P=[new Array(K).fill(100)];
+  const P=[cfg.assets.map(a=>a.p0||100)];
   const dt=cfg.dt, sdt=Math.sqrt(dt);
   for(let t=1;t<=upTo;t++){
     const zi=z[t-1], prev=P[t-1], row=new Array(K);
@@ -818,24 +821,30 @@ async function submitTrades(list){ // [{a, s}] at current tick
   try{ await roomRef.update(up); return true; }
   catch(e){ toast("Order didn't go through — try again."); return false; }
 }
-async function quickTrade(i, dollars, side){
+function trimU(u){ return Math.abs(u-Math.round(u))<1e-6 ? String(Math.round(u)) : (+u).toFixed(2); }
+function updCost(i){
+  const el=$("tc_"+i); if(!el||!CFG) return;
+  const n=parseFloat($("ti_"+i).value);
+  if(!(n>0)){ el.innerHTML="&nbsp;"; return; }
+  const t=capTick(), px=pricePath(CFG,allShocks(CFG,MANUAL),t)[t][i];
+  el.textContent="≈ "+fmt$(n*px);
+}
+async function quickTrade(i, units, side){
   const acct=myAccount(); if(!acct){ toast("Join first."); return; }
   const P=pricePath(CFG,allShocks(CFG,MANUAL),capTick());
   const px=P[capTick()][i], fee=(CFG.feeBps||0)/10000;
   let s;
   if(side>0){
-    const maxD=acct.cash/(1+fee);
-    const d=Math.min(dollars, maxD);
-    if(d<0.01){ toast("Not enough cash."); return; }
-    s=d/px;
+    const u=Math.min(units, acct.cash/(px*(1+fee)));
+    if(u*px<0.01){ toast("Not enough cash."); return; }
+    s=u;
   } else {
-    const have=acct.sh[i]*px;
-    const d=Math.min(dollars, have);
-    if(d<0.01){ toast("Nothing to sell."); return; }
-    s=-d/px;
+    const u=Math.min(units, acct.sh[i]);
+    if(u*px<0.01){ toast("Nothing to sell."); return; }
+    s=-u;
   }
   const ok=await submitTrades([{a:i, s}]);
-  if(ok){ toast((side>0?"Bought ":"Sold ")+fmt$(Math.abs(s)*px)+" of "+CFG.assets[i].key); if(navigator.vibrate)navigator.vibrate(25); }
+  if(ok){ toast((side>0?"Bought ":"Sold ")+trimU(Math.abs(s))+" sh "+CFG.assets[i].key+" ≈ "+fmt$(Math.abs(s)*px)); if(navigator.vibrate)navigator.vibrate(25); }
 }
 async function applyRebalance(){
   const acct=myAccount(); if(!acct) return;
@@ -864,7 +873,7 @@ async function applyRebalance(){
 /* ---------- actions: admin ---------- */
 function readCfgInputs(){
   const mins=Math.min(60,Math.max(3,parseFloat($("cfgMin").value)||12));
-  const tickSec=Math.min(15,Math.max(1,parseFloat($("cfgTickSec").value)||3));
+  const tickSec=Math.min(15,Math.max(1,parseFloat($("cfgTickSec").value)||4));
   const ppy=parseInt($("cfgFreq").value)||52;
   const assets=defaultAssets().map((a,i)=>{
     const mu=parseFloat($("mu_"+i).value), sg=parseFloat($("sg_"+i).value);
@@ -963,6 +972,12 @@ function wireUI(){
   });
   $("rbApply").onclick=applyRebalance;
   $("rbSync").onclick=syncSlidersToHoldings;
+  $("rbToggle").onclick=()=>{
+    const w=$("rbWrap"), open=w.style.display==="none";
+    w.style.display=open?"":"none";
+    $("rbArrow").textContent=open?"hide ▴":"show ▾";
+    if(open) syncSlidersToHoldings();
+  };
   $("startBtn").onclick=startGame;
   $("pauseBtn").onclick=togglePause;
   $("endBtn").onclick=()=>{ if(confirm("End the game and show results?")) endGame(); };
@@ -987,7 +1002,7 @@ function buildAssetEditor(){
   $("assetEditor").innerHTML='<div class="assetedit"><div class="gridhead">Asset</div><div class="gridhead">E[return] %</div><div class="gridhead">Vol %</div>'+rows+'</div>';
 }
 function cfgPreview(){
-  const mins=parseFloat($("cfgMin").value)||12, sec=parseFloat($("cfgTickSec").value)||3;
+  const mins=parseFloat($("cfgMin").value)||12, sec=parseFloat($("cfgTickSec").value)||4;
   const ppy=parseInt($("cfgFreq").value)||52;
   const ticks=Math.round(mins*60/sec), yrs=(ticks/ppy).toFixed(1);
   $("cfgPreview").innerHTML="That's <b>"+ticks+" ticks</b> ≈ <b>"+yrs+" market-years</b> in "+mins+" minutes. "+
@@ -1017,12 +1032,15 @@ function buildPlayUI(){
         '<div class="hmy"><div class="v" id="h_v_'+i+'">–</div><div class="w" id="h_w_'+i+'">–</div></div>'+
       '</div>'+
       '<div class="tradepanel" id="tp_'+i+'">'+
-        '<div class="row"><input type="number" id="ti_'+i+'" inputmode="decimal" min="0" placeholder="$ amount"></div>'+
+        '<div class="row" style="align-items:center; gap:10px">'+
+          '<input type="number" id="ti_'+i+'" inputmode="decimal" min="0" step="1" placeholder="# shares" style="flex:1">'+
+          '<span class="mono" id="tc_'+i+'" style="font-size:13px; color:var(--muted); min-width:78px; text-align:right">&nbsp;</span>'+
+        '</div>'+
         '<div class="chiprow">'+
-          '<button data-i="'+i+'" data-amt="10">$10</button>'+
-          '<button data-i="'+i+'" data-amt="25">$25</button>'+
-          '<button data-i="'+i+'" data-amt="maxbuy">Max buy</button>'+
-          '<button data-i="'+i+'" data-amt="stake">My stake</button>'+
+          '<button data-i="'+i+'" data-u="1">+1 sh</button>'+
+          '<button data-i="'+i+'" data-u="5">+5 sh</button>'+
+          '<button data-i="'+i+'" data-u="maxbuy">Max buy</button>'+
+          '<button data-i="'+i+'" data-u="all">All mine</button>'+
         '</div>'+
         '<div class="bs"><button class="btn-buy" data-buy="'+i+'">Buy</button><button class="btn-sell" data-sell="'+i+'">Sell</button></div>'+
       '</div>'+
@@ -1034,20 +1052,24 @@ function buildPlayUI(){
     const i=+b.dataset.i, acct=myAccount(); if(!acct) return;
     const P=pricePath(CFG,allShocks(CFG,MANUAL),capTick()), px=P[capTick()][i];
     const fee=(CFG.feeBps||0)/10000;
-    let v;
-    if(b.dataset.amt==="maxbuy") v=acct.cash/(1+fee);
-    else if(b.dataset.amt==="stake") v=acct.sh[i]*px;
-    else v=+b.dataset.amt;
-    $("ti_"+i).value=Math.max(0,v).toFixed(2);
+    const cur=parseFloat($("ti_"+i).value)||0;
+    let u;
+    if(b.dataset.u==="maxbuy") u=Math.floor(acct.cash/(px*(1+fee)));
+    else if(b.dataset.u==="all") u=acct.sh[i];
+    else u=cur+(+b.dataset.u);
+    u=Math.max(0,u);
+    $("ti_"+i).value = Math.abs(u-Math.round(u))<1e-9 ? String(Math.round(u)) : u.toFixed(4);
+    updCost(i);
   });
+  CFG.assets.forEach((a,i)=>{ $("ti_"+i).addEventListener("input",()=>updCost(i)); });
   $("holdList").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{
     const i=+b.dataset.buy, v=parseFloat($("ti_"+i).value);
-    if(!(v>0)){ toast("Enter a $ amount."); return; }
+    if(!(v>0)){ toast("Enter a number of shares."); return; }
     quickTrade(i,v,+1);
   });
   $("holdList").querySelectorAll("[data-sell]").forEach(b=>b.onclick=()=>{
     const i=+b.dataset.sell, v=parseFloat($("ti_"+i).value);
-    if(!(v>0)){ toast("Enter a $ amount."); return; }
+    if(!(v>0)){ toast("Enter a number of shares."); return; }
     quickTrade(i,v,-1);
   });
   /* rebalance sliders */
@@ -1058,13 +1080,13 @@ function buildPlayUI(){
   CFG.assets.forEach((a,i)=>{
     $("sl_"+i).addEventListener("input",()=>{ sliderVals[i]=+$("sl_"+i).value; renderRbPreview(); });
   });
-  $("rbNote").textContent="Sliders are target weights of your total wealth; whatever's left stays in the money market. Fee: "+(CFG.feeBps||0)+" bps per trade.";
+  $("rbNote").textContent="This sells winners and buys laggards in one shot to hit your target weights — the rest stays in the money market. It costs "+(CFG.feeBps||0)+" bps per trade today; the payoff, if any, shows up over the long run. Nobody rebalances for you: buy-and-hold is the default.";
   /* prefill sliders from current weights once account exists */
   setTimeout(syncSlidersToHoldings, 300);
   /* rules text */
   const rules=[
     "You start with "+fmt$(CFG.startCash)+" in a money-market account earning "+fmtPct(CFG.rf)+"/yr. It never loses value.",
-    "Trade the five stocks any time. Prices come from the market — your trades don't move them. Each trade costs "+(CFG.feeBps||0)+" bps.",
+    "Stocks trade at per-share prices, like a real brokerage: you decide how many shares to buy or sell. Prices come from the market — your trades don't move them — and each trade costs "+(CFG.feeBps||0)+" bps.",
     "Each tick of the clock is "+(Math.round(1/CFG.dt)===252?"one trading day":Math.round(1/CFG.dt)===12?"one month":"one week")+" of market time.",
     "Winner = "+metricExplain()+" The leaderboard is live and sorted by wealth. No restarts.",
     "Any surprise rules the instructor has chosen will flash on every phone for "+(CFG.briefSec||30)+" seconds right before the market opens — read fast."
@@ -1126,9 +1148,9 @@ function buildParamTables(){
   $("paramCard").style.display=CFG.showParams?"":"none";
   $("corrCard").style.display=CFG.showParams?"":"none";
   if(!CFG.showParams) return;
-  $("assetTable").innerHTML="<tr><th>Asset</th><th>E[return]</th><th>Volatility</th></tr>"+
-    '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>T-bills</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
-    CFG.assets.map(a=>'<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</td><td>'+fmtPct(a.mu)+'</td><td>'+fmtPct(a.sigma,0)+'</td></tr>').join("");
+  $("assetTable").innerHTML="<tr><th>Asset</th><th>Start px</th><th>E[return]</th><th>Volatility</th></tr>"+
+    '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>T-bills</td><td>–</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
+    CFG.assets.map(a=>'<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</td><td>'+fmt$(a.p0||100)+'</td><td>'+fmtPct(a.mu)+'</td><td>'+fmtPct(a.sigma,0)+'</td></tr>').join("");
   $("corrTable").innerHTML=corrTableHTML();
 }
 
@@ -1259,7 +1281,8 @@ function renderPlay(dataChanged){
     const dEl=$("h_d_"+i); dEl.textContent=fmtSign(d); dEl.className="d "+(d>0?"up":d<0?"down":"");
     const v=acct.sh[i]*p1;
     $("h_v_"+i).textContent=v>0.005? fmt$(v):"–";
-    $("h_w_"+i).textContent=v>0.005&&W>0? (v/W*100).toFixed(0)+"%":"";
+    $("h_w_"+i).textContent=v>0.005&&W>0? trimU(acct.sh[i])+" sh · "+(v/W*100).toFixed(0)+"%":"";
+    updCost(i);
   }
 
   const active=document.querySelector(".tabpane.on");
@@ -1372,7 +1395,7 @@ function renderResults(){
   let th="<tr><th>Asset</th><th>E[r]</th><th>Vol</th><th>Geometric</th><th>This game</th></tr>";
   CFG.assets.forEach((a,i)=>{
     const geo=a.mu-a.sigma*a.sigma/2;
-    const real=T>0? Math.log(P[cap][i]/100)/T : 0;
+    const real=T>0? Math.log(P[cap][i]/(a.p0||100))/T : 0;
     th+='<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+"</td><td>"+fmtPct(a.mu)+"</td><td>"+fmtPct(a.sigma,0)+"</td><td>"+fmtSign(geo)+"</td><td>"+fmtSign(real)+"</td></tr>";
   });
   $("theoryTable").innerHTML=th;
@@ -1424,7 +1447,7 @@ function drawMarketChart(id,cap,P){
   const step=Math.max(1,Math.floor(cap/300));
   const labels=[], idx=[];
   for(let t=0;t<=cap;t+=step){ labels.push(fmtClock(t)); idx.push(t); }
-  const data=CFG.assets.map((a,i)=>({label:a.key, data:idx.map(t=>P[t][i]), borderColor:a.color, backgroundColor:a.color, pointRadius:0, borderWidth:1.8, tension:0}));
+  const data=CFG.assets.map((a,i)=>({label:a.key, data:idx.map(t=>P[t][i]/(a.p0||100)*100), borderColor:a.color, backgroundColor:a.color, pointRadius:0, borderWidth:1.8, tension:0}));
   if(!charts[id]){
     charts[id]=new Chart($(id).getContext("2d"),{type:"line",data:{labels,datasets:data},options:baseOpts()});
   } else { charts[id].data.labels=labels; charts[id].data.datasets=data; charts[id].update("none"); }
@@ -1447,7 +1470,7 @@ function drawScatter(id, withAssets){
   const rows=rankAll();
   const pts=rows.filter(r=>r.m.ok).map(r=>({x:r.m.sig*100, y:r.m.mu*100, name:r.name, me:r.pid===me.id}));
   const cap=capTick(), P=pricePath(CFG,allShocks(CFG,MANUAL),cap), T=cap*CFG.dt;
-  const assetPts=CFG.assets.map((a,i)=>({x:a.sigma*100, y:(T>0? Math.log(P[cap][i]/100)/T : a.mu)*100, name:a.key, color:a.color}));
+  const assetPts=CFG.assets.map((a,i)=>({x:a.sigma*100, y:(T>0? Math.log(P[cap][i]/(a.p0||100))/T : a.mu)*100, name:a.key, color:a.color}));
   const tg=tangency(CFG);
   const xmax=Math.max(20, ...pts.map(p=>p.x), ...assetPts.map(p=>p.x))*1.08;
   const ds=[
