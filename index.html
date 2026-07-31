@@ -490,7 +490,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   <div style="max-width:420px; margin:18vh auto 0">
     <h2 style="margin-bottom:10px">📄 This page is outdated</h2>
     <p style="color:var(--muted); margin-bottom:18px">Your phone loaded an older cached copy of the game, so your numbers would disagree with everyone else&rsquo;s. One reload fixes it.</p>
-    <button class="btn-primary" onclick="location.reload()" style="padding:12px 28px">Reload the page</button>
+    <button class="btn-primary" onclick="hardReload()" style="padding:12px 28px">Reload the page</button>
   </div>
 </div>
 
@@ -511,7 +511,7 @@ const firebaseConfig = {
 };
 /* ===================================================================== */
 
-const APP_VERSION = 4;                          // bump when redeploying breaking changes
+const APP_VERSION = 5;                          // bump when redeploying breaking changes
 const ADMIN_PASSWORD = "arbitrageur";           // change me
 const ROOM = new URLSearchParams(location.search).get("room") || "classroom";
 const CASH_COLOR = "#93A3B4";
@@ -553,6 +553,11 @@ function defaultConfig(){ return {
 
 /* ---------- tiny helpers ---------- */
 const $ = id => document.getElementById(id);
+window.hardReload=function(){
+  const u=new URL(location.href);
+  u.searchParams.set("v", Date.now().toString(36));   // cache-busting param; harmless extra query
+  location.replace(u.toString());
+};
 const fmt$ = v => (v==null||isNaN(v)) ? "–" : "$"+Number(v).toFixed(2);
 const fmtPct = (v,dp=1) => (v==null||isNaN(v)) ? "–" : (v*100).toFixed(dp)+"%";
 const fmtSign = (v,dp=1) => (v==null||isNaN(v)) ? "–" : (v>=0?"+":"")+(v*100).toFixed(dp)+"%";
@@ -774,7 +779,9 @@ function boot(){
   roomRef=db.ref("pf/w-"+ROOM);
   db.ref(".info/serverTimeOffset").on("value",s=>{ serverOffset=s.val()||0; });
   roomRef.child("config").on("value",s=>{ CFG=s.val();
-    if(CFG && CFG.appVersion && CFG.appVersion!==APP_VERSION){ $("verGate").style.display=""; return; }
+    /* gate only when this page is OLDER than the running game's version;
+       a newer page looking at an old game's config is fine */
+    if(CFG && CFG.appVersion && CFG.appVersion > APP_VERSION){ $("verGate").style.display=""; return; }
     $("verGate").style.display="none";
     render(true); });
   roomRef.child("live").on("value",s=>{ LIVE=s.val(); render(true); });
@@ -794,13 +801,26 @@ async function ensureDefaults(){
 }
 
 /* ---------- actions: join / login ---------- */
+function nameKey(n){ return n.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g,"_").slice(0,40) || "_"; }
 async function join(){
-  const name=$("nameInput").value.trim();
+  const name=$("nameInput").value.trim().replace(/\s+/g," ");
   if(!name){ toast("Pick a name first"); return; }
+  /* fast local check for instant feedback */
+  if(Object.values(PLAYERS).some(p=>(p.name||"").trim().toLowerCase()===name.toLowerCase())){
+    toast("That name's taken — add a last initial?"); return;
+  }
   const pid="p"+Math.random().toString(36).slice(2,10);
   const rec={ name, joinedAt:firebase.database.ServerValue.TIMESTAMP, joinTick: running()? currentTick() : 0 };
   try{
-    await roomRef.child("players/"+pid).set(rec);
+    /* atomic claim: only one device can own a name, even on a simultaneous submit */
+    const claim=await roomRef.child("names/"+nameKey(name)).transaction(c=> c===null ? pid : undefined);
+    if(!claim.committed){ toast("That name's taken — add a last initial?"); return; }
+    try{
+      await roomRef.child("players/"+pid).set(rec);
+    }catch(e){
+      roomRef.child("names/"+nameKey(name)).remove();   // release the claim if the join failed
+      throw e;
+    }
     me={id:pid,name}; store.set("pfw_pid",pid); store.set("pfw_name",name);
     if(running()) toast("You're in — starting with "+fmt$(CFG.startCash)+" cash");
     render(true);
@@ -1032,13 +1052,15 @@ async function endGame(){
 async function resetGame(keepPlayers){
   const ups={ shocks:null, live:{phase:"lobby"} };
   if(keepPlayers){ for(const pid of Object.keys(PLAYERS)){ ups["players/"+pid+"/trades"]=null; ups["players/"+pid+"/joinTick"]=0; } }
-  else ups["players"]=null;
+  else { ups["players"]=null; ups["names"]=null; }
   await roomRef.update(ups);
   toast(keepPlayers? "New game — same class" : "Full reset");
 }
 async function removePlayer(pid){
   if(!confirm("Remove "+(PLAYERS[pid]?PLAYERS[pid].name:"this player")+"?")) return;
+  const nm=PLAYERS[pid] && PLAYERS[pid].name;
   await roomRef.child("players/"+pid).remove();
+  if(nm) roomRef.child("names/"+nameKey(nm)).remove();
 }
 window.removePlayer=removePlayer;
 
