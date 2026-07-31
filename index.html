@@ -241,7 +241,14 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <div class="statgrid" id="posStats"></div>
       <div class="chartbox" style="height:170px; margin-top:10px"><canvas id="meChart"></canvas></div>
       <div class="notice" id="posHold" style="margin-top:6px">Dashed line = parking everything in the money market.</div>
-      <div id="ordBox" style="display:none; margin-top:10px">
+    </div>
+    <div class="card">
+      <h3>Prices (growth of $100)</h3>
+      <div class="chartbox"><canvas id="mktChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Holdings</h3>
+      <div id="ordBox" style="display:none; margin:2px 0 12px">
         <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px">Staged orders</div>
         <div class="mono" id="ordSum" style="font-size:13.5px; line-height:1.55"></div>
         <div id="ordErr" style="display:none; margin-top:8px; color:var(--loss); font-weight:600; font-size:13.5px"></div>
@@ -250,13 +257,6 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
           <button class="btn-primary" id="ordExec" style="flex:1; padding:11px">Execute orders</button>
         </div>
       </div>
-    </div>
-    <div class="card">
-      <h3>Prices (growth of $100)</h3>
-      <div class="chartbox"><canvas id="mktChart"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Holdings</h3>
       <div id="holdList"></div>
     </div>
     <div class="card">
@@ -277,6 +277,10 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 
   <!-- --- TAB: MARKET --- -->
   <div class="tabpane" id="tab-market">
+    <div class="card">
+      <h3>Meet the market</h3>
+      <div id="storyList"></div>
+    </div>
     <div class="card" id="crashCard" style="display:none">
       <h3>⚡ Crash risk this game</h3>
       <div class="notice" id="crashInfo" style="margin-top:6px"></div>
@@ -525,11 +529,16 @@ const CASH_COLOR = "#93A3B4";
 
 /* ---------- default asset menu ---------- */
 function defaultAssets(){ return [
-  {key:"BLU", name:"BlueChip Industrials", mu:0.08, sigma:0.16, beta:1.0,  p0:25, color:"#2E6FB8"},
-  {key:"TEC", name:"TechNova Growth",      mu:0.14, sigma:0.32, beta:1.0,  p0:42, color:"#7C4DBE"},
-  {key:"UTL", name:"Steady Utilities",     mu:0.06, sigma:0.11, beta:1.0,  p0:18, color:"#3E8E75"},
-  {key:"GLD", name:"Gold Reserve ETF",     mu:0.05, sigma:0.17, beta:-0.3, p0:31, color:"#C79A2A"},
-  {key:"MSV", name:"MoonShot Ventures",    mu:0.22, sigma:0.75, beta:1.25, p0:7,  color:"#D0563B"}
+  {key:"BLU", name:"BlueChip Industrials", mu:0.08, sigma:0.16, beta:1.0,  p0:25, color:"#2E6FB8",
+   blurb:"A century-old conglomerate — turbines, rail, and dividends your grandparents trusted."},
+  {key:"TEC", name:"TechNova Growth",      mu:0.14, sigma:0.32, beta:1.0,  p0:42, color:"#7C4DBE",
+   blurb:"The cloud-AI darling of the moment; every earnings call swings the whole market's mood."},
+  {key:"UTL", name:"Steady Utilities",     mu:0.06, sigma:0.11, beta:1.0,  p0:18, color:"#3E8E75",
+   blurb:"Regulated power and water. Nobody brags about owning it — and nobody panics either."},
+  {key:"GLD", name:"Gold Reserve ETF",     mu:0.05, sigma:0.17, beta:-0.3, p0:31, color:"#C79A2A",
+   blurb:"A vault in Zurich with a ticker. It pays almost nothing — and shines exactly when everything else doesn't."},
+  {key:"MSV", name:"MoonShot Ventures",    mu:0.22, sigma:0.75, beta:1.25, p0:7,  color:"#D0563B",
+   blurb:"A basket of pre-revenue dreams: asteroid mining, fusion, longevity pills. The next hundred-bagger, allegedly."}
 ];}
 const CORR_PRESETS = {
   realistic:[[1,.60,.50,-.15,.35],[.60,1,.30,-.10,.50],[.50,.30,1,.05,.15],[-.15,-.10,.05,1,-.05],[.35,.50,.15,-.05,1]],
@@ -1253,6 +1262,11 @@ function corrTableHTML(){
 }
 function buildParamTables(){
   if(!CFG) return;
+  $("storyList").innerHTML=
+    '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+CASH_COLOR+'; flex:0 0 auto"></span><div><b>Money market</b><br><span style="color:var(--muted); font-size:13.5px">T-bills: the mattress that pays interest. Boring is a feature.</span></div></div>'+
+    CFG.assets.map(a=>
+      '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+a.color+'; flex:0 0 auto"></span><div><b>'+esc(a.key)+' · '+esc(a.name)+'</b><br><span style="color:var(--muted); font-size:13.5px">'+esc(a.blurb||"")+'</span></div></div>'
+    ).join("");
   const cf=CFG.crashFreq||0;
   $("tanCard").style.display=CFG.showTangent?"":"none";
   $("crashCard").style.display=cf>0?"":"none";
