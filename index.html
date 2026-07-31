@@ -239,7 +239,8 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
     <div class="card">
       <h3>My position</h3>
       <div class="statgrid" id="posStats"></div>
-      <div class="notice" id="posHold" style="margin-top:8px"></div>
+      <div class="chartbox" style="height:170px; margin-top:10px"><canvas id="meChart"></canvas></div>
+      <div class="notice" id="posHold" style="margin-top:6px">Dashed line = parking everything in the money market.</div>
       <div id="ordBox" style="display:none; margin-top:10px">
         <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px">Staged orders</div>
         <div class="mono" id="ordSum" style="font-size:13.5px; line-height:1.55"></div>
@@ -290,6 +291,13 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
       <h3>Correlations</h3>
       <table class="tbl" id="corrTable"></table>
     </div>
+    <div class="card" id="tanCard" style="display:none">
+      <button class="btn-ghost" id="tanToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px">📐 Markowitz: frontier &amp; tangency <span style="float:right; color:var(--muted); font-size:13px" id="tanArrow">show ▾</span></button>
+      <div id="tanWrap" style="display:none">
+        <div class="chartbox tall" style="margin-top:8px"><canvas id="tanChart"></canvas></div>
+        <div class="notice" id="tanNote" style="margin-top:8px"></div>
+      </div>
+    </div>
     <div class="card">
       <h3>Event log</h3>
       <ul class="eventlog" id="eventLog"></ul>
@@ -305,8 +313,6 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
     <div class="card">
       <h3>Your performance</h3>
       <div class="statgrid" id="myStats"></div>
-      <div class="chartbox"><canvas id="meChart"></canvas></div>
-      <div class="notice">Dashed line = parking everything in the money market. Beat it — without blowing up.</div>
     </div>
     <div class="card">
       <h3>Standings</h3>
@@ -375,6 +381,7 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 
     <label class="chklabel"><input type="checkbox" id="cfgPublic" checked> Public portfolios (anyone can see anyone's weights)</label>
     <label class="chklabel"><input type="checkbox" id="cfgShowParams" checked> Show true means, vols &amp; correlations to students</label>
+    <label class="chklabel"><input type="checkbox" id="cfgShowTangent"> Show the Markowitz frontier &amp; tangency portfolio box (the answer key)</label>
 
     <details class="adv">
       <summary>Assets (annual %, edit if you like)</summary>
@@ -926,9 +933,10 @@ function paintOrders(){
   ps.innerHTML=[[fmt$(W),"wealth"],[fmt$(pl.acct.cash),"cash"],[fmt$(W-pl.acct.cash),"in stocks"]]
     .map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
   const held=CFG.assets.map((a,i)=>({a,n:pl.acct.sh[i]})).filter(x=>x.n>0.049);
-  $("posHold").innerHTML = held.length
+  $("posHold").innerHTML = (held.length
     ? "Holding "+held.map(x=>"<b>"+trimU(x.n)+" "+esc(x.a.key)+"</b>").join(" · ")+" · cash "+(W>0?(pl.acct.cash/W*100).toFixed(0):100)+"%"
-    : "Everything is in the money market. Slide a stock to place an order.";
+    : "Everything is in the money market. Slide a stock to place an order.")
+    + " &nbsp;·&nbsp; dashed = all in T-bills";
   $("ordBox").style.display = pl.any ? "" : "none";
   if(!pl.any) return;
   const lines = pl.sells.map(o=>'<span style="color:var(--loss)">SELL '+trimU(-o.s)+" "+esc(CFG.assets[o.a].key)+"</span> ≈ +"+fmt$(o.val))
@@ -1031,6 +1039,7 @@ function readCfgInputs(){
     crashMag: $("cfgCrashMag").value,
     publicPf: $("cfgPublic").checked,
     showParams: $("cfgShowParams").checked,
+    showTangent: $("cfgShowTangent").checked,
     corr: $("cfgCorr").value,
     assets
   };
@@ -1109,6 +1118,12 @@ function wireUI(){
   $("rbApply").onclick=applyRebalance;
   $("rbSync").onclick=syncSlidersToHoldings;
   $("ordExec").onclick=executeOrders;
+  $("tanToggle").onclick=()=>{
+    const w=$("tanWrap"), open=w.style.display==="none";
+    w.style.display=open?"":"none";
+    $("tanArrow").textContent=open?"hide ▴":"show ▾";
+    if(open) drawTangentChart();
+  };
   $("ordClear").onclick=()=>{ STAGED=STAGED.map(()=>null); if(CFG) CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); };
   $("rbToggle").onclick=()=>{
     const w=$("rbWrap"), open=w.style.display==="none";
@@ -1239,6 +1254,7 @@ function corrTableHTML(){
 function buildParamTables(){
   if(!CFG) return;
   const cf=CFG.crashFreq||0;
+  $("tanCard").style.display=CFG.showTangent?"":"none";
   $("crashCard").style.display=cf>0?"":"none";
   if(cf>0){
     const pr=CRASH_MAGS[CFG.crashMag]||CRASH_MAGS.mix;
@@ -1395,9 +1411,9 @@ function renderPlay(dataChanged){
   paintOrders();
 
   const active=document.querySelector(".tabpane.on");
-  if(active&&active.id==="tab-trade"){ drawMarketChart("mktChart",cap,P); }
+  if(active&&active.id==="tab-trade"){ drawMarketChart("mktChart",cap,P); drawMeChart(acct); }
   if(active&&active.id==="tab-market"){ renderEventLog(cap); }
-  if(active&&active.id==="tab-ranks"){ renderMyStats(acct); drawMeChart(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false); 
+  if(active&&active.id==="tab-ranks"){ renderMyStats(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false); 
     $("lbNote").textContent = CFG.publicPf? "Tap a row to see that investor's current mix." : "Portfolios are private this game — only the numbers show.";
   }
 }
@@ -1597,6 +1613,52 @@ function drawScatter(id, withAssets){
   o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return (d.name||c.dataset.label)+": vol "+d.x.toFixed(1)+"%, growth "+d.y.toFixed(1)+"%"; }}};
   if(!charts[id]) charts[id]=new Chart($(id).getContext("2d"),{type:"scatter",data:{datasets:ds},options:o});
   else { charts[id].data.datasets=ds; charts[id].options=o; charts[id].update("none"); }
+}
+function drawTangentChart(){
+  if(!CFG || charts["tanChart"]) { return; }
+  const K=CFG.assets.length;
+  const mu=CFG.assets.map(a=>a.mu), sg=CFG.assets.map(a=>a.sigma);
+  const C=CORR_PRESETS[CFG.corr]||CORR_PRESETS.realistic;
+  const Sg=[]; for(let i=0;i<K;i++){ Sg.push([]); for(let j=0;j<K;j++) Sg[i].push(sg[i]*sg[j]*C[i][j]); }
+  const ones=new Array(K).fill(1);
+  const x1=solveLin(Sg.map(r=>r.slice()), ones.slice());
+  const x2=solveLin(Sg.map(r=>r.slice()), mu.slice());
+  const A=ones.reduce((s,_,i)=>s+x1[i],0);
+  const B=mu.reduce((s,m,i)=>s+m*x1[i],0);
+  const Cq=mu.reduce((s,m,i)=>s+m*x2[i],0);
+  const D=A*Cq-B*B;
+  const tg=tangency(CFG);
+  const muT=tg.wt.reduce((s,w,i)=>s+w*mu[i],0);
+  let vT=0; for(let i=0;i<K;i++)for(let j=0;j<K;j++)vT+=tg.wt[i]*tg.wt[j]*Sg[i][j];
+  const sgT=Math.sqrt(Math.max(0,vT));
+  if(!(D>0)||!isFinite(sgT)){ $("tanNote").textContent="Frontier is undefined for the current parameter set."; return; }
+  /* frontier hyperbola, both branches around the min-variance return B/A */
+  const mv=B/A, span=Math.max(...mu)-mv;
+  const mLo=mv-span*1.05, mHi=Math.max(Math.max(...mu), muT)+0.02;
+  const front=[];
+  for(let k=0;k<=80;k++){
+    const m=mLo+(mHi-mLo)*k/80;
+    const v=(A*m*m-2*B*m+Cq)/D;
+    if(v>=0) front.push({x:Math.sqrt(v)*100, y:m*100});
+  }
+  const xmax=Math.max(...sg.map(x=>x*100), sgT*100)*1.18;
+  const assetPts=CFG.assets.map((a,i)=>({x:sg[i]*100, y:mu[i]*100, name:a.key}));
+  const ds=[
+    {label:"Frontier (risky mixes)", type:"line", data:front, borderColor:"#5B7089", borderWidth:2, pointRadius:0, tension:0, parsing:false},
+    {label:"CAL", type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderDash:[7,5], borderWidth:2, pointRadius:0, parsing:false},
+    {label:"Single assets", data:assetPts, backgroundColor:CFG.assets.map(a=>a.color), pointStyle:"rect", pointRadius:6, parsing:false},
+    {label:"T-bills", data:[{x:0,y:CFG.rf*100,name:"T-bills"}], backgroundColor:"#C77F00", pointStyle:"rectRot", pointRadius:6, parsing:false},
+    {label:"Tangency ★", data:[{x:sgT*100,y:muT*100,name:"Tangency"}], backgroundColor:"#C03A2B", pointStyle:"star", pointRadius:9, borderColor:"#C03A2B", borderWidth:2, parsing:false}
+  ];
+  const o=baseOpts();
+  o.parsing=false;
+  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:"volatility %/yr",font:{size:11}}, ticks:{font:FONT}},
+             y:{title:{display:true,text:"E[return] %/yr",font:{size:11}}, ticks:{font:FONT}} };
+  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return (d.name||c.dataset.label)+": vol "+d.x.toFixed(1)+"%, E[r] "+d.y.toFixed(1)+"%"; }}};
+  charts["tanChart"]=new Chart($("tanChart").getContext("2d"),{type:"scatter",data:{datasets:ds},options:o});
+  const mix=CFG.assets.map((a,i)=>esc(a.key)+" <b>"+(tg.wt[i]*100).toFixed(0)+"%</b>").join(" · ");
+  $("tanNote").innerHTML="Tangency portfolio — the risky mix with the best possible Sharpe ("+tg.Sstar.toFixed(2)+"): "+mix+
+    ".<br>E[r] "+fmtPct(muT)+" at vol "+fmtPct(sgT,1)+". Every point on the gold CAL is this same mix blended with T-bills — pick your spot by how much cash you hold.";
 }
 function renderEventLog(cap){
   const evs=allShocks(CFG,MANUAL).filter(s=>s.tick<=cap).map(s=>({
