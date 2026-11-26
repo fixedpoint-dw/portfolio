@@ -15,18 +15,20 @@
   --line:#D7DEE6; --navy:#1E3A5F; --navy-dark:#152C4A;
   --gain:#0E7C4F; --gain-bg:#E6F4EC; --loss:#C03A2B; --loss-bg:#FBEAE7;
   --amber:#C77F00; --chip:#E8EDF2;
+  --disp:"Space Grotesk","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  --mono:"IBM Plex Mono","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",monospace;
   --radius:14px; --shadow:0 1px 3px rgba(19,26,36,.08), 0 4px 14px rgba(19,26,36,.06);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
 html,body{margin:0; padding:0}
 body{background:var(--paper); color:var(--ink); font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; padding-bottom:44px}
-h1,h2,h3,.display{font-family:"Space Grotesk",sans-serif; letter-spacing:-.01em}
-.mono{font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums}
+h1,h2,h3,.display{font-family:var(--disp); letter-spacing:-.01em}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
 .screen{display:none; max-width:560px; margin:0 auto; padding:16px}
 .screen.active{display:block}
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
 .card h3{margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
-button{font-family:"Space Grotesk",sans-serif; font-weight:700; font-size:17px; border:none; border-radius:12px; padding:14px 18px; cursor:pointer; touch-action:manipulation; color:var(--ink); background:var(--chip)}
+button{font-family:var(--disp); font-weight:700; font-size:17px; border:none; border-radius:12px; padding:14px 18px; cursor:pointer; touch-action:manipulation; color:var(--ink); background:var(--chip)}
 button:disabled{opacity:.4; cursor:default}
 .btn-primary{background:var(--navy); color:#fff; width:100%}
 .btn-primary:active{background:var(--navy-dark)}
@@ -48,9 +50,9 @@ label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin
 .tape{position:sticky; top:0; z-index:50; background:var(--ink); color:#E8EEF5; margin:-16px -16px 12px; padding:10px 16px calc(10px + env(safe-area-inset-top,0)); display:flex; justify-content:space-between; align-items:center; gap:6px}
 .tape .cell{text-align:center; min-width:0}
 .tape .lbl{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8FA3B8}
-.tape .val{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px; white-space:nowrap}
+.tape .val{font-family:var(--mono); font-weight:600; font-size:16px; white-space:nowrap}
 .tape .val.up{color:#6FE3A5}.tape .val.down{color:#FF9C8A}
-.timerchip{background:#2A3A4C; border-radius:999px; padding:4px 12px; font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
+.timerchip{background:#2A3A4C; border-radius:999px; padding:4px 12px; font-family:var(--mono); font-weight:600; font-size:15px}
 .timerchip.hot{background:var(--loss); animation:pulse 1s infinite}
 .timerchip.paused{background:var(--amber); color:#fff}
 @keyframes pulse{50%{opacity:.6}}
@@ -86,11 +88,11 @@ label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin
 .hname .nm{font-weight:700; font-size:15px}
 .hname .sub2{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .hpx{text-align:right}
-.hpx .p{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
-.hpx .d{font-size:12px; font-family:"IBM Plex Mono",monospace}
+.hpx .p{font-family:var(--mono); font-weight:600; font-size:15px}
+.hpx .d{font-size:12px; font-family:var(--mono)}
 .hmy{text-align:right; min-width:86px}
-.hmy .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px}
-.hmy .w{font-size:12px; color:var(--muted); font-family:"IBM Plex Mono",monospace}
+.hmy .v{font-family:var(--mono); font-weight:600; font-size:15px}
+.hmy .w{font-size:12px; color:var(--muted); font-family:var(--mono)}
 .up{color:var(--gain)} .down{color:var(--loss)}
 .tradepanel{display:none; margin-top:10px; background:var(--chip); border-radius:12px; padding:12px}
 .tradepanel.open{display:block; animation:slideIn .18s ease}
@@ -102,10 +104,10 @@ label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin
 /* sliders */
 .sl{margin-bottom:12px}
 .sl .top{display:flex; justify-content:space-between; font-size:14px; margin-bottom:2px}
-.sl .top .w{font-family:"IBM Plex Mono",monospace; font-weight:600}
+.sl .top .w{font-family:var(--mono); font-weight:600}
 input[type=range]{width:100%; accent-color:var(--navy); height:30px}
 .cashleft{display:flex; justify-content:space-between; font-size:14px; padding:8px 2px; border-top:1px dashed var(--line); margin-top:4px}
-.cashleft .w{font-family:"IBM Plex Mono",monospace; font-weight:700}
+.cashleft .w{font-family:var(--mono); font-weight:700}
 .cashleft.bad .w{color:var(--loss)}
 
 .pill{display:inline-block; background:var(--chip); border-radius:999px; padding:3px 10px; font-size:12px; font-weight:600; color:var(--muted)}
@@ -122,13 +124,13 @@ input[type=range]{width:100%; accent-color:var(--navy); height:30px}
 
 .statgrid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:4px}
 .stat{background:var(--chip); border-radius:10px; padding:9px 6px; text-align:center}
-.stat .v{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:16px}
+.stat .v{font-family:var(--mono); font-weight:600; font-size:16px}
 .stat .k{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-top:1px}
 
 table.tbl{width:100%; border-collapse:collapse; font-size:13.5px}
 table.tbl th{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:right; padding:6px 4px; border-bottom:1px solid var(--line)}
 table.tbl th:first-child,table.tbl td:first-child{text-align:left}
-table.tbl td{padding:7px 4px; border-bottom:1px solid var(--line); text-align:right; font-family:"IBM Plex Mono",monospace}
+table.tbl td{padding:7px 4px; border-bottom:1px solid var(--line); text-align:right; font-family:var(--mono)}
 table.tbl td.nm{font-family:inherit; font-weight:600; text-align:left}
 table.tbl tr:last-child td{border-bottom:none}
 tr.metric-col td.hi, th.hi{background:#F4F7FB}
@@ -143,7 +145,7 @@ tr.me td{background:#FBF3E0}
 .eventlog{list-style:none; margin:0; padding:0; font-size:13.5px}
 .eventlog li{padding:7px 0; border-bottom:1px solid var(--line); display:flex; gap:10px}
 .eventlog li:last-child{border-bottom:none}
-.eventlog .when{font-family:"IBM Plex Mono",monospace; color:var(--muted); flex:none}
+.eventlog .when{font-family:var(--mono); color:var(--muted); flex:none}
 .q{margin:0 0 6px; padding-left:20px}
 .q li{margin-bottom:9px; font-size:14.5px}
 code{background:var(--chip); padding:2px 6px; border-radius:6px; font-size:14px}
@@ -160,54 +162,69 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 .gridhead{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
 .flash-up{animation:flashUp 1s} .flash-down{animation:flashDown 1s}
 @media (prefers-reduced-motion:reduce){ .timerchip.hot{animation:none} .banner,.tradepanel.open{animation:none} .allocbar .seg{transition:none} }
+
+/* language switch + footer (who's signed in, log out) */
+:lang(ko){word-break:keep-all; overflow-wrap:break-word}
+.toprow{display:flex; justify-content:flex-end; margin:6px 0 -12px}
+.langsw{display:inline-flex; background:var(--chip); border-radius:10px; padding:3px; flex:none}
+.langsw button{font-size:13px; padding:6px 12px; border-radius:8px; background:transparent; color:var(--muted); font-weight:700}
+.langsw button.on{background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(19,26,36,.12)}
+.utilbar{max-width:560px; margin:0 auto; padding:4px 16px 0; display:flex; align-items:center; gap:10px}
+.utilbar .whoami{flex:1; min-width:0; text-align:right; font-size:13px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.utilbar #logoutBtn{flex:none; width:auto}
+#scr-landing.active ~ .utilbar .langsw{display:none}   /* landing has its own switch up top */
+.plist li button{width:auto; flex:none}   /* keep the roster's "remove" button from squeezing the name to "L…" */
 </style>
 </head>
 <body>
 
 <!-- ============ SETUP (shown only if firebaseConfig is missing) ============ -->
 <div class="screen" id="scr-setup">
-  <div class="brand"><h1>Frontier</h1><span class="tag">setup</span></div>
-  <p class="sub">One-time setup for the instructor: connect this page to a free Firebase database so students' phones can sync.</p>
+  <div class="brand"><h1>Frontier</h1><span class="tag" data-i18n="su_tag">setup</span></div>
+  <p class="sub" data-i18n="su_sub">One-time setup for the instructor: connect this page to a free Firebase database so students' phones can sync.</p>
   <div class="card">
-    <div class="setupstep"><div class="n">1</div><div>Go to <b>console.firebase.google.com</b> → Add project.</div></div>
-    <div class="setupstep"><div class="n">2</div><div><b>Build → Realtime Database → Create database</b> → test mode.</div></div>
-    <div class="setupstep"><div class="n">3</div><div>Project settings (gear) → <b>Your apps → Web app (&lt;/&gt;)</b> → copy the <code>firebaseConfig</code>.</div></div>
-    <div class="setupstep"><div class="n">4</div><div>Paste it into the <code>firebaseConfig</code> block at the top of the script in <code>index.html</code>.</div></div>
+    <div class="setupstep"><div class="n">1</div><div data-i18n="su_1">Go to <b>console.firebase.google.com</b> → Add project.</div></div>
+    <div class="setupstep"><div class="n">2</div><div data-i18n="su_2"><b>Build → Realtime Database → Create database</b> → test mode.</div></div>
+    <div class="setupstep"><div class="n">3</div><div data-i18n="su_3">Project settings (gear) → <b>Your apps → Web app (&lt;/&gt;)</b> → copy the <code>firebaseConfig</code>.</div></div>
+    <div class="setupstep"><div class="n">4</div><div data-i18n="su_4">Paste it into the <code>firebaseConfig</code> block at the top of the script in <code>index.html</code>.</div></div>
   </div>
 </div>
 
 <!-- ============ LANDING ============ -->
 <div class="screen" id="scr-landing">
-  <div class="brand"><h1>Frontier</h1><span class="tag">crash edition</span></div>
-  <p class="sub">You manage $1,000 across a money-market account and five stocks. Markets can jump without warning. Whoever holds the most money at the final bell wins — that simple.</p>
+  <div class="toprow">
+    <div class="langsw" role="group" aria-label="Language / 언어"><button type="button" data-lang="en" lang="en">English</button><button type="button" data-lang="ko" lang="ko">한국어</button></div>
+  </div>
+  <div class="brand"><h1>Frontier</h1><span class="tag" data-i18n="ld_tag">crash edition</span></div>
+  <p class="sub" data-i18n="ld_sub">You manage $1,000 across a money-market account and five stocks. Markets can jump without warning. Whoever holds the most money at the final bell wins — that simple.</p>
   <div class="card">
-    <h3>Join the game</h3>
-    <label for="nameInput">Your name</label>
-    <input type="text" id="nameInput" maxlength="18" placeholder="e.g. Minji" autocomplete="off">
+    <h3 data-i18n="ld_join_h">Join the game</h3>
+    <label for="nameInput" data-i18n="ld_name_l">Your name</label>
+    <input type="text" id="nameInput" maxlength="18" placeholder="e.g. Minji" data-i18n-ph="ld_name_ph" autocomplete="off">
     <div style="height:12px"></div>
-    <button class="btn-primary" id="joinBtn">Open my account</button>
+    <button class="btn-primary" id="joinBtn" data-i18n="ld_join_btn">Open my account</button>
     <div class="notice" id="joinNotice" style="display:none"></div>
   </div>
-  <button class="admin-link" id="showAdminBtn">Instructor login</button>
+  <button class="admin-link" id="showAdminBtn" data-i18n="ld_admin_link">Instructor login</button>
   <div class="card" id="adminLoginCard" style="display:none">
-    <h3>Instructor</h3>
-    <label for="pwInput">Password</label>
+    <h3 data-i18n="ld_inst_h">Instructor</h3>
+    <label for="pwInput" data-i18n="ld_pw_l">Password</label>
     <input type="password" id="pwInput" autocomplete="off">
     <div style="height:12px"></div>
-    <button class="btn-primary" id="adminLoginBtn">Open control room</button>
+    <button class="btn-primary" id="adminLoginBtn" data-i18n="ld_admin_btn">Open control room</button>
   </div>
 </div>
 
 <!-- ============ PLAYER LOBBY ============ -->
 <div class="screen" id="scr-lobby">
-  <div class="brand"><h1>Market opens soon</h1></div>
-  <p class="sub">Your account is ready, <b id="lobbyName"></b>. Waiting for the instructor to start the clock.</p>
+  <div class="brand"><h1 data-i18n="lb_h1">Market opens soon</h1></div>
+  <p class="sub" data-i18n="lb_sub">Your account is ready, <b id="lobbyName"></b>. Waiting for the instructor to start the clock.</p>
   <div class="card">
-    <h3>How this game works</h3>
+    <h3 data-i18n="lb_how_h">How this game works</h3>
     <ul class="q" id="rulesList"></ul>
   </div>
   <div class="card">
-    <h3>Investors in the room (<span id="lobbyCount">0</span>)</h3>
+    <h3 data-i18n="lb_room_h">Investors in the room (<span id="lobbyCount">0</span>)</h3>
     <ul class="plist" id="lobbyList"></ul>
   </div>
 </div>
@@ -215,9 +232,9 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 <!-- ============ PLAYER: PLAY ============ -->
 <div class="screen" id="scr-play">
   <div class="tape">
-    <div class="cell"><div class="lbl">Clock</div><div class="val" id="tClock">–</div></div>
-    <div class="cell"><div class="lbl">My wealth</div><div class="val" id="tWealth">–</div></div>
-    <div class="cell"><div class="lbl">Last tick</div><div class="val" id="tChange">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="tp_clock">Clock</div><div class="val" id="tClock">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="tp_wealth">My wealth</div><div class="val" id="tWealth">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="tp_last">Last tick</div><div class="val" id="tChange">–</div></div>
     <div class="cell"><div class="timerchip" id="tTimer">–</div></div>
   </div>
 
@@ -225,50 +242,50 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 
   <div class="allocwrap">
     <div class="allocbar" id="allocBar"></div>
-    <div class="alloccap"><span>Your allocation</span><span id="allocCap"></span></div>
+    <div class="alloccap"><span data-i18n="pl_alloc">Your allocation</span><span id="allocCap"></span></div>
   </div>
 
   <div class="tabbar" id="tabbar">
-    <button data-tab="trade" class="on">Trade</button>
-    <button data-tab="market">Market</button>
-    <button data-tab="ranks">Ranks</button>
+    <button data-tab="trade" class="on" data-i18n="tab_trade">Trade</button>
+    <button data-tab="market" data-i18n="tab_market">Market</button>
+    <button data-tab="ranks" data-i18n="tab_ranks">Ranks</button>
   </div>
 
   <!-- --- TAB: TRADE --- -->
   <div class="tabpane on" id="tab-trade">
     <div class="card">
-      <h3>My position</h3>
+      <h3 data-i18n="pl_pos_h">My position</h3>
       <div class="statgrid" id="posStats"></div>
       <div class="chartbox" style="height:170px; margin-top:10px"><canvas id="meChart"></canvas></div>
-      <div class="notice" id="posHold" style="margin-top:6px">Dashed line = parking everything in the money market.</div>
+      <div class="notice" id="posHold" style="margin-top:6px" data-i18n="pl_dash">Dashed line = parking everything in the money market.</div>
     </div>
     <div class="card">
-      <h3>Prices (growth of $100)</h3>
+      <h3 data-i18n="pl_prices_h">Prices (growth of $100)</h3>
       <div class="chartbox"><canvas id="mktChart"></canvas></div>
     </div>
     <div class="card">
-      <h3>Holdings</h3>
+      <h3 data-i18n="pl_hold_h">Holdings</h3>
       <div id="ordBox" style="display:none; margin:2px 0 12px">
-        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px">Staged orders</div>
+        <div style="font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px" data-i18n="pl_staged">Staged orders</div>
         <div class="mono" id="ordSum" style="font-size:13.5px; line-height:1.55"></div>
         <div id="ordErr" style="display:none; margin-top:8px; color:var(--loss); font-weight:600; font-size:13.5px"></div>
         <div class="row" style="margin-top:10px">
-          <button class="btn-ghost btn-small" id="ordClear" style="flex:0 0 32%">Cancel all</button>
-          <button class="btn-primary" id="ordExec" style="flex:1; padding:11px">Execute orders</button>
+          <button class="btn-ghost btn-small" id="ordClear" style="flex:0 0 32%" data-i18n="pl_cancel_all">Cancel all</button>
+          <button class="btn-primary" id="ordExec" style="flex:1; padding:11px" data-i18n="pl_exec">Execute orders</button>
         </div>
       </div>
       <div id="holdList"></div>
     </div>
     <div class="card">
-      <button class="btn-ghost" id="rbToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px">⚖️ Rebalancing tool <span style="float:right; color:var(--muted); font-size:13px" id="rbArrow">show ▾</span></button>
+      <button class="btn-ghost" id="rbToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px"><span data-i18n="pl_rb_tool">⚖️ Rebalancing tool</span> <span style="float:right; color:var(--muted); font-size:13px" id="rbArrow">show ▾</span></button>
       <div id="rbWrap" style="display:none">
-      <h3 style="margin-top:10px">Rebalance to target weights</h3>
+      <h3 style="margin-top:10px" data-i18n="pl_rb_h">Rebalance to target weights</h3>
       <div id="rbHost"></div>
-      <div class="cashleft" id="rbCashRow"><span>Money market (the rest)</span><span class="w" id="rbCash">100%</span></div>
+      <div class="cashleft" id="rbCashRow"><span data-i18n="pl_rb_cash">Money market (the rest)</span><span class="w" id="rbCash">100%</span></div>
       <div class="allocbar" id="rbBar" style="height:14px; margin:8px 0 12px"></div>
       <div class="row">
-        <button class="btn-ghost btn-small" id="rbSync" style="flex:0 0 42%">Load my current mix</button>
-        <button class="btn-primary" id="rbApply" style="padding:10px 12px; font-size:15px">Trade to these weights</button>
+        <button class="btn-ghost btn-small" id="rbSync" style="flex:0 0 42%" data-i18n="pl_rb_load">Load my current mix</button>
+        <button class="btn-primary" id="rbApply" style="padding:10px 12px; font-size:15px" data-i18n="pl_rb_apply">Trade to these weights</button>
       </div>
       <div class="notice" id="rbNote"></div>
       </div>
@@ -278,36 +295,36 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   <!-- --- TAB: MARKET --- -->
   <div class="tabpane" id="tab-market">
     <div class="card">
-      <h3>Meet the market</h3>
+      <h3 data-i18n="mk_meet_h">Meet the market</h3>
       <div id="storyList"></div>
     </div>
     <div class="card" id="crashCard" style="display:none">
-      <h3>⚡ Crash risk this game</h3>
+      <h3 data-i18n="mk_crash_h">⚡ Crash risk this game</h3>
       <div class="notice" id="crashInfo" style="margin-top:6px"></div>
       <table class="tbl" id="crashTable"></table>
     </div>
     <div class="card" id="paramCard">
-      <h3>What you're choosing between</h3>
+      <h3 data-i18n="mk_param_h">What you're choosing between</h3>
       <table class="tbl" id="assetTable"></table>
-      <div class="notice">These are the true annual parameters generating prices. Your job: combine them well — not just pick the biggest number.</div>
+      <div class="notice" data-i18n="mk_param_note">These are the true annual parameters generating prices. Your job: combine them well — not just pick the biggest number.</div>
     </div>
     <div class="card" id="corrCard">
-      <h3>Correlations</h3>
+      <h3 data-i18n="mk_corr_h">Correlations</h3>
       <table class="tbl" id="corrTable"></table>
     </div>
     <div class="card" id="tanCard" style="display:none">
-      <button class="btn-ghost" id="tanToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px">📐 Markowitz: frontier &amp; tangency <span style="float:right; color:var(--muted); font-size:13px" id="tanArrow">show ▾</span></button>
+      <button class="btn-ghost" id="tanToggle" style="width:100%; text-align:left; font-size:15px; padding:12px 10px"><span data-i18n="mk_tan">📐 Markowitz: frontier &amp; tangency</span> <span style="float:right; color:var(--muted); font-size:13px" id="tanArrow">show ▾</span></button>
       <div id="tanWrap" style="display:none">
         <div class="chartbox tall" style="margin-top:8px"><canvas id="tanChart"></canvas></div>
         <div class="notice" id="tanNote" style="margin-top:8px"></div>
       </div>
     </div>
     <div class="card">
-      <h3>Event log</h3>
+      <h3 data-i18n="mk_log_h">Event log</h3>
       <ul class="eventlog" id="eventLog"></ul>
     </div>
     <div class="card">
-      <h3>Rules of the road</h3>
+      <h3 data-i18n="mk_rules_h">Rules of the road</h3>
       <ul class="q" id="rulesList2"></ul>
     </div>
   </div>
@@ -315,18 +332,18 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
   <!-- --- TAB: RANKS --- -->
   <div class="tabpane" id="tab-ranks">
     <div class="card">
-      <h3>Your performance</h3>
+      <h3 data-i18n="rk_perf_h">Your performance</h3>
       <div class="statgrid" id="myStats"></div>
     </div>
     <div class="card">
-      <h3>Standings</h3>
+      <h3 data-i18n="rk_stand_h">Standings</h3>
       <table class="tbl" id="lbTable"></table>
       <div class="notice" id="lbNote"></div>
     </div>
     <div class="card">
-      <h3>Risk–return map (live)</h3>
+      <h3 data-i18n="rk_map_h">Risk–return map (live)</h3>
       <div class="chartbox tall"><canvas id="scatterChart"></canvas></div>
-      <div class="notice">Every investor is a dot: realized volatility (x) vs realized growth (y), annualized. The gold line is the best risk–return trade-off theoretically available. Up and to the left is skill; far right is gambling.</div>
+      <div class="notice" data-i18n="rk_map_note">Every investor is a dot: realized volatility (x) vs realized growth (y), annualized. The gold line is the best risk–return trade-off theoretically available. Up and to the left is skill; far right is gambling.</div>
     </div>
   </div>
 </div>
@@ -334,180 +351,188 @@ details.adv summary{font-weight:700; font-size:14px; cursor:pointer}
 <!-- ============ ADMIN ============ -->
 <div class="screen" id="scr-admin">
   <div class="tape">
-    <div class="cell"><div class="lbl">Phase</div><div class="val" id="aPhase">–</div></div>
-    <div class="cell"><div class="lbl">Clock</div><div class="val" id="aClock">–</div></div>
-    <div class="cell"><div class="lbl">Investors</div><div class="val" id="aCount">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="ad_phase">Phase</div><div class="val" id="aPhase">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="tp_clock">Clock</div><div class="val" id="aClock">–</div></div>
+    <div class="cell"><div class="lbl" data-i18n="ad_inv">Investors</div><div class="val" id="aCount">–</div></div>
     <div class="cell"><div class="timerchip" id="aTimer">–</div></div>
   </div>
 
-  <div class="notice" style="margin:0 0 14px">Prices are generated from a shared seed, so every phone computes the identical market — you can even close this page mid-game and nothing breaks. Come back to trigger shocks or end early.</div>
+  <div class="notice" style="margin:0 0 14px" data-i18n="ad_notice">Prices are generated from a shared seed, so every phone computes the identical market — you can even close this page mid-game and nothing breaks. Come back to trigger shocks or end early.</div>
 
   <div class="card" id="admCfg">
-    <h3>Game setup</h3>
+    <h3 data-i18n="ad_setup_h">Game setup</h3>
     <div class="row">
-      <div><label>Game length (min)</label><input type="number" id="cfgMin" inputmode="numeric" min="3" max="60" value="12"></div>
-      <div><label>Seconds per tick</label><input type="number" id="cfgTickSec" inputmode="numeric" min="1" max="15" value="4"></div>
+      <div><label data-i18n="ad_min_l">Game length (min)</label><input type="number" id="cfgMin" inputmode="numeric" min="3" max="60" value="12"></div>
+      <div><label data-i18n="ad_tick_l">Seconds per tick</label><input type="number" id="cfgTickSec" inputmode="numeric" min="1" max="15" value="4"></div>
     </div>
     <div class="row">
-      <div><label>One tick equals</label><select id="cfgFreq"><option value="52" selected>1 week</option><option value="252">1 day</option><option value="12">1 month</option></select></div>
-      <div><label>Start cash ($)</label><input type="number" id="cfgCash" min="10" value="1000"></div>
+      <div><label data-i18n="ad_freq_l">One tick equals</label><select id="cfgFreq"><option value="52" selected data-i18n="opt_week">1 week</option><option value="252" data-i18n="opt_day">1 day</option><option value="12" data-i18n="opt_month">1 month</option></select></div>
+      <div><label data-i18n="ad_cash_l">Start cash ($)</label><input type="number" id="cfgCash" min="10" value="1000"></div>
     </div>
     <div class="row">
-      <div><label>T-bill rate (%/yr)</label><input type="number" id="cfgRf" step="0.5" value="4"></div>
-      <div><label>Trading fee (bps)</label><input type="number" id="cfgFee" step="1" min="0" value="10"></div>
+      <div><label data-i18n="ad_rf_l">T-bill rate (%/yr)</label><input type="number" id="cfgRf" step="0.5" value="4"></div>
+      <div><label data-i18n="ad_fee_l">Trading fee (bps)</label><input type="number" id="cfgFee" step="1" min="0" value="10"></div>
     </div>
-    <label style="margin-top:6px">Ranking</label>
-    <div class="notice" style="margin-top:2px">Most money when the final bell rings. The live leaderboard is always sorted by current wealth — no risk adjustment, no excuses.</div>
+    <label style="margin-top:6px" data-i18n="ad_rank_l">Ranking</label>
+    <div class="notice" style="margin-top:2px" data-i18n="ad_rank_note">Most money when the final bell rings. The live leaderboard is always sorted by current wealth — no risk adjustment, no excuses.</div>
 
-    <label style="margin-top:16px">Surprises (revealed to the class at kickoff)</label>
+    <label style="margin-top:16px" data-i18n="ad_surp_l">Surprises (revealed to the class at kickoff)</label>
     <div class="row">
-      <div><label>Expected crashes per game</label><input type="number" id="cfgCrashFreq" min="0" max="5" step="0.5" value="1"></div>
-      <div><label>Crash magnitude</label>
+      <div><label data-i18n="ad_cfreq_l">Expected crashes per game</label><input type="number" id="cfgCrashFreq" min="0" max="5" step="0.5" value="1"></div>
+      <div><label data-i18n="ad_cmag_l">Crash magnitude</label>
         <select id="cfgCrashMag">
-          <option value="mix" selected>Historic mix (random each time)</option>
-          <option value="correction">Correction (blue chips −7…12%)</option>
-          <option value="blackmonday">Black Monday '87 (−18…23%)</option>
-          <option value="covid">COVID '20 (−25…35%)</option>
+          <option value="mix" selected data-i18n="opt_mix">Historic mix (random each time)</option>
+          <option value="correction" data-i18n="opt_corr">Correction (blue chips −7…12%)</option>
+          <option value="blackmonday" data-i18n="opt_bm">Black Monday '87 (−18…23%)</option>
+          <option value="covid" data-i18n="opt_covid">COVID '20 (−25…35%)</option>
         </select>
       </div>
     </div>
-    <div class="notice">A crash is a one-tick <b>jump</b> hitting every stock at once. The % is the blue-chip drop; each stock falls in proportion to its own risk (wilder stocks fall much harder, gold tends to pop <i>up</i>). Arrivals are random — expecting 1 sometimes means 0, sometimes 2. Each crash draws its own size from the chosen menu.</div>
+    <div class="notice" data-i18n="ad_crash_note">A crash is a one-tick <b>jump</b> hitting every stock at once. The % is the blue-chip drop; each stock falls in proportion to its own risk (wilder stocks fall much harder, gold tends to pop <i>up</i>). Arrivals are random — expecting 1 sometimes means 0, sometimes 2. Each crash draws its own size from the chosen menu.</div>
     <div class="row" style="margin-top:10px">
-      <div><label>Kickoff briefing (seconds)</label><input type="number" id="cfgBriefSec" min="5" max="120" step="5" value="30"></div>
-      <div><label>&nbsp;</label><div class="notice" style="margin:0">How long the chosen surprises stay on every phone before the market opens.</div></div>
+      <div><label data-i18n="ad_brief_l">Kickoff briefing (seconds)</label><input type="number" id="cfgBriefSec" min="5" max="120" step="5" value="30"></div>
+      <div><label>&nbsp;</label><div class="notice" style="margin:0" data-i18n="ad_brief_note">How long the chosen surprises stay on every phone before the market opens.</div></div>
     </div>
-    <label class="chklabel"><input type="checkbox" id="cfgExpOn"> Liquidity calls (cash-on-demand stress tests)</label>
+    <label class="chklabel"><input type="checkbox" id="cfgExpOn"> <span data-i18n="ad_exp_chk">Liquidity calls (cash-on-demand stress tests)</span></label>
     <div class="row3" id="expRow" style="display:none">
-      <div><label style="margin-top:4px"># random calls</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
-      <div><label style="margin-top:4px">Call: % of wealth</label><input type="number" id="cfgExpPct" min="1" max="60" value="20"></div>
-      <div><label style="margin-top:4px">Fire-sale haircut %</label><input type="number" id="cfgHaircut" min="0" max="60" value="25"></div>
+      <div><label style="margin-top:4px" data-i18n="ad_nexp_l"># random calls</label><input type="number" id="cfgNExp" min="0" max="6" value="2"></div>
+      <div><label style="margin-top:4px" data-i18n="ad_exppct_l">Call: % of wealth</label><input type="number" id="cfgExpPct" min="1" max="60" value="20"></div>
+      <div><label style="margin-top:4px" data-i18n="ad_hc_l">Fire-sale haircut %</label><input type="number" id="cfgHaircut" min="0" max="60" value="25"></div>
     </div>
 
-    <label class="chklabel"><input type="checkbox" id="cfgPublic" checked> Public portfolios (anyone can see anyone's weights)</label>
-    <label class="chklabel"><input type="checkbox" id="cfgShowParams" checked> Show true means, vols &amp; correlations to students</label>
-    <label class="chklabel"><input type="checkbox" id="cfgShowTangent"> Show the Markowitz frontier &amp; tangency portfolio box (the answer key)</label>
+    <label class="chklabel"><input type="checkbox" id="cfgPublic" checked> <span data-i18n="ad_pub_chk">Public portfolios (anyone can see anyone's weights)</span></label>
+    <label class="chklabel"><input type="checkbox" id="cfgShowParams" checked> <span data-i18n="ad_params_chk">Show true means, vols &amp; correlations to students</span></label>
+    <label class="chklabel"><input type="checkbox" id="cfgShowTangent"> <span data-i18n="ad_tan_chk">Show the Markowitz frontier &amp; tangency portfolio box (the answer key)</span></label>
 
     <details class="adv">
-      <summary>Assets (annual %, edit if you like)</summary>
+      <summary data-i18n="ad_assets_sum">Assets (annual %, edit if you like)</summary>
       <div id="assetEditor"></div>
-      <label>Correlation structure</label>
+      <label data-i18n="ad_corr_l">Correlation structure</label>
       <select id="cfgCorr">
-        <option value="realistic" selected>Realistic (equities co-move, gold hedges)</option>
-        <option value="zero">Independent (all correlations 0)</option>
-        <option value="high">Crisis-like (equities highly correlated)</option>
+        <option value="realistic" selected data-i18n="opt_c_real">Realistic (equities co-move, gold hedges)</option>
+        <option value="zero" data-i18n="opt_c_zero">Independent (all correlations 0)</option>
+        <option value="high" data-i18n="opt_c_high">Crisis-like (equities highly correlated)</option>
       </select>
     </details>
 
     <div class="notice" id="cfgPreview"></div>
     <div style="height:12px"></div>
-    <button class="btn-primary" id="startBtn">Start the market</button>
+    <button class="btn-primary" id="startBtn" data-i18n="ad_start_btn">Start the market</button>
   </div>
 
   <div class="card" id="admLive" style="display:none">
-    <h3>Live controls</h3>
+    <h3 data-i18n="ad_live_h">Live controls</h3>
     <div class="row">
       <button class="btn-ghost" id="pauseBtn">Pause</button>
-      <button class="btn-danger" id="endBtn">End game → results</button>
+      <button class="btn-danger" id="endBtn" data-i18n="ad_end_btn">End game → results</button>
     </div>
     <div style="height:10px"></div>
     <div class="row">
-      <button class="btn-ghost" id="fireExpBtn">💸 Liquidity shock now</button>
-      <button class="btn-ghost" id="fireCrashBtn">📉 Crash now</button>
+      <button class="btn-ghost" id="fireExpBtn" data-i18n="ad_fire_exp">💸 Liquidity shock now</button>
+      <button class="btn-ghost" id="fireCrashBtn" data-i18n="ad_fire_crash">📉 Crash now</button>
     </div>
-    <label>Announcement to all phones</label>
+    <label data-i18n="ad_ann_l">Announcement to all phones</label>
     <div class="row">
-      <input type="text" id="bannerInput" maxlength="90" placeholder="e.g. Rumor: trouble in tech…">
-      <button class="btn-small btn-primary" style="flex:none; width:90px" id="bannerSend">Send</button>
+      <input type="text" id="bannerInput" maxlength="90" placeholder="e.g. Rumor: trouble in tech…" data-i18n-ph="ad_ann_ph">
+      <button class="btn-small btn-primary" style="flex:none; width:90px" id="bannerSend" data-i18n="ad_send">Send</button>
     </div>
   </div>
 
   <div class="card">
-    <h3>Standings</h3>
+    <h3 data-i18n="rk_stand_h">Standings</h3>
     <table class="tbl" id="aLbTable"></table>
   </div>
 
   <div class="card">
-    <h3>Risk–return map</h3>
+    <h3 data-i18n="ad_map_h">Risk–return map</h3>
     <div class="chartbox tall"><canvas id="aScatter"></canvas></div>
   </div>
 
   <div class="card">
-    <h3>Market</h3>
+    <h3 data-i18n="ad_mkt_h">Market</h3>
     <div class="chartbox"><canvas id="aMktChart"></canvas></div>
   </div>
 
   <div class="card">
-    <h3>Roster</h3>
+    <h3 data-i18n="ad_roster_h">Roster</h3>
     <ul class="plist" id="aRoster"></ul>
   </div>
 
   <div class="card">
-    <h3>Danger zone</h3>
-    <button class="btn-ghost" id="againBtn">New game, same class (fresh market, keep everyone)</button>
+    <h3 data-i18n="ad_danger_h">Danger zone</h3>
+    <button class="btn-ghost" id="againBtn" data-i18n="ad_again">New game, same class (fresh market, keep everyone)</button>
     <div style="height:10px"></div>
-    <button class="btn-ghost" id="wipeBtn">Full reset (clear players too)</button>
+    <button class="btn-ghost" id="wipeBtn" data-i18n="ad_wipe">Full reset (clear players too)</button>
+    <div class="notice" data-i18n="ad_auto_note">Auto-reset: once the clock has stopped and nobody has touched the game for 30 minutes, this room clears itself — roster, trades and results — so an old game can't leak into the next class.</div>
   </div>
 </div>
 
 <!-- ============ RESULTS ============ -->
 <div class="screen" id="scr-results">
-  <div class="brand"><h1>Closing bell</h1><span class="tag">what the market taught</span></div>
+  <div class="brand"><h1 data-i18n="rs_h1">Closing bell</h1><span class="tag" data-i18n="rs_tag">what the market taught</span></div>
   <p class="sub" id="resSub"></p>
 
   <div class="statgrid" id="resStats" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:14px"></div>
 
   <div class="card">
-    <h3>Final standings</h3>
+    <h3 data-i18n="rs_final_h">Final standings</h3>
     <table class="tbl" id="resTable"></table>
     <div class="notice" id="resNote"></div>
   </div>
 
   <div class="card">
-    <h3>Could you have done better?</h3>
+    <h3 data-i18n="rs_bench_h">Could you have done better?</h3>
     <table class="tbl" id="benchTable"></table>
     <div class="notice" id="benchNote"></div>
   </div>
 
   <div class="card">
-    <h3>Risk–return map</h3>
+    <h3 data-i18n="ad_map_h">Risk–return map</h3>
     <div class="chartbox tall"><canvas id="resScatter"></canvas></div>
-    <div class="notice">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best <b>expected</b> trade-off &mdash; a forecast, not a ceiling. In any single game, lucky assets and lucky investors can land above it; run it again and they usually won&rsquo;t. Diversified portfolios should plot above and left of single stocks.</div>
+    <div class="notice" data-i18n="rs_map_note">Dots are investors; squares are what each single asset actually delivered this game. The gold line through the T-bill point is the best <b>expected</b> trade-off &mdash; a forecast, not a ceiling. In any single game, lucky assets and lucky investors can land above it; run it again and they usually won&rsquo;t. Diversified portfolios should plot above and left of single stocks.</div>
   </div>
 
   <div class="card">
-    <h3>Theory corner — the reveal</h3>
+    <h3 data-i18n="rs_theory_h">Theory corner — the reveal</h3>
     <table class="tbl" id="theoryTable"></table>
-    <h3 style="margin-top:16px">Correlations</h3>
+    <h3 style="margin-top:16px" data-i18n="mk_corr_h">Correlations</h3>
     <table class="tbl" id="theoryCorr"></table>
     <div class="notice" id="theoryNote"></div>
   </div>
 
   <div class="card">
-    <h3>Discussion</h3>
+    <h3 data-i18n="rs_disc_h">Discussion</h3>
     <ol class="q">
-      <li>Compare the <b>wealth</b> ranking with the <b>risk-adjusted</b> ranking. Who swaps places, and why?</li>
-      <li>MoonShot had the highest expected return on the menu. Look at its geometric growth in Theory corner. Where did the difference go? (Hint: this is the same volatility drag you met in the Kelly game.)</li>
-      <li>Gold's expected return barely beat T-bills, yet good portfolios held it. What was it being paid for?</li>
-      <li>Find your dot on the map. What mix of the menu would have moved you up and to the left, toward the gold line?</li>
-      <li>When the liquidity call hit, who was covered and who got fire-sold? What does that say about holding "lazy" cash?</li>
-      <li>If everyone's risk aversion γ doubled, how should the winning portfolio change — and which part of it stays exactly the same? (Two-fund separation.)</li>
+      <li data-i18n="rs_q1">Compare the <b>wealth</b> ranking with the <b>risk-adjusted</b> ranking. Who swaps places, and why?</li>
+      <li data-i18n="rs_q2">MoonShot had the highest expected return on the menu. Look at its geometric growth in Theory corner. Where did the difference go? (Hint: this is the same volatility drag you met in the Kelly game.)</li>
+      <li data-i18n="rs_q3">Gold's expected return barely beat T-bills, yet good portfolios held it. What was it being paid for?</li>
+      <li data-i18n="rs_q4">Find your dot on the map. What mix of the menu would have moved you up and to the left, toward the gold line?</li>
+      <li data-i18n="rs_q5">When the liquidity call hit, who was covered and who got fire-sold? What does that say about holding "lazy" cash?</li>
+      <li data-i18n="rs_q6">If everyone's risk aversion γ doubled, how should the winning portfolio change — and which part of it stays exactly the same? (Two-fund separation.)</li>
     </ol>
   </div>
 
   <div class="card" id="resAdminCard" style="display:none">
-    <h3>Instructor</h3>
-    <button class="btn-primary" id="againBtn2">New game, same class</button>
+    <h3 data-i18n="ld_inst_h">Instructor</h3>
+    <button class="btn-primary" id="againBtn2" data-i18n="rs_again">New game, same class</button>
     <div style="height:10px"></div>
-    <button class="btn-ghost" id="wipeBtn2">Full reset</button>
+    <button class="btn-ghost" id="wipeBtn2" data-i18n="rs_wipe">Full reset</button>
   </div>
+</div>
+
+<!-- ============ FOOTER: language + log out (every screen) ============ -->
+<div class="utilbar" id="utilBar">
+  <div class="langsw" role="group" aria-label="Language / 언어"><button type="button" data-lang="en" lang="en">English</button><button type="button" data-lang="ko" lang="ko">한국어</button></div>
+  <div class="whoami" id="whoami"></div>
+  <button type="button" class="btn-small btn-ghost" id="logoutBtn" style="display:none" data-i18n="logout">Log out</button>
 </div>
 
 <div class="toast" id="toast"></div>
 <div id="verGate" style="display:none; position:fixed; inset:0; z-index:999; background:var(--paper); padding:32px 24px; text-align:center">
   <div style="max-width:420px; margin:18vh auto 0">
-    <h2 style="margin-bottom:10px">📄 This page is outdated</h2>
-    <p style="color:var(--muted); margin-bottom:18px">Your phone loaded an older cached copy of the game, so your numbers would disagree with everyone else&rsquo;s. One reload fixes it.</p>
-    <button class="btn-primary" onclick="hardReload()" style="padding:12px 28px">Reload the page</button>
+    <h2 style="margin-bottom:10px" data-i18n="vg_h">📄 This page is outdated</h2>
+    <p style="color:var(--muted); margin-bottom:18px" data-i18n="vg_p">Your phone loaded an older cached copy of the game, so your numbers would disagree with everyone else&rsquo;s. One reload fixes it.</p>
+    <button class="btn-primary" onclick="hardReload()" style="padding:12px 28px" data-i18n="vg_btn">Reload the page</button>
   </div>
 </div>
 
@@ -528,10 +553,12 @@ const firebaseConfig = {
 };
 /* ===================================================================== */
 
-const APP_VERSION = 6;                          // bump when redeploying breaking changes
+const APP_VERSION = 7;                          // bump when redeploying breaking changes
 const ADMIN_PASSWORD = "arbitrageur";           // change me
 const ROOM = new URLSearchParams(location.search).get("room") || "classroom";
 const CASH_COLOR = "#93A3B4";
+const STALE_MS = 30*60*1000;                    // an untouched room resets itself after this long
+const TOUCH_EVERY_MS = 2*60*1000;               // how often a device in use refreshes the room's "last touched" stamp
 
 /* ---------- default asset menu ---------- */
 function defaultAssets(){ return [
@@ -561,7 +588,7 @@ function drawMag(rng, key){
   let k=key||"mix";
   if(k==="mix"){ const pool=CRASH_MAGS.mix.pool; k=pool[Math.floor(rng()*pool.length)]; }
   const pr=CRASH_MAGS[k]||CRASH_MAGS.correction;
-  return { m: pr.lo + rng()*(pr.hi-pr.lo), label: pr.name };
+  return { m: pr.lo + rng()*(pr.hi-pr.lo), label: pr.name, ck: CRASH_MAGS[k]? k : "correction" };   /* ck = language-neutral name key */
 }
 function sevFromMag(cfg, m){
   const a0=cfg.assets[0];   /* anchored so the blue chip drops exactly m */
@@ -594,6 +621,466 @@ let toastTimer=null;
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2800); }
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); }
 function configured(){ return firebaseConfig.apiKey && !String(firebaseConfig.apiKey).startsWith("PASTE"); }
+
+/* =====================================================================
+   LANGUAGE — English / 한국어
+   Static page text carries data-i18n="key": the English stays in the HTML
+   and is swapped for I18N.ko[key] when Korean is on. Text built in script
+   goes through tx(key, values). Default is English; the choice is saved on
+   each device. Share the link with ?lang=ko to make Korean the default.
+   ===================================================================== */
+const I18N = {
+en: {
+  /* --- shared words --- */
+  mm:"Money market", tbills:"T-bills", cash:"Cash", you:"you", ok:"ok",
+  show:"show ▾", hide:"hide ▴", pause:"Pause", resume:"Resume", remove:"remove",
+  n_sh:"{n} sh", this_player:"this player",
+  metric:"the most money when the final bell rings — pure wealth, no risk adjustment.",
+  /* --- crash names --- */
+  cm_correction:"Correction", cm_blackmonday:"Black Monday '87", cm_covid:"COVID crash '20", cm_mix:"Historic mix", cm_generic:"Market crash",
+  /* --- toasts --- */
+  to_cant_reach:"Can't reach the database — check your connection.",
+  to_pick_name:"Pick a name first",
+  to_name_taken:"That name's taken — add a last initial?",
+  to_youre_in:"You're in — starting with {cash} cash",
+  to_join_fail:"Couldn't join — try again.",
+  to_welcome:"Welcome, instructor",
+  to_wrong_pw:"Wrong password",
+  to_closed:"The market is closed.",
+  to_trading_paused:"Trading is paused.",
+  to_order_fail:"Order didn't go through — try again.",
+  to_join_first:"Join first.",
+  to_nothing_staged:"Nothing staged — slide a stock first.",
+  to_rejected:"Rejected — not feasible with your cash.",
+  to_executed:v=>"Executed "+v.n+" order"+(v.n>1?"s":"")+" ✓",
+  to_w_exceed:"Weights exceed 100% — lower something.",
+  to_rb_close:"Already as close to those weights as whole shares get.",
+  to_rb_done:"Rebalanced ({n} orders, whole shares)",
+  to_brief_start:"Briefing on every phone — market opens in {s}s",
+  to_open5:"Market opens in 5 seconds",
+  to_wait_kick:"Wait for kickoff.",
+  to_resumed:"Resumed",
+  to_paused:"Paused — clock frozen",
+  to_no_live:"No live market.",
+  to_resume_first:"Resume before firing a shock.",
+  to_exp_off:"Liquidity calls are off this game.",
+  to_exp_fired:"Liquidity call fired",
+  to_crash_fired:"Crash fired — {label} (−{m}% blue chips)",
+  to_ann_sent:"Announcement sent",
+  to_newgame:"New game — same class",
+  to_fullreset:"Full reset",
+  to_liq:"💸 Liquidity call!",
+  to_logged_out:"Logged out — you're off the roster",
+  to_admin_out:"Instructor logged out",
+  to_logout_fail:"Couldn't reach the database — you may still be on the roster.",
+  to_swept:"The last game sat idle for {min}+ minutes — room reset.",
+  /* --- confirms --- */
+  cf_start_empty:"No students have joined yet — start anyway?",
+  cf_end:"End the game and show results?",
+  cf_again:"Start over with the same class?",
+  cf_wipe:"Clear everything including players?",
+  cf_remove:"Remove {name}?",
+  cf_logout:"Log out, {name}? You'll be removed from the roster.",
+  cf_logout_live:"Log out, {name}? You'll be removed from the roster, and your account, trades and place in the standings for this game are deleted.",
+  /* --- footer --- */
+  who_admin:"Signed in as <b>instructor</b>",
+  who_player:"Signed in as <b>{name}</b>",
+  /* --- trade tab --- */
+  sl_hold:"holding {n} sh",
+  sl_buy:"{a} → {b} sh · order: BUY {d} ≈ {v}",
+  sl_sell:"{a} → {b} sh · order: SELL {d} ≈ {v}",
+  st_wealth:"wealth", st_cash:"cash", st_instocks:"in stocks",
+  pos_holding:"Holding {list} · cash {pct}%",
+  pos_allcash:"Everything is in the money market. Slide a stock to place an order.",
+  pos_dashed:"dashed = all in T-bills",
+  ord_sell:"SELL {n} {k}", ord_buy:"BUY {n} {k}",
+  ord_cash_after:"cash after (incl. fees): <b>{v}</b>",
+  ord_infeasible:"✗ Not feasible — these orders need {v} more cash than you have. Reduce a buy or add a sell.",
+  mm_sub:"T-bills · {rf}/yr · safe",
+  as_sub:"E[r] {mu} · vol {vol}",
+  as_sub_np:"no shorting · slide to trade",
+  aria_shares:"shares of {k}",
+  rb_note:"This sells winners and buys laggards in one shot, rounded to whole shares — the closest fit to your target weights that your cash allows. The rest stays in the money market. It costs {bps} bps per trade today; the payoff, if any, shows up over the long run. Nobody rebalances for you: buy-and-hold is the default.",
+  alloc_cap:"cash <b>{c}%</b> · stocks <b>{s}%</b>",
+  /* --- rules --- */
+  r1:"You start with {cash} in a money-market account earning {rf}/yr. It never loses value.",
+  r2:"Every stock has a slider showing your shares: slide right and confirm to buy, left to sell. You can never go below zero (no shorting) and never buy past your cash. Each trade costs {bps} bps; prices come from the market — your trades don't move them.",
+  r3:"Each tick of the clock is {unit} of market time.",
+  unit_day:"one trading day", unit_month:"one month", unit_week:"one week",
+  r4:"Winner = {metric} The leaderboard is live and sorted by wealth. No restarts.",
+  r5:"Any surprise rules the instructor has chosen will flash on every phone for {s} seconds right before the market opens — read fast.",
+  d1:"You start with $1,000 in a money-market account earning the T-bill rate.",
+  d2:"Trade five stocks in real time; prices are the market's, not yours.",
+  d3:"Winner = the most money when the final bell rings. Simple.",
+  d4:"Any extra rules the instructor picks will be revealed for 30 seconds at kickoff.",
+  d5:"No restarts. Everyone sees the same market and the same standings.",
+  /* --- market tab --- */
+  mm_blurb:"T-bills: the mattress that pays interest. Boring is a feature.",
+  crash_info:v=>"Expected <b>"+v.n+"</b> crash"+(v.n==1?"":"es")+" this game — arrivals are random, so it could be none or several, at any moment. Magnitude "+v.mag+". Every stock falls in the same instant, each in proportion to its own risk; gold usually jumps <i>up</i>. The instructor can also trigger one manually.",
+  mag_mix:"drawn from history each time — usually a correction (−7…12%), sometimes Black Monday scale (−18…23%), occasionally COVID scale (−25…35%), quoted as the blue-chip drop",
+  mag_one:"{name}: blue chips drop {lo}–{hi}% in a single tick",
+  ct_if:"If a {m}% event hits", ct_move:"One-tick move",
+  th_asset:"Asset", th_startpx:"Start px", th_er:"E[return]", th_vol:"Volatility",
+  ev_liq:"💸 Liquidity call: show {pct} of wealth in cash; shortfalls fire-sold at {hc} haircut",
+  ev_crash:"📉 {label}: blue chips −{m}% in one tick",
+  ev_quiet:"Quiet so far. It won't last.",
+  /* --- landing / lobby --- */
+  ld_live_note:"The market is already <b>live</b> — you can still join and start with fresh cash.",
+  nobody:"Nobody yet.",
+  /* --- kickoff briefing + banners --- */
+  br_crash:v=>"⚡ <b>Crash risk is ON</b>: about "+v.n+" jump"+(v.n==1?"":"s")+" expected this game (the actual count is random). When one hits, every stock gaps down in the same instant — "+v.mag+". Riskier stocks fall harder; gold tends to jump <i>up</i>.",
+  br_mag_mix:"sizes drawn from history — anywhere from a correction to a COVID-scale panic (blue chips −7% to −35%)",
+  br_mag_one:"{name} scale (blue chips −{lo}% to −{hi}%)",
+  br_exp:"💸 <b>Liquidity calls are ON</b>: at random moments you must be holding {pct} of your wealth in cash. Come up short and the gap is fire-sold at a {hc} haircut.",
+  br_none:"No surprises this game — a pure market. May the best portfolio win.",
+  br_details:"Full details are in the <b>Market</b> tab. Ranking: most money at the bell.",
+  bn_kick:"🔔 Kickoff briefing — read fast",
+  bn_opens:"Market opens when the timer above hits zero.",
+  bn_liq:'<span class="t">💸 Liquidity call at {when}:</span> show {pct} of your wealth in cash. Anyone short just got fire-sold at a {hc} haircut.',
+  bn_crash:'<span class="t">📉 {label} at {when}:</span> blue chips −{m}% in one tick. Risk got punished; gold popped.',
+  /* --- ranks tab --- */
+  lb_note_pub:"Tap a row to see that investor's current mix.",
+  lb_note_priv:"Portfolios are private this game — only the numbers show.",
+  ms_rank_of:"#{i} of {n}",
+  ms_rank:"rank (by wealth)", ms_ret:"return", ms_vol:"volatility", ms_sharpe:"sharpe", ms_mdd:"max drawdown", ms_fees:"fees + fire-sales",
+  th_inv:"Investor", th_wealth:"Wealth", th_ret:"Ret", th_vols:"Vol", th_sharpe:"Sharpe", th_mdd:"MaxDD",
+  /* --- admin --- */
+  ph_lobby:"Lobby", ph_brief:"Briefing", ph_paused:"Paused", ph_live:"Live",
+  chip_paused:"PAUSED",
+  ad_roster_empty:"Students open this page and enter a name.",
+  ae_asset:"Asset", ae_mu:"E[return] %", ae_vol:"Vol %",
+  cfg_prev:"That's <b>{ticks} ticks</b> ≈ <b>{yrs} market-years</b> in {mins} minutes.",
+  cfg_prev_surp:"Chosen surprises get a {s}-second on-screen briefing at kickoff, then the market opens.",
+  cfg_prev_none:"No surprises configured — the market opens after a 5-second countdown. (You can still fire a crash manually.)",
+  /* --- results --- */
+  res_sub:"The clock ran {cap} ticks ≈ <b>{yrs} market-years</b>. Ranking metric: <b>{metric}</b>",
+  rs_winner:"winner", rs_best_sharpe:"best sharpe ({name})", rs_median:"median return",
+  res_note:"Ranking is pure final wealth. Sharpe, volatility and drawdown are shown for the debrief — ask who WOULD have won under a risk-adjusted rule. Fire-sale losses and fees are already inside these numbers.",
+  th_robo:"Robo strategy",
+  bench_tan:"Markowitz tangency", bench_rp:"Risk parity (1/σ)", bench_ew:"Equal weight", bench_mm:"Money market only",
+  bench_note:"These robots played the exact same market you did — same prices, same shocks, same fees — mechanically rebalancing to fixed weights every 4 ticks, never predicting anything.<br>{w}<br>Students who beat the tangency robot on wealth: <b>{k} of {n}</b>. Ask them how much extra risk it took — the Vol and MaxDD columns don't lie.",
+  th_er_s:"E[r]", th_geo:"Geometric", th_thisgame:"This game",
+  theory_note:"<b>Geometric</b> = μ − σ²/2: what compounding actually pays. That's where MoonShot's fat mean goes to die. And the correlation table is why gold earns a big portfolio weight despite a feeble return: it zigs when everything else zags.<br><br>Best possible Sharpe with this menu: <b>{s}</b>, achieved by one specific risky mix — <b>{mix}</b> — blended with T-bills to taste. Every investor, whatever their γ, should hold the <i>same</i> risky mix and only vary the cash split. That's Markowitz + Tobin's two-fund separation, and it's the gold line on the map.",
+  /* --- charts --- */
+  ch_you:"You", ch_alltb:"All in T-bills", ch_investors:"Investors", ch_cml:"Best line (CML)", ch_single:"Single assets",
+  ax_vol:"volatility %/yr", ax_growth:"growth %/yr", ax_er:"E[return] %/yr",
+  tt_vg:"{name}: vol {x}%, growth {y}%", tt_ve:"{name}: vol {x}%, E[r] {y}%",
+  ch_frontier:"Frontier (risky mixes)", ch_cal:"CAL", ch_tan:"Tangency ★", tan_pt:"Tangency",
+  tan_undef:"Frontier is undefined for the current parameter set.",
+  tan_note:"Tangency portfolio — the risky mix with the best possible Sharpe ({s}): {mix}.<br>E[r] {mu} at vol {vol}. Every point on the gold CAL is this same mix blended with T-bills — pick your spot by how much cash you hold."
+},
+ko: {
+  /* ================= static page text (data-i18n) ================= */
+  su_tag:"설정",
+  su_sub:"강사용 최초 1회 설정: 학생들의 휴대폰이 서로 동기화되도록 이 페이지를 무료 Firebase 데이터베이스에 연결합니다.",
+  su_1:"<b>console.firebase.google.com</b>에 접속 → 프로젝트 추가.",
+  su_2:"<b>빌드 → Realtime Database → 데이터베이스 만들기</b> → 테스트 모드.",
+  su_3:"프로젝트 설정(톱니바퀴) → <b>내 앱 → 웹 앱(&lt;/&gt;)</b> → <code>firebaseConfig</code>를 복사.",
+  su_4:"<code>index.html</code> 스크립트 맨 위의 <code>firebaseConfig</code> 블록에 붙여 넣습니다.",
+  ld_tag:"폭락 에디션",
+  ld_sub:"여러분은 $1,000를 머니마켓 계좌와 다섯 개 주식에 나누어 운용합니다. 시장은 예고 없이 급변할 수 있습니다. 종료 벨이 울릴 때 돈이 가장 많은 사람이 이깁니다 — 그게 전부입니다.",
+  ld_join_h:"게임 참가",
+  ld_name_l:"이름",
+  ld_name_ph:"예: 민지",
+  ld_join_btn:"계좌 개설",
+  ld_admin_link:"강사 로그인",
+  ld_inst_h:"강사",
+  ld_pw_l:"비밀번호",
+  ld_admin_btn:"관제실 열기",
+  lb_h1:"곧 장이 열립니다",
+  lb_sub:'<b id="lobbyName"></b> 님, 계좌가 준비되었습니다. 강사가 시계를 시작하기를 기다리는 중입니다.',
+  lb_how_h:"게임 진행 방식",
+  lb_room_h:'참가한 투자자 (<span id="lobbyCount">0</span>명)',
+  tp_clock:"시각", tp_wealth:"내 자산", tp_last:"직전 틱",
+  pl_alloc:"내 자산 배분",
+  tab_trade:"거래", tab_market:"시장", tab_ranks:"순위",
+  pl_pos_h:"내 포지션",
+  pl_dash:"점선 = 전액을 머니마켓에 넣어 둔 경우.",
+  pl_prices_h:"가격 ($100의 성장)",
+  pl_hold_h:"보유 종목",
+  pl_staged:"대기 주문",
+  pl_cancel_all:"모두 취소",
+  pl_exec:"주문 실행",
+  pl_rb_tool:"⚖️ 리밸런싱 도구",
+  pl_rb_h:"목표 비중으로 리밸런싱",
+  pl_rb_cash:"머니마켓 (나머지)",
+  pl_rb_load:"현재 비중 불러오기",
+  pl_rb_apply:"이 비중으로 거래",
+  mk_meet_h:"시장 소개",
+  mk_crash_h:"⚡ 이번 게임의 폭락 위험",
+  mk_param_h:"선택할 수 있는 자산",
+  mk_param_note:"가격을 만들어 내는 실제 연간 모수입니다. 여러분의 과제는 가장 큰 숫자를 고르는 것이 아니라, 이들을 잘 조합하는 것입니다.",
+  mk_corr_h:"상관계수",
+  mk_tan:"📐 마코위츠: 효율적 투자선과 접점 포트폴리오",
+  mk_log_h:"이벤트 기록",
+  mk_rules_h:"게임 규칙",
+  rk_perf_h:"내 성과",
+  rk_stand_h:"순위표",
+  rk_map_h:"위험–수익 지도 (실시간)",
+  rk_map_note:"점 하나가 투자자 한 명입니다: 실현 변동성(x)과 실현 성장률(y), 연율 기준. 금색 선은 이론적으로 가능한 최선의 위험–수익 조합입니다. 왼쪽 위는 실력, 오른쪽 끝은 도박입니다.",
+  ad_phase:"단계", ad_inv:"투자자",
+  ad_notice:"가격은 공유된 시드에서 생성되므로 모든 휴대폰이 똑같은 시장을 계산합니다. 게임 도중에 이 페이지를 닫아도 아무 문제가 없습니다. 충격을 발동하거나 일찍 끝내려면 다시 들어오면 됩니다.",
+  ad_setup_h:"게임 설정",
+  ad_min_l:"게임 길이 (분)",
+  ad_tick_l:"틱당 초",
+  ad_freq_l:"1틱의 길이",
+  opt_week:"1주", opt_day:"1일", opt_month:"1개월",
+  ad_cash_l:"시작 현금 ($)",
+  ad_rf_l:"단기국채 금리 (연 %)",
+  ad_fee_l:"거래 수수료 (bp)",
+  ad_rank_l:"순위 기준",
+  ad_rank_note:"종료 벨이 울릴 때 돈이 가장 많은 사람이 1등입니다. 실시간 순위표는 항상 현재 자산 순으로 정렬됩니다 — 위험 조정도, 변명도 없습니다.",
+  ad_surp_l:"돌발 이벤트 (시작 직전에 전원에게 공개)",
+  ad_cfreq_l:"게임당 예상 폭락 횟수",
+  ad_cmag_l:"폭락 규모",
+  opt_mix:"역사적 혼합 (매번 무작위)",
+  opt_corr:"조정 (우량주 −7…12%)",
+  opt_bm:"블랙 먼데이 '87 (−18…23%)",
+  opt_covid:"코로나 '20 (−25…35%)",
+  ad_crash_note:"폭락은 모든 주식을 한 틱 안에 동시에 덮치는 <b>점프</b>입니다. %는 우량주(BLU)의 하락폭이며, 각 주식은 자신의 위험에 비례해 떨어집니다(변동성이 큰 주식일수록 훨씬 크게 떨어지고, 금은 오히려 <i>오르는</i> 경향이 있습니다). 발생 시점은 무작위입니다 — 기대 횟수가 1이어도 0번일 수도, 2번일 수도 있습니다. 폭락마다 선택한 메뉴에서 크기를 따로 뽑습니다.",
+  ad_brief_l:"시작 브리핑 (초)",
+  ad_brief_note:"장이 열리기 전, 선택한 돌발 이벤트 안내가 모든 휴대폰에 표시되는 시간입니다.",
+  ad_exp_chk:"유동성 콜 (현금 보유 스트레스 테스트)",
+  ad_nexp_l:"무작위 콜 횟수",
+  ad_exppct_l:"콜: 자산 대비 %",
+  ad_hc_l:"투매 헤어컷 %",
+  ad_pub_chk:"포트폴리오 공개 (누구나 서로의 비중을 볼 수 있음)",
+  ad_params_chk:"실제 기대수익률·변동성·상관계수를 학생에게 공개",
+  ad_tan_chk:"마코위츠 효율적 투자선과 접점 포트폴리오 상자 표시 (정답지)",
+  ad_assets_sum:"자산 (연 %, 원하면 수정)",
+  ad_corr_l:"상관관계 구조",
+  opt_c_real:"현실적 (주식은 함께 움직이고, 금은 헤지)",
+  opt_c_zero:"독립 (모든 상관계수 0)",
+  opt_c_high:"위기형 (주식 간 상관관계가 매우 높음)",
+  ad_start_btn:"장 시작",
+  ad_live_h:"실시간 제어",
+  ad_end_btn:"게임 종료 → 결과",
+  ad_fire_exp:"💸 지금 유동성 충격",
+  ad_fire_crash:"📉 지금 폭락",
+  ad_ann_l:"모든 휴대폰에 공지",
+  ad_ann_ph:"예: 루머: 기술주에 문제가…",
+  ad_send:"보내기",
+  ad_map_h:"위험–수익 지도",
+  ad_mkt_h:"시장",
+  ad_roster_h:"참가자 명단",
+  ad_danger_h:"위험 구역",
+  ad_again:"새 게임, 같은 반 (시장은 새로, 참가자는 유지)",
+  ad_wipe:"전체 초기화 (참가자도 삭제)",
+  ad_auto_note:"자동 초기화: 시계가 멈춘 뒤 30분 동안 아무도 게임을 조작하지 않으면 이 방은 참가자 명단·거래·결과까지 스스로 지워집니다. 지난 게임이 다음 수업에 영향을 주지 않도록 하기 위한 장치입니다.",
+  rs_h1:"종료 벨", rs_tag:"시장이 가르쳐 준 것",
+  rs_final_h:"최종 순위",
+  rs_bench_h:"더 잘할 수 있었을까?",
+  rs_map_note:"점은 투자자, 네모는 각 개별 자산이 이번 게임에서 실제로 낸 성과입니다. 단기국채 점을 지나는 금색 선은 <b>기대</b> 기준으로 가능한 최선의 조합입니다 — 예측일 뿐, 천장이 아닙니다. 한 번의 게임에서는 운 좋은 자산과 운 좋은 투자자가 그 위에 놓일 수 있지만, 다시 해 보면 대개 그렇지 않습니다. 분산된 포트폴리오는 개별 주식보다 왼쪽 위에 놓여야 합니다.",
+  rs_theory_h:"이론 코너 — 정답 공개",
+  rs_disc_h:"토론",
+  rs_q1:"<b>자산</b> 순위와 <b>위험 조정</b> 순위를 비교해 보세요. 누구의 순위가 바뀌고, 그 이유는 무엇일까요?",
+  rs_q2:"문샷은 메뉴에서 기대수익률이 가장 높았습니다. 이론 코너에서 문샷의 기하 성장률을 보세요. 그 차이는 어디로 갔을까요? (힌트: 켈리 게임에서 만났던 바로 그 변동성 손실입니다.)",
+  rs_q3:"금의 기대수익률은 단기국채를 겨우 넘는데도 좋은 포트폴리오는 금을 담았습니다. 금은 어떤 역할로 그 자리를 얻었을까요?",
+  rs_q4:"지도에서 자신의 점을 찾아보세요. 어떤 조합이었다면 금색 선을 향해 왼쪽 위로 옮겨 갈 수 있었을까요?",
+  rs_q5:"유동성 콜이 왔을 때 누가 현금으로 버텼고, 누가 투매를 당했나요? 이것은 '놀고 있는' 현금을 보유하는 것에 대해 무엇을 말해 줄까요?",
+  rs_q6:"모든 사람의 위험회피도 γ가 두 배가 된다면 최적 포트폴리오는 어떻게 바뀌어야 할까요 — 그리고 어느 부분은 그대로일까요? (2기금 분리 정리.)",
+  rs_again:"새 게임, 같은 반",
+  rs_wipe:"전체 초기화",
+  vg_h:"📄 이 페이지는 이전 버전입니다",
+  vg_p:"휴대폰이 예전에 저장된 게임 사본을 불러와서, 이대로는 숫자가 다른 사람들과 어긋납니다. 새로고침 한 번이면 해결됩니다.",
+  vg_btn:"페이지 새로고침",
+  logout:"로그아웃",
+
+  /* ================= text built in script (tx) ================= */
+  mm:"머니마켓", tbills:"단기국채", cash:"현금", you:"나", ok:"확인",
+  show:"펼치기 ▾", hide:"접기 ▴", pause:"일시정지", resume:"재개", remove:"내보내기",
+  n_sh:"{n}주", this_player:"이 참가자",
+  metric:"종료 벨이 울릴 때 돈이 가장 많은 사람 — 순수한 자산 기준이며 위험 조정은 없습니다.",
+  cm_correction:"조정", cm_blackmonday:"블랙 먼데이 '87", cm_covid:"코로나 폭락 '20", cm_mix:"역사적 혼합", cm_generic:"시장 폭락",
+  /* asset names + stories, by ticker */
+  an_BLU:"블루칩 인더스트리얼", an_TEC:"테크노바 그로스", an_UTL:"스테디 유틸리티", an_GLD:"골드 리저브 ETF", an_MSV:"문샷 벤처스",
+  ab_BLU:"100년 역사의 대기업 — 터빈과 철도, 그리고 조부모 세대가 믿고 맡기던 배당.",
+  ab_TEC:"지금 가장 뜨거운 클라우드·AI 대표주. 실적 발표 때마다 시장 전체의 분위기를 흔듭니다.",
+  ab_UTL:"규제를 받는 전력·수도 사업. 갖고 있다고 자랑하는 사람도 없지만, 패닉에 빠지는 사람도 없습니다.",
+  ab_GLD:"티커가 붙은 취리히의 금고. 수익은 거의 없지만, 다른 모든 것이 빛을 잃을 때 정확히 빛납니다.",
+  ab_MSV:"매출도 없는 꿈의 묶음: 소행성 채굴, 핵융합, 장수 알약. 다음 100배 종목이라는 소문입니다.",
+  /* toasts */
+  to_cant_reach:"데이터베이스에 연결할 수 없습니다 — 네트워크를 확인하세요.",
+  to_pick_name:"먼저 이름을 입력하세요",
+  to_name_taken:"이미 사용 중인 이름입니다 — 성이나 숫자를 덧붙여 보세요",
+  to_youre_in:"참가 완료 — 현금 {cash}로 시작합니다",
+  to_join_fail:"참가하지 못했습니다 — 다시 시도하세요.",
+  to_welcome:"환영합니다, 강사님",
+  to_wrong_pw:"비밀번호가 틀렸습니다",
+  to_closed:"장이 닫혔습니다.",
+  to_trading_paused:"거래가 일시정지되었습니다.",
+  to_order_fail:"주문이 처리되지 않았습니다 — 다시 시도하세요.",
+  to_join_first:"먼저 게임에 참가하세요.",
+  to_nothing_staged:"대기 주문이 없습니다 — 먼저 슬라이더를 움직이세요.",
+  to_rejected:"거부됨 — 현금이 부족합니다.",
+  to_executed:"주문 {n}건 체결 ✓",
+  to_w_exceed:"비중 합계가 100%를 넘습니다 — 일부를 낮추세요.",
+  to_rb_close:"정수 주식 수로는 이미 목표 비중에 가장 가깝습니다.",
+  to_rb_done:"리밸런싱 완료 (주문 {n}건, 정수 주식)",
+  to_brief_start:"모든 휴대폰에 브리핑 표시 중 — {s}초 후 개장",
+  to_open5:"5초 후 개장합니다",
+  to_wait_kick:"개장할 때까지 기다리세요.",
+  to_resumed:"재개했습니다",
+  to_paused:"일시정지 — 시계가 멈췄습니다",
+  to_no_live:"진행 중인 시장이 없습니다.",
+  to_resume_first:"충격을 발동하려면 먼저 재개하세요.",
+  to_exp_off:"이번 게임은 유동성 콜이 꺼져 있습니다.",
+  to_exp_fired:"유동성 콜 발동",
+  to_crash_fired:"폭락 발동 — {label} (우량주 −{m}%)",
+  to_ann_sent:"공지를 보냈습니다",
+  to_newgame:"새 게임 — 같은 반",
+  to_fullreset:"전체 초기화 완료",
+  to_liq:"💸 유동성 콜!",
+  to_logged_out:"로그아웃했습니다 — 명단에서 삭제되었습니다",
+  to_admin_out:"강사 로그아웃 완료",
+  to_logout_fail:"데이터베이스에 연결하지 못했습니다 — 명단에 남아 있을 수 있습니다.",
+  to_swept:"지난 게임이 {min}분 넘게 방치되어 방을 초기화했습니다.",
+  /* confirms */
+  cf_start_empty:"아직 참가한 학생이 없습니다 — 그래도 시작할까요?",
+  cf_end:"게임을 끝내고 결과를 보여 줄까요?",
+  cf_again:"같은 반으로 새로 시작할까요?",
+  cf_wipe:"참가자를 포함해 모두 지울까요?",
+  cf_remove:"{name} 님을 내보낼까요?",
+  cf_logout:"{name} 님, 로그아웃할까요? 참가자 명단에서 삭제됩니다.",
+  cf_logout_live:"{name} 님, 로그아웃할까요? 참가자 명단에서 삭제되고, 이번 게임의 계좌·거래 내역·순위도 함께 지워집니다.",
+  /* footer */
+  who_admin:"<b>강사</b>로 로그인됨",
+  who_player:"<b>{name}</b> 님으로 참가 중",
+  /* trade tab */
+  sl_hold:"{n}주 보유",
+  sl_buy:"{a} → {b}주 · 주문: 매수 {d}주 ≈ {v}",
+  sl_sell:"{a} → {b}주 · 주문: 매도 {d}주 ≈ {v}",
+  st_wealth:"총자산", st_cash:"현금", st_instocks:"주식",
+  pos_holding:"보유: {list} · 현금 {pct}%",
+  pos_allcash:"전액이 머니마켓에 있습니다. 종목의 슬라이더를 움직여 주문하세요.",
+  pos_dashed:"점선 = 전액 단기국채",
+  ord_sell:"매도 {n} {k}", ord_buy:"매수 {n} {k}",
+  ord_cash_after:"체결 후 현금 (수수료 포함): <b>{v}</b>",
+  ord_infeasible:"✗ 실행 불가 — 이 주문에는 현금이 {v} 더 필요합니다. 매수를 줄이거나 매도를 추가하세요.",
+  mm_sub:"단기국채 · 연 {rf} · 안전",
+  as_sub:"기대 {mu} · 변동 {vol}",
+  as_sub_np:"공매도 불가 · 슬라이더로 거래",
+  aria_shares:"{k} 보유 주식 수",
+  rb_note:"오른 종목은 팔고 뒤처진 종목은 사는 거래를 한 번에 실행합니다. 정수 주식 단위로 반올림하며, 보유 현금이 허용하는 범위에서 목표 비중에 가장 가깝게 맞춥니다. 나머지는 머니마켓에 남습니다. 지금 거래당 {bps}bp의 비용이 들고, 효과가 있다면 장기에 걸쳐 나타납니다. 대신 리밸런싱해 주는 사람은 없습니다 — 기본값은 매수 후 보유입니다.",
+  alloc_cap:"현금 <b>{c}%</b> · 주식 <b>{s}%</b>",
+  /* rules */
+  r1:"머니마켓 계좌에 {cash}를 가지고 시작하며, 연 {rf}의 이자를 받습니다. 원금 손실은 없습니다.",
+  r2:"모든 종목에는 보유 주식 수를 보여 주는 슬라이더가 있습니다. 오른쪽으로 밀고 확인하면 매수, 왼쪽은 매도입니다. 0주 아래로 내려갈 수 없고(공매도 불가), 보유 현금을 넘겨 살 수도 없습니다. 거래마다 {bps}bp의 수수료가 붙습니다. 가격은 시장이 정하며, 여러분의 거래는 가격을 움직이지 않습니다.",
+  r3:"시계의 1틱은 시장 시간으로 {unit}입니다.",
+  unit_day:"1거래일", unit_month:"1개월", unit_week:"1주",
+  r4:"승자 = {metric} 순위표는 실시간이며 자산 순으로 정렬됩니다. 다시 시작은 없습니다.",
+  r5:"강사가 선택한 돌발 규칙은 장이 열리기 직전 {s}초 동안 모든 휴대폰에 표시됩니다 — 빨리 읽으세요.",
+  d1:"단기국채 금리를 주는 머니마켓 계좌에 $1,000를 가지고 시작합니다.",
+  d2:"다섯 개 주식을 실시간으로 거래합니다. 가격은 시장이 정하는 것이지, 여러분이 정하는 것이 아닙니다.",
+  d3:"승자 = 종료 벨이 울릴 때 돈이 가장 많은 사람. 간단합니다.",
+  d4:"강사가 고른 추가 규칙은 시작 직전 30초 동안 공개됩니다.",
+  d5:"다시 시작은 없습니다. 모두가 같은 시장과 같은 순위표를 봅니다.",
+  /* market tab */
+  mm_blurb:"단기국채: 이자가 붙는 장롱 속 현금. 지루함이 곧 장점입니다.",
+  crash_info:"이번 게임의 예상 폭락 횟수는 <b>{n}</b>회입니다. 발생은 무작위여서 한 번도 없을 수도, 여러 번일 수도 있고, 언제든 일어날 수 있습니다. 규모: {mag}. 모든 주식이 같은 순간에 각자의 위험에 비례해 떨어지며, 금은 대개 <i>오릅니다</i>. 강사가 수동으로 발동할 수도 있습니다.",
+  mag_mix:"매번 역사적 사례에서 추첨 — 대개는 조정(−7…12%), 때로는 블랙 먼데이급(−18…23%), 드물게 코로나급(−25…35%), 우량주 하락폭 기준",
+  mag_one:"{name}: 우량주가 한 틱에 {lo}–{hi}% 하락",
+  ct_if:"{m}% 충격이 오면", ct_move:"한 틱 변동",
+  th_asset:"자산", th_startpx:"시작가", th_er:"기대수익률", th_vol:"변동성",
+  ev_liq:"💸 유동성 콜: 자산의 {pct}를 현금으로 보유해야 함 · 부족분은 {hc} 헤어컷으로 투매",
+  ev_crash:"📉 {label}: 우량주 한 틱에 −{m}%",
+  ev_quiet:"아직은 조용합니다. 오래가지는 않을 겁니다.",
+  /* landing / lobby */
+  ld_live_note:"장이 이미 <b>열려 있습니다</b> — 지금 참가해도 새 현금으로 시작할 수 있습니다.",
+  nobody:"아직 아무도 없습니다.",
+  /* kickoff briefing + banners */
+  br_crash:"⚡ <b>폭락 위험 켜짐</b>: 이번 게임에서 약 {n}회의 점프가 예상됩니다(실제 횟수는 무작위). 폭락이 오면 모든 주식이 같은 순간에 갭 하락합니다 — {mag}. 위험한 주식일수록 더 크게 떨어지고, 금은 <i>오르는</i> 경향이 있습니다.",
+  br_mag_mix:"규모는 역사적 사례에서 추첨 — 조정 수준부터 코로나급 패닉까지 (우량주 −7% ~ −35%)",
+  br_mag_one:"{name} 규모 (우량주 −{lo}% ~ −{hi}%)",
+  br_exp:"💸 <b>유동성 콜 켜짐</b>: 무작위 시점에 자산의 {pct}를 현금으로 보유하고 있어야 합니다. 모자라면 부족분은 {hc} 헤어컷으로 투매됩니다.",
+  br_none:"이번 게임에는 돌발 이벤트가 없습니다 — 순수한 시장입니다. 최고의 포트폴리오가 이기기를.",
+  br_details:"자세한 내용은 <b>시장</b> 탭에 있습니다. 순위: 종료 벨 시점의 자산.",
+  bn_kick:"🔔 시작 브리핑 — 빨리 읽으세요",
+  bn_opens:"위 타이머가 0이 되면 장이 열립니다.",
+  bn_liq:'<span class="t">💸 {when} 유동성 콜:</span> 자산의 {pct}를 현금으로 보여 주세요. 모자란 사람은 방금 {hc} 헤어컷으로 투매되었습니다.',
+  bn_crash:'<span class="t">📉 {when} {label}:</span> 우량주가 한 틱에 −{m}%. 위험은 벌을 받았고, 금은 올랐습니다.',
+  /* ranks tab */
+  lb_note_pub:"행을 누르면 해당 투자자의 현재 구성을 볼 수 있습니다.",
+  lb_note_priv:"이번 게임은 포트폴리오 비공개입니다 — 숫자만 표시됩니다.",
+  ms_rank_of:"{n}명 중 {i}위",
+  ms_rank:"순위 (자산 기준)", ms_ret:"수익률", ms_vol:"변동성", ms_sharpe:"샤프 비율", ms_mdd:"최대 낙폭", ms_fees:"수수료 + 투매 손실",
+  th_inv:"투자자", th_wealth:"자산", th_ret:"수익률", th_vols:"변동성", th_sharpe:"샤프", th_mdd:"최대낙폭",
+  /* admin */
+  ph_lobby:"대기실", ph_brief:"브리핑", ph_paused:"일시정지", ph_live:"진행 중",
+  chip_paused:"일시정지",
+  ad_roster_empty:"학생들이 이 페이지를 열고 이름을 입력하면 됩니다.",
+  ae_asset:"자산", ae_mu:"기대수익률 %", ae_vol:"변동성 %",
+  cfg_prev:"{mins}분 동안 <b>{ticks}틱</b> ≈ <b>시장 시간 {yrs}년</b>입니다.",
+  cfg_prev_surp:"선택한 돌발 이벤트는 시작 직전 {s}초 동안 화면에 안내된 뒤 장이 열립니다.",
+  cfg_prev_none:"설정된 돌발 이벤트가 없습니다 — 5초 카운트다운 후 장이 열립니다. (폭락은 수동으로도 발동할 수 있습니다.)",
+  /* results */
+  res_sub:"시계는 {cap}틱 ≈ <b>시장 시간 {yrs}년</b> 동안 돌았습니다. 순위 기준: <b>{metric}</b>",
+  rs_winner:"우승", rs_best_sharpe:"최고 샤프 ({name})", rs_median:"수익률 중앙값",
+  res_note:"순위는 오직 최종 자산 기준입니다. 샤프 비율, 변동성, 낙폭은 디브리핑을 위해 표시합니다 — 위험 조정 기준이었다면 누가 이겼을지 물어보세요. 투매 손실과 수수료는 이미 이 숫자에 반영되어 있습니다.",
+  th_robo:"로보 전략",
+  bench_tan:"마코위츠 접점 포트폴리오", bench_rp:"리스크 패리티 (1/σ)", bench_ew:"동일 비중", bench_mm:"머니마켓만",
+  bench_note:"이 로봇들은 여러분과 완전히 같은 시장에서 — 같은 가격, 같은 충격, 같은 수수료로 — 아무것도 예측하지 않고 4틱마다 고정 비중으로 기계적으로 리밸런싱했습니다.<br>{w}<br>자산 기준으로 접점 포트폴리오 로봇을 이긴 학생: <b>{n}명 중 {k}명</b>. 그러기 위해 위험을 얼마나 더 졌는지 물어보세요 — 변동성과 최대낙폭 열은 거짓말을 하지 않습니다.",
+  th_er_s:"E[r]", th_geo:"기하평균", th_thisgame:"이번 게임",
+  theory_note:"<b>기하평균</b> = μ − σ²/2: 복리가 실제로 지급하는 수익률입니다. 문샷의 두둑한 평균 수익률이 사라지는 곳이 바로 여기입니다. 그리고 상관계수 표는 금이 수익률이 빈약한데도 포트폴리오에서 큰 비중을 차지하는 이유를 보여 줍니다: 다른 모든 것이 내릴 때 금은 오릅니다.<br><br>이 메뉴로 가능한 최고의 샤프 비율은 <b>{s}</b>이며, 특정한 하나의 위험자산 조합 — <b>{mix}</b> — 에 단기국채를 취향대로 섞어 달성합니다. 모든 투자자는 γ가 얼마든 <i>같은</i> 위험자산 조합을 보유하고 현금 비중만 달리해야 합니다. 이것이 마코위츠 + 토빈의 2기금 분리 정리이며, 지도의 금색 선입니다.",
+  /* charts */
+  ch_you:"나", ch_alltb:"전액 단기국채", ch_investors:"투자자", ch_cml:"최적선 (CML)", ch_single:"개별 자산",
+  ax_vol:"변동성 (연 %)", ax_growth:"성장률 (연 %)", ax_er:"기대수익률 (연 %)",
+  tt_vg:"{name}: 변동성 {x}%, 성장률 {y}%", tt_ve:"{name}: 변동성 {x}%, 기대수익률 {y}%",
+  ch_frontier:"효율적 투자선 (위험자산 조합)", ch_cal:"자본배분선 (CAL)", ch_tan:"접점 포트폴리오 ★", tan_pt:"접점 포트폴리오",
+  tan_undef:"현재 모수에서는 효율적 투자선이 정의되지 않습니다.",
+  tan_note:"접점 포트폴리오 — 샤프 비율이 가장 높은 위험자산 조합 ({s}): {mix}.<br>기대수익률 {mu}, 변동성 {vol}. 금색 CAL 위의 모든 점은 이 조합에 단기국채를 섞은 것입니다 — 현금을 얼마나 들고 갈지로 자신의 위치를 고르세요."
+}
+};
+let LANG=(function(){
+  const saved=store.get("pfw_lang");
+  if(saved==="en"||saved==="ko") return saved;                    // this device's own choice wins
+  const q=(new URLSearchParams(location.search).get("lang")||"").toLowerCase();
+  return (q==="ko"||q==="kr") ? "ko" : "en";                      // …?lang=ko makes Korean the default
+})();
+function tx(key, v){
+  let s=(I18N[LANG]||{})[key];
+  if(s==null) s=I18N.en[key];
+  if(s==null) return key;
+  if(typeof s==="function") return s(v||{});
+  return v ? s.replace(/\{(\w+)\}/g,(m,k)=> v[k]!=null ? v[k] : m) : s;
+}
+function aName(a){ return (I18N[LANG]||{})["an_"+a.key] || a.name; }
+function aBlurb(a){ return (I18N[LANG]||{})["ab_"+a.key] || a.blurb || ""; }
+function crashName(s){
+  let k=s&&s.ck;
+  if(!k && s && s.label) k=Object.keys(CRASH_MAGS).find(x=>CRASH_MAGS[x].name===s.label);   // records from older pages
+  return k ? tx("cm_"+k) : ((s&&s.label)||tx("cm_generic"));
+}
+/* swap every piece of static page text to the current language */
+function applyLang(){
+  document.documentElement.lang=LANG;
+  const dict = LANG==="en" ? {} : (I18N[LANG]||{});
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    if(el._en===undefined) el._en=el.innerHTML;                  // remember the English that shipped in the HTML
+    const s=dict[el.getAttribute("data-i18n")];
+    el.innerHTML = s!=null ? s : el._en;
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    if(el._enPh===undefined) el._enPh=el.getAttribute("placeholder")||"";
+    const s=dict[el.getAttribute("data-i18n-ph")];
+    el.setAttribute("placeholder", s!=null ? s : el._enPh);
+  });
+  document.querySelectorAll(".langsw button").forEach(b=>{
+    const on=b.dataset.lang===LANG; b.classList.toggle("on",on); b.setAttribute("aria-pressed", on?"true":"false");
+  });
+  [["rbWrap","rbArrow"],["tanWrap","tanArrow"]].forEach(p=>{ if($(p[0])&&$(p[1])) setArrow(p[0],p[1]); });
+}
+function setArrow(wrapId, arrowId){ $(arrowId).textContent = $(wrapId).style.display==="none" ? tx("show") : tx("hide"); }
+function setLang(l){
+  if((l!=="en"&&l!=="ko") || l===LANG) return;
+  LANG=l; store.set("pfw_lang",l);
+  applyLang();
+  if(!roomRef) return;                                            // setup screen: static text only
+  /* everything script-built gets rebuilt in the new language */
+  buildAssetEditor(); cfgPreview();
+  lastHeavyTick=-1; utilKey=null;
+  render(true);
+}
 
 /* =====================================================================
    PURE MARKET ENGINE — everything below is deterministic given the
@@ -648,7 +1135,7 @@ function scheduledShocks(cfg){
     for(let t=first;t<=T;t++){
       if(rng()<pr){
         const d=drawMag(rng, cfg.crashMag);
-        out.push({tick:t, type:"crash", sev:sevFromMag(cfg,d.m), m:d.m, label:d.label, auto:true});
+        out.push({tick:t, type:"crash", sev:sevFromMag(cfg,d.m), m:d.m, label:d.label, ck:d.ck, auto:true});
       }
     }
   }
@@ -798,11 +1285,12 @@ function capTick(){
   return Math.min(end, currentTick());
 }
 function gameOver(){ return LIVE && (LIVE.phase==="done" || (LIVE.startAt && currentTick()>=CFG.totalTicks)); }
-function fmtClock(t){
+function fmtClock(tk){
   if(!CFG) return "–";
   const ppy=Math.round(1/CFG.dt);
-  const unit=ppy===252?"D":ppy===12?"M":"W";
-  return "Y"+(Math.floor(t/ppy)+1)+"·"+unit+((t%ppy)+1);
+  const y=Math.floor(tk/ppy)+1, n=(tk%ppy)+1;
+  if(LANG==="ko") return y+"년·"+n+(ppy===252?"일":ppy===12?"월":"주");
+  return "Y"+y+"·"+(ppy===252?"D":ppy===12?"M":"W")+n;
 }
 function remainMs(){
   if(!CFG||!LIVE||!LIVE.startAt) return 0;
@@ -810,22 +1298,28 @@ function remainMs(){
 }
 
 function boot(){
+  applyLang(); wireLang();
   if(!configured()){ show("scr-setup"); return; }
   firebase.initializeApp(firebaseConfig);
   db=firebase.database();
   roomRef=db.ref("pf/w-"+ROOM);
   db.ref(".info/serverTimeOffset").on("value",s=>{ serverOffset=s.val()||0; });
-  roomRef.child("config").on("value",s=>{ CFG=s.val();
+  db.ref(".info/connected").on("value",s=>{ connected=!!s.val(); });
+  roomRef.child("config").on("value",s=>{ CFG=s.val(); cfgLoaded=true;
     /* gate only when this page is OLDER than the running game's version;
        a newer page looking at an old game's config is fine */
-    if(CFG && CFG.appVersion && CFG.appVersion > APP_VERSION){ $("verGate").style.display=""; return; }
+    gated=!!(CFG && CFG.appVersion && CFG.appVersion > APP_VERSION);
+    if(gated){ $("verGate").style.display=""; return; }
     $("verGate").style.display="none";
     render(true); });
-  roomRef.child("live").on("value",s=>{ LIVE=s.val(); render(true); });
+  roomRef.child("live").on("value",s=>{ LIVE=s.val(); liveLoaded=true; render(true); });
   roomRef.child("players").on("value",s=>{ PLAYERS=s.val()||{}; playersLoaded=true; render(true); });
   roomRef.child("shocks").on("value",s=>{
-    const v=s.val()||{}; MANUAL=Object.keys(v).sort().map(k=>v[k]); render(true);
+    const v=s.val()||{}; MANUAL=Object.keys(v).sort().map(k=>v[k]); shocksLoaded=true; render(true);
   });
+  /* any real interaction on this device counts as the room being in use */
+  ["pointerdown","keydown","touchstart","wheel","scroll","mousemove"].forEach(ev=>
+    window.addEventListener(ev,()=>{ lastInput=Date.now(); },{passive:true, capture:true}));
   ensureDefaults(); wireUI();
   setInterval(tickLoop,500);
   show("scr-landing");
@@ -834,38 +1328,130 @@ async function ensureDefaults(){
   try{
     const l=await roomRef.child("live").get();
     if(!l.exists()||!l.val()||!l.val().phase) await roomRef.child("live").set({phase:"lobby"});
-  }catch(e){ toast("Can't reach the database — check your connection."); }
+  }catch(e){ toast(tx("to_cant_reach")); }
+}
+
+/* =====================================================================
+   HOUSEKEEPING — a room nobody has used for STALE_MS resets itself, so
+   an old game (roster, trades, results) can't leak into the next class.
+   "In use" means any of:
+     · the game clock is running (briefing → final bell)
+     · someone signed in (instructor or player) touched their screen
+     · an action was taken: join, start, pause/resume, announce, end, reset
+   Every device checks; the first one to notice does the sweep.
+   ===================================================================== */
+const STAMP=()=>firebase.database.ServerValue.TIMESTAMP;
+let connected=false, cfgLoaded=false, liveLoaded=false, shocksLoaded=false, gated=false;
+let lastInput=0, sweeping=false, sweepHoldUntil=0, touchHoldUntil=0, utilKey=null;
+function dataReady(){ return connected && cfgLoaded && liveLoaded && playersLoaded && shocksLoaded && !gated; }
+function roomDirty(){   // is there anything left over to clean up?
+  return !!(LIVE && (LIVE.startAt || (LIVE.phase && LIVE.phase!=="lobby"))) || Object.keys(PLAYERS).length>0 || MANUAL.length>0;
+}
+function lastActivityAt(){
+  let a=0;
+  if(LIVE){
+    a=Math.max(a, LIVE.touch||0, LIVE.startAt||0, LIVE.pauseAt||0, (LIVE.banner&&LIVE.banner.ts)||0);
+    if(CFG && LIVE.startAt){
+      const base=LIVE.startAt+(LIVE.pausedMs||0);
+      if(LIVE.endTick!=null) a=Math.max(a, base+LIVE.endTick*CFG.tickMs);                 // when it was ended
+      else if(LIVE.phase==="running" && !LIVE.pauseAt)                                     // a ticking clock is activity, up to the bell
+        a=Math.max(a, Math.min(now(), base+CFG.totalTicks*CFG.tickMs));
+    }
+  }
+  for(const p of Object.values(PLAYERS)) a=Math.max(a, p.joinedAt||0);
+  return a;
+}
+function staleRoom(){ return dataReady() && roomDirty() && (now()-lastActivityAt() > STALE_MS); }
+function liveSig(l){ l=l||{}; return [l.phase||"", l.startAt||0, l.pauseAt||0, l.pausedMs||0, l.endTick==null?"":l.endTick, l.touch||0, (l.banner&&l.banner.ts)||0].join("|"); }
+async function sweepStale(){
+  if(sweeping || Date.now()<sweepHoldUntil || !staleRoom()) return false;
+  sweeping=true;
+  const seen=liveSig(LIVE);
+  let done=false;
+  try{
+    /* guard: reset only if `live` is still exactly what we judged stale. Any
+       device that joined, started a game or already swept has changed it, and
+       then this aborts instead of wiping something fresh. */
+    const res=await roomRef.child("live").transaction(
+      cur=> liveSig(cur)===seen ? {phase:"lobby", touch:STAMP()} : undefined, undefined, false);
+    if(res && res.committed){
+      await roomRef.update({players:null, names:null, shocks:null, config:null});
+      done=true;
+      toast(tx("to_swept",{min:Math.round(STALE_MS/60000)}));
+    }
+  }catch(e){}
+  sweeping=false;
+  if(!done) sweepHoldUntil=Date.now()+5000;
+  return done;
+}
+function keepAlive(){   // refresh the room's "last touched" stamp while someone is really using it
+  if(!roomDirty() || !(isAdmin || (me.id && PLAYERS[me.id]))) return;
+  if(document.visibilityState && document.visibilityState!=="visible") return;
+  if(Date.now()-lastInput > TOUCH_EVERY_MS) return;                 // nobody has touched this device lately
+  if(LIVE && now()-(LIVE.touch||0) < TOUCH_EVERY_MS) return;        // stamp is fresh enough
+  if(Date.now()<touchHoldUntil) return;
+  touchHoldUntil=Date.now()+10000;
+  roomRef.child("live/touch").set(STAMP()).catch(()=>{});
+}
+function housekeeping(){
+  if(!dataReady()) return;
+  if(staleRoom()){ sweepStale(); return; }   // a dead room is swept, never revived
+  keepAlive();
 }
 
 /* ---------- actions: join / login ---------- */
 function nameKey(n){ return n.trim().toLowerCase().replace(/[.#$\[\]\/\s]+/g,"_").slice(0,40) || "_"; }
 async function join(){
   const name=$("nameInput").value.trim().replace(/\s+/g," ");
-  if(!name){ toast("Pick a name first"); return; }
+  if(!name){ toast(tx("to_pick_name")); return; }
+  /* never open an account on top of a dead game's leftovers */
+  if(staleRoom()) await sweepStale();
   /* fast local check for instant feedback */
   if(Object.values(PLAYERS).some(p=>(p.name||"").trim().toLowerCase()===name.toLowerCase())){
-    toast("That name's taken — add a last initial?"); return;
+    toast(tx("to_name_taken")); return;
   }
   const pid="p"+Math.random().toString(36).slice(2,10);
-  const rec={ name, joinedAt:firebase.database.ServerValue.TIMESTAMP, joinTick: running()? currentTick() : 0 };
+  const rec={ name, joinedAt:STAMP(), joinTick: running()? currentTick() : 0 };
   try{
     /* atomic claim: only one device can own a name, even on a simultaneous submit */
     const claim=await roomRef.child("names/"+nameKey(name)).transaction(c=> c===null ? pid : undefined);
-    if(!claim.committed){ toast("That name's taken — add a last initial?"); return; }
+    if(!claim.committed){ toast(tx("to_name_taken")); return; }
     try{
-      await roomRef.child("players/"+pid).set(rec);
+      const ups={}; ups["players/"+pid]=rec; ups["live/touch"]=STAMP();
+      await roomRef.update(ups);
     }catch(e){
       roomRef.child("names/"+nameKey(name)).remove();   // release the claim if the join failed
       throw e;
     }
     me={id:pid,name}; store.set("pfw_pid",pid); store.set("pfw_name",name);
-    if(running()) toast("You're in — starting with "+fmt$(CFG.startCash)+" cash");
+    if(running()) toast(tx("to_youre_in",{cash:fmt$(CFG.startCash)}));
     render(true);
-  }catch(e){ toast("Couldn't join — try again."); }
+  }catch(e){ toast(tx("to_join_fail")); }
 }
 function adminLogin(){
-  if($("pwInput").value===ADMIN_PASSWORD){ isAdmin=true; store.set("pfw_admin","1"); toast("Welcome, instructor"); render(true); }
-  else toast("Wrong password");
+  if($("pwInput").value===ADMIN_PASSWORD){ isAdmin=true; store.set("pfw_admin","1"); toast(tx("to_welcome")); render(true); }
+  else toast(tx("to_wrong_pw"));
+}
+/* log out. Instructor: this device just leaves the control room — the game
+   itself is untouched. Player: the account is deleted from the roster and
+   the name is freed, so the standings no longer show them. */
+function logout(){
+  if(isAdmin){
+    isAdmin=false; store.del("pfw_admin");
+    $("pwInput").value=""; $("adminLoginCard").style.display="none";
+    toast(tx("to_admin_out")); render(true);
+    return;
+  }
+  const pid=me.id, rec=pid && PLAYERS[pid];
+  if(!rec) return;
+  const started=!!(LIVE && LIVE.startAt);
+  if(!confirm(tx(started?"cf_logout_live":"cf_logout",{name:rec.name}))) return;
+  const ups={}; ups["players/"+pid]=null; ups["names/"+nameKey(rec.name)]=null;   // one atomic write
+  roomRef.update(ups).catch(()=>toast(tx("to_logout_fail")));
+  me={id:null, name:null}; store.del("pfw_pid"); store.del("pfw_name");
+  STAGED=STAGED.map(()=>null); openPf=null; shockFlash=null;
+  $("nameInput").value="";
+  toast(tx("to_logged_out")); render(true);
 }
 
 /* ---------- actions: trading ---------- */
@@ -890,8 +1476,8 @@ function accountOf(pid){
   return acct;
 }
 async function submitTrades(list){ // [{a, s}] at current tick
-  if(!running()||gameOver()){ toast("The market is closed."); return false; }
-  if(LIVE.pauseAt){ toast("Trading is paused."); return false; }
+  if(!running()||gameOver()){ toast(tx("to_closed")); return false; }
+  if(LIVE.pauseAt){ toast(tx("to_trading_paused")); return false; }
   const t=currentTick();
   const up={};
   list.forEach(tr=>{
@@ -901,7 +1487,7 @@ async function submitTrades(list){ // [{a, s}] at current tick
   });
   if(!Object.keys(up).length) return false;
   try{ await roomRef.update(up); return true; }
-  catch(e){ toast("Order didn't go through — try again."); return false; }
+  catch(e){ toast(tx("to_order_fail")); return false; }
 }
 function trimU(u){ return Math.abs(u-Math.round(u))<1e-6 ? String(Math.round(u)) : (+u).toFixed(1); }
 let STAGED=[];
@@ -926,13 +1512,13 @@ function paintSlider(i){
   const d = tgt - c.cur;
   const pv=$("tpv_"+i); if(!pv) return;
   if(Math.abs(d)*c.px < 0.01 || Math.abs(d) < 0.05){
-    pv.textContent="holding "+trimU(c.cur)+" sh";
+    pv.textContent=tx("sl_hold",{n:trimU(c.cur)});
     pv.style.color="var(--muted)";
   } else if(d>0){
-    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · order: BUY "+trimU(d)+" ≈ "+fmt$(d*c.px);
+    pv.textContent=tx("sl_buy",{a:trimU(c.cur), b:trimU(tgt), d:trimU(d), v:fmt$(d*c.px)});
     pv.style.color="var(--gain)";
   } else {
-    pv.textContent=trimU(c.cur)+" → "+trimU(tgt)+" sh · order: SELL "+trimU(-d)+" ≈ "+fmt$(-d*c.px);
+    pv.textContent=tx("sl_sell",{a:trimU(c.cur), b:trimU(tgt), d:trimU(-d), v:fmt$(-d*c.px)});
     pv.style.color="var(--loss)";
   }
   paintOrders();
@@ -960,33 +1546,33 @@ function paintOrders(){
   const pl=stagedPlan(); if(!pl) return;
   const ps=$("posStats"); if(!ps) return;
   let W=pl.acct.cash; CFG.assets.forEach((a,i)=>W+=pl.acct.sh[i]*pl.px[i]);
-  ps.innerHTML=[[fmt$(W),"wealth"],[fmt$(pl.acct.cash),"cash"],[fmt$(W-pl.acct.cash),"in stocks"]]
+  ps.innerHTML=[[fmt$(W),tx("st_wealth")],[fmt$(pl.acct.cash),tx("st_cash")],[fmt$(W-pl.acct.cash),tx("st_instocks")]]
     .map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
   const held=CFG.assets.map((a,i)=>({a,n:pl.acct.sh[i]})).filter(x=>x.n>0.049);
   $("posHold").innerHTML = (held.length
-    ? "Holding "+held.map(x=>"<b>"+trimU(x.n)+" "+esc(x.a.key)+"</b>").join(" · ")+" · cash "+(W>0?(pl.acct.cash/W*100).toFixed(0):100)+"%"
-    : "Everything is in the money market. Slide a stock to place an order.")
-    + " &nbsp;·&nbsp; dashed = all in T-bills";
+    ? tx("pos_holding",{list:held.map(x=>"<b>"+trimU(x.n)+" "+esc(x.a.key)+"</b>").join(" · "), pct:(W>0?(pl.acct.cash/W*100).toFixed(0):100)})
+    : tx("pos_allcash"))
+    + " &nbsp;·&nbsp; "+tx("pos_dashed");
   $("ordBox").style.display = pl.any ? "" : "none";
   if(!pl.any) return;
-  const lines = pl.sells.map(o=>'<span style="color:var(--loss)">SELL '+trimU(-o.s)+" "+esc(CFG.assets[o.a].key)+"</span> ≈ +"+fmt$(o.val))
-    .concat(pl.buys.map(o=>'<span style="color:var(--gain)">BUY '+trimU(o.s)+" "+esc(CFG.assets[o.a].key)+"</span> ≈ −"+fmt$(o.val)));
-  lines.push("cash after (incl. fees): <b>"+fmt$(pl.cashAfter)+"</b>");
+  const lines = pl.sells.map(o=>'<span style="color:var(--loss)">'+tx("ord_sell",{n:trimU(-o.s), k:esc(CFG.assets[o.a].key)})+"</span> ≈ +"+fmt$(o.val))
+    .concat(pl.buys.map(o=>'<span style="color:var(--gain)">'+tx("ord_buy",{n:trimU(o.s), k:esc(CFG.assets[o.a].key)})+"</span> ≈ −"+fmt$(o.val)));
+  lines.push(tx("ord_cash_after",{v:fmt$(pl.cashAfter)}));
   $("ordSum").innerHTML=lines.join("<br>");
   $("ordExec").disabled = !pl.feasible;
   $("ordErr").style.display = pl.feasible ? "none" : "";
-  if(!pl.feasible) $("ordErr").textContent="✗ Not feasible — these orders need "+fmt$(-pl.cashAfter)+" more cash than you have. Reduce a buy or add a sell.";
+  if(!pl.feasible) $("ordErr").textContent=tx("ord_infeasible",{v:fmt$(-pl.cashAfter)});
 }
 async function executeOrders(){
   const pl=stagedPlan();
-  if(!pl){ toast("Join first."); return; }
-  if(!pl.any){ toast("Nothing staged — slide a stock first."); return; }
+  if(!pl){ toast(tx("to_join_first")); return; }
+  if(!pl.any){ toast(tx("to_nothing_staged")); return; }
   /* joint cross-check on the freshest account & prices; infeasible = rejected, never clamped */
-  if(!pl.feasible){ toast("Rejected — not feasible with your cash."); paintOrders(); return; }
+  if(!pl.feasible){ toast(tx("to_rejected")); paintOrders(); return; }
   const ok=await submitTrades(pl.orders);
   if(ok){
     STAGED=STAGED.map(()=>null);
-    toast("Executed "+pl.orders.length+" order"+(pl.orders.length>1?"s":"")+" ✓");
+    toast(tx("to_executed",{n:pl.orders.length}));
     if(navigator.vibrate)navigator.vibrate([20,40,20]);
   }
 }
@@ -1034,11 +1620,11 @@ async function applyRebalance(){
   const fee=(CFG.feeBps||0)/10000;
   const weights=CFG.assets.map((a,i)=>(sliderVals[i]||0)/100);
   const sumW=weights.reduce((s,x)=>s+x,0);
-  if(sumW>1.0001){ toast("Weights exceed 100% — lower something."); return; }
+  if(sumW>1.0001){ toast(tx("to_w_exceed")); return; }
   const plan=intRebalanceOrders(acct.sh.slice(), acct.cash, px, fee, weights);
-  if(!plan.orders.length){ toast("Already as close to those weights as whole shares get."); return; }
+  if(!plan.orders.length){ toast(tx("to_rb_close")); return; }
   const ok=await submitTrades(plan.orders);
-  if(ok){ toast("Rebalanced ("+plan.orders.length+" orders, whole shares)"); if(navigator.vibrate)navigator.vibrate([20,40,20]); }
+  if(ok){ toast(tx("to_rb_done",{n:plan.orders.length})); if(navigator.vibrate)navigator.vibrate([20,40,20]); }
 }
 
 /* ---------- actions: admin ---------- */
@@ -1075,58 +1661,59 @@ function readCfgInputs(){
   };
 }
 async function startGame(){
-  if(!Object.keys(PLAYERS).length && !confirm("No students have joined yet — start anyway?")) return;
+  if(!Object.keys(PLAYERS).length && !confirm(tx("cf_start_empty"))) return;
   const cfg=readCfgInputs();
   const hasExtras = cfg.expOn || (cfg.crashFreq||0)>0;
   const ups={ config:cfg, shocks:null,
-    live:{ phase:"running", startAt:now()+(hasExtras?(cfg.briefSec||30)*1000:5000), pausedMs:0, pauseAt:null, endTick:null, banner:null } };
+    live:{ phase:"running", startAt:now()+(hasExtras?(cfg.briefSec||30)*1000:5000), pausedMs:0, pauseAt:null, endTick:null, banner:null, touch:STAMP() } };
   for(const pid of Object.keys(PLAYERS)) ups["players/"+pid+"/trades"]=null, ups["players/"+pid+"/joinTick"]=0;
   await roomRef.update(ups);
-  toast(hasExtras? "Briefing on every phone — market opens in "+(cfg.briefSec||30)+"s" : "Market opens in 5 seconds");
+  toast(hasExtras? tx("to_brief_start",{s:(cfg.briefSec||30)}) : tx("to_open5"));
 }
 async function togglePause(){
   if(!LIVE) return;
-  if(briefing()){ toast("Wait for kickoff."); return; }
+  if(briefing()){ toast(tx("to_wait_kick")); return; }
   if(LIVE.pauseAt){
     const extra=now()-LIVE.pauseAt;
-    await roomRef.child("live").update({pausedMs:(LIVE.pausedMs||0)+extra, pauseAt:null});
-    toast("Resumed");
+    await roomRef.child("live").update({pausedMs:(LIVE.pausedMs||0)+extra, pauseAt:null, touch:STAMP()});
+    toast(tx("to_resumed"));
   } else {
-    await roomRef.child("live").update({pauseAt:now()});
-    toast("Paused — clock frozen");
+    await roomRef.child("live").update({pauseAt:now(), touch:STAMP()});
+    toast(tx("to_paused"));
   }
 }
 async function fireShock(type){
-  if(!running()||gameOver()){ toast("No live market."); return; }
-  if(LIVE.pauseAt){ toast("Resume before firing a shock."); return; }
-  if(type==="exp" && !CFG.expOn){ toast("Liquidity calls are off this game."); return; }
+  if(!running()||gameOver()){ toast(tx("to_no_live")); return; }
+  if(LIVE.pauseAt){ toast(tx("to_resume_first")); return; }
+  if(type==="exp" && !CFG.expOn){ toast(tx("to_exp_off")); return; }
   const t=currentTick()+1;
   let rec;
   if(type==="exp") rec={tick:t, type:"exp", pct:CFG.expPct, hc:CFG.haircut};
-  else { const d=drawMag(Math.random, CFG.crashMag); rec={tick:t, type:"crash", sev:sevFromMag(CFG,d.m), m:d.m, label:d.label}; }
+  else { const d=drawMag(Math.random, CFG.crashMag); rec={tick:t, type:"crash", sev:sevFromMag(CFG,d.m), m:d.m, label:d.label, ck:d.ck}; }
   await roomRef.child("shocks").push(rec);
-  toast(type==="exp"?"Liquidity call fired":"Crash fired — "+rec.label+" (−"+Math.round(rec.m*100)+"% blue chips)");
+  toast(type==="exp"? tx("to_exp_fired") : tx("to_crash_fired",{label:crashName(rec), m:Math.round(rec.m*100)}));
 }
 async function sendBanner(){
   const text=$("bannerInput").value.trim(); if(!text) return;
-  await roomRef.child("live/banner").set({text, ts:now()});
-  $("bannerInput").value=""; toast("Announcement sent");
+  await roomRef.child("live").update({banner:{text, ts:now()}, touch:STAMP()});
+  $("bannerInput").value=""; toast(tx("to_ann_sent"));
 }
 async function endGame(){
-  await roomRef.child("live").update({phase:"done", endTick:currentTick(), pauseAt:null});
+  await roomRef.child("live").update({phase:"done", endTick:currentTick(), pauseAt:null, touch:STAMP()});
 }
 async function resetGame(keepPlayers){
-  const ups={ shocks:null, live:{phase:"lobby"} };
+  const ups={ shocks:null, live:{phase:"lobby", touch:STAMP()} };
   if(keepPlayers){ for(const pid of Object.keys(PLAYERS)){ ups["players/"+pid+"/trades"]=null; ups["players/"+pid+"/joinTick"]=0; } }
   else { ups["players"]=null; ups["names"]=null; }
   await roomRef.update(ups);
-  toast(keepPlayers? "New game — same class" : "Full reset");
+  toast(keepPlayers? tx("to_newgame") : tx("to_fullreset"));
 }
 async function removePlayer(pid){
-  if(!confirm("Remove "+(PLAYERS[pid]?PLAYERS[pid].name:"this player")+"?")) return;
+  if(!confirm(tx("cf_remove",{name:PLAYERS[pid]?PLAYERS[pid].name:tx("this_player")}))) return;
   const nm=PLAYERS[pid] && PLAYERS[pid].name;
-  await roomRef.child("players/"+pid).remove();
-  if(nm) roomRef.child("names/"+nameKey(nm)).remove();
+  const ups={}; ups["players/"+pid]=null;
+  if(nm) ups["names/"+nameKey(nm)]=null;
+  await roomRef.update(ups);
 }
 window.removePlayer=removePlayer;
 
@@ -1134,12 +1721,17 @@ window.removePlayer=removePlayer;
    UI WIRING
    ===================================================================== */
 let sliderVals=[0,0,0,0,0], playersLoaded=false, shockFlash=null;
+function wireLang(){
+  document.querySelectorAll(".langsw button").forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+}
 function wireUI(){
   $("joinBtn").onclick=join;
-  $("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") join(); });
+  /* isComposing: Enter that only confirms a Hangul syllable must not submit */
+  $("nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.isComposing && e.keyCode!==229) join(); });
   $("showAdminBtn").onclick=()=>{ const c=$("adminLoginCard"); c.style.display=c.style.display==="none"?"":"none"; };
   $("adminLoginBtn").onclick=adminLogin;
-  $("pwInput").addEventListener("keydown",e=>{ if(e.key==="Enter") adminLogin(); });
+  $("pwInput").addEventListener("keydown",e=>{ if(e.key==="Enter" && !e.isComposing && e.keyCode!==229) adminLogin(); });
+  $("logoutBtn").onclick=logout;
   document.querySelectorAll("#tabbar button").forEach(b=>b.onclick=()=>{
     document.querySelectorAll("#tabbar button").forEach(x=>x.classList.toggle("on",x===b));
     document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("on",p.id==="tab-"+b.dataset.tab));
@@ -1151,108 +1743,118 @@ function wireUI(){
   $("tanToggle").onclick=()=>{
     const w=$("tanWrap"), open=w.style.display==="none";
     w.style.display=open?"":"none";
-    $("tanArrow").textContent=open?"hide ▴":"show ▾";
+    setArrow("tanWrap","tanArrow");
     if(open) drawTangentChart();
   };
   $("ordClear").onclick=()=>{ STAGED=STAGED.map(()=>null); if(CFG) CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); };
   $("rbToggle").onclick=()=>{
     const w=$("rbWrap"), open=w.style.display==="none";
     w.style.display=open?"":"none";
-    $("rbArrow").textContent=open?"hide ▴":"show ▾";
+    setArrow("rbWrap","rbArrow");
     if(open) syncSlidersToHoldings();
   };
   $("startBtn").onclick=startGame;
   $("pauseBtn").onclick=togglePause;
-  $("endBtn").onclick=()=>{ if(confirm("End the game and show results?")) endGame(); };
+  $("endBtn").onclick=()=>{ if(confirm(tx("cf_end"))) endGame(); };
   $("fireExpBtn").onclick=()=>fireShock("exp");
   $("fireCrashBtn").onclick=()=>fireShock("crash");
   $("bannerSend").onclick=sendBanner;
-  $("againBtn").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
-  $("wipeBtn").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
-  $("againBtn2").onclick=()=>{ if(confirm("Start over with the same class?")) resetGame(true); };
-  $("wipeBtn2").onclick=()=>{ if(confirm("Clear everything including players?")) resetGame(false); };
+  $("againBtn").onclick=()=>{ if(confirm(tx("cf_again"))) resetGame(true); };
+  $("wipeBtn").onclick=()=>{ if(confirm(tx("cf_wipe"))) resetGame(false); };
+  $("againBtn2").onclick=()=>{ if(confirm(tx("cf_again"))) resetGame(true); };
+  $("wipeBtn2").onclick=()=>{ if(confirm(tx("cf_wipe"))) resetGame(false); };
   buildAssetEditor();
   ["cfgMin","cfgTickSec","cfgFreq","cfgCrashFreq","cfgBriefSec"].forEach(id=>$(id).addEventListener("input",cfgPreview));
   $("cfgExpOn").addEventListener("change",()=>{ $("expRow").style.display=$("cfgExpOn").checked?"":"none"; cfgPreview(); });
   cfgPreview();
 }
 function buildAssetEditor(){
-  const rows=defaultAssets().map((a,i)=>
-    '<div class="an" style="grid-column:1"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.name)+'</div>'+
-    '<input id="mu_'+i+'" type="number" step="0.5" value="'+(a.mu*100)+'">'+
-    '<input id="sg_'+i+'" type="number" step="1" value="'+(a.sigma*100)+'">'
-  ).join("");
-  $("assetEditor").innerHTML='<div class="assetedit"><div class="gridhead">Asset</div><div class="gridhead">E[return] %</div><div class="gridhead">Vol %</div>'+rows+'</div>';
+  const rows=defaultAssets().map((a,i)=>{
+    const mu=$("mu_"+i), sg=$("sg_"+i);   /* on a language switch, keep whatever the instructor already typed */
+    return '<div class="an" style="grid-column:1"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(aName(a))+'</div>'+
+    '<input id="mu_'+i+'" type="number" step="0.5" value="'+(mu? esc(mu.value) : (a.mu*100))+'">'+
+    '<input id="sg_'+i+'" type="number" step="1" value="'+(sg? esc(sg.value) : (a.sigma*100))+'">';
+  }).join("");
+  $("assetEditor").innerHTML='<div class="assetedit"><div class="gridhead">'+tx("ae_asset")+'</div><div class="gridhead">'+tx("ae_mu")+'</div><div class="gridhead">'+tx("ae_vol")+'</div>'+rows+'</div>';
 }
 function cfgPreview(){
   const mins=parseFloat($("cfgMin").value)||12, sec=parseFloat($("cfgTickSec").value)||4;
   const ppy=parseInt($("cfgFreq").value)||52;
   const ticks=Math.round(mins*60/sec), yrs=(ticks/ppy).toFixed(1);
-  $("cfgPreview").innerHTML="That's <b>"+ticks+" ticks</b> ≈ <b>"+yrs+" market-years</b> in "+mins+" minutes. "+
-    ($("cfgExpOn").checked||parseFloat($("cfgCrashFreq").value)>0 ? "Chosen surprises get a "+(parseInt($("cfgBriefSec").value)||30)+"-second on-screen briefing at kickoff, then the market opens." : "No surprises configured — the market opens after a 5-second countdown. (You can still fire a crash manually.)");
+  $("cfgPreview").innerHTML=tx("cfg_prev",{ticks, yrs, mins})+" "+
+    ($("cfgExpOn").checked||parseFloat($("cfgCrashFreq").value)>0 ? tx("cfg_prev_surp",{s:(parseInt($("cfgBriefSec").value)||30)}) : tx("cfg_prev_none"));
 }
 
-/* build the per-game trade UI once */
+/* build the per-game trade UI once (and again when the language changes) */
+let uiGame=null, rulesTag=null;
 function buildPlayUI(){
-  const key=CFG? CFG.seed+"|"+CFG.assets.map(a=>a.key).join("") : null;
-  if(uiBuiltFor===key||!CFG) return;
-  uiBuiltFor=key;
+  if(!CFG) return;
+  const game=CFG.seed+"|"+CFG.assets.map(a=>a.key).join("");
+  const key=game+"|"+LANG;
+  if(uiBuiltFor===key) return;
   const K=CFG.assets.length;
+  /* same market, new language → keep staged orders and rebalance targets */
+  const langOnly = uiGame===game && STAGED.length===K && sliderVals.length===K;
+  const keepStaged = langOnly ? STAGED.slice() : null, keepSl = langOnly ? sliderVals.slice() : null;
+  uiBuiltFor=key; uiGame=game;
   /* holdings rows */
   $("holdList").innerHTML =
     '<div class="hrow"><div class="hmain" style="cursor:default">'+
       '<span class="dotc" style="background:'+CASH_COLOR+'"></span>'+
-      '<div class="hname"><div class="nm">Money market</div><div class="sub2">T-bills · '+fmtPct(CFG.rf)+'/yr · safe</div></div>'+
+      '<div class="hname"><div class="nm">'+tx("mm")+'</div><div class="sub2">'+tx("mm_sub",{rf:fmtPct(CFG.rf)})+'</div></div>'+
       '<div class="hmy"><div class="v" id="h_cash">–</div><div class="w" id="h_cashw">–</div></div>'+
     '</div></div>' +
     CFG.assets.map((a,i)=>
     '<div class="hrow">'+
       '<div class="hmain" id="hm_'+i+'">'+
         '<span class="dotc" style="background:'+a.color+'"></span>'+
-        '<div class="hname"><div class="nm">'+esc(a.key)+' · '+esc(a.name)+'</div>'+
-        '<div class="sub2">'+(CFG.showParams? 'E[r] '+fmtPct(a.mu)+' · vol '+fmtPct(a.sigma,0) : 'no shorting · slide to trade')+'</div></div>'+
+        '<div class="hname"><div class="nm">'+esc(a.key)+' · '+esc(aName(a))+'</div>'+
+        '<div class="sub2">'+(CFG.showParams? tx("as_sub",{mu:fmtPct(a.mu), vol:fmtPct(a.sigma,0)}) : tx("as_sub_np"))+'</div></div>'+
         '<div class="hpx"><div class="p" id="h_px_'+i+'">–</div><div class="d" id="h_d_'+i+'">–</div></div>'+
         '<div class="hmy"><div class="v" id="h_v_'+i+'">–</div><div class="w" id="h_w_'+i+'">–</div></div>'+
       '</div>'+
       '<div class="tradepanel open" id="tp_'+i+'" style="display:block">'+
-        '<input type="range" id="ts_'+i+'" min="0" max="1" step="1" value="0" aria-label="shares of '+esc(a.key)+'">'+
+        '<input type="range" id="ts_'+i+'" min="0" max="1" step="1" value="0" aria-label="'+esc(tx("aria_shares",{k:a.key}))+'">'+
         '<div class="mono" id="tpv_'+i+'" style="font-size:13px; color:var(--muted); margin-top:2px">–</div>'+
       '</div>'+
     '</div>').join("");
-  
-  STAGED=new Array(K).fill(null);
+
+  STAGED=keepStaged || new Array(K).fill(null);
   CFG.assets.forEach((a,i)=>{
     $("ts_"+i).addEventListener("input",()=>{ STAGED[i]=parseFloat($("ts_"+i).value); paintSlider(i); });
   });
-  setTimeout(()=>{ CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); }, 250);
+  setTimeout(()=>{ if(!CFG) return; CFG.assets.forEach((a,i)=>syncSlider(i)); paintOrders(); }, 250);
   /* rebalance sliders */
-  sliderVals=new Array(K).fill(0);
+  sliderVals=keepSl || new Array(K).fill(0);
   $("rbHost").innerHTML=CFG.assets.map((a,i)=>
-    '<div class="sl"><div class="top"><span><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</span><span class="w" id="sw_'+i+'">0%</span></div>'+
-    '<input type="range" id="sl_'+i+'" min="0" max="100" step="1" value="0"></div>').join("");
+    '<div class="sl"><div class="top"><span><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</span><span class="w" id="sw_'+i+'">'+(sliderVals[i]||0)+'%</span></div>'+
+    '<input type="range" id="sl_'+i+'" min="0" max="100" step="1" value="'+(sliderVals[i]||0)+'"></div>').join("");
   CFG.assets.forEach((a,i)=>{
     $("sl_"+i).addEventListener("input",()=>{ sliderVals[i]=+$("sl_"+i).value; renderRbPreview(); });
   });
-  $("rbNote").textContent="This sells winners and buys laggards in one shot, rounded to whole shares — the closest fit to your target weights that your cash allows. The rest stays in the money market. It costs "+(CFG.feeBps||0)+" bps per trade today; the payoff, if any, shows up over the long run. Nobody rebalances for you: buy-and-hold is the default.";
+  $("rbNote").textContent=tx("rb_note",{bps:(CFG.feeBps||0)});
   /* prefill sliders from current weights once account exists */
-  setTimeout(syncSlidersToHoldings, 300);
+  if(langOnly) renderRbPreview(); else setTimeout(syncSlidersToHoldings, 300);
   /* rules text */
+  const ppy=Math.round(1/CFG.dt);
   const rules=[
-    "You start with "+fmt$(CFG.startCash)+" in a money-market account earning "+fmtPct(CFG.rf)+"/yr. It never loses value.",
-    "Every stock has a slider showing your shares: slide right and confirm to buy, left to sell. You can never go below zero (no shorting) and never buy past your cash. Each trade costs "+(CFG.feeBps||0)+" bps; prices come from the market — your trades don't move them.",
-    "Each tick of the clock is "+(Math.round(1/CFG.dt)===252?"one trading day":Math.round(1/CFG.dt)===12?"one month":"one week")+" of market time.",
-    "Winner = "+metricExplain()+" The leaderboard is live and sorted by wealth. No restarts.",
-    "Any surprise rules the instructor has chosen will flash on every phone for "+(CFG.briefSec||30)+" seconds right before the market opens — read fast."
+    tx("r1",{cash:fmt$(CFG.startCash), rf:fmtPct(CFG.rf)}),
+    tx("r2",{bps:(CFG.feeBps||0)}),
+    tx("r3",{unit:tx(ppy===252?"unit_day":ppy===12?"unit_month":"unit_week")}),
+    tx("r4",{metric:metricExplain()}),
+    tx("r5",{s:(CFG.briefSec||30)})
   ];
   $("rulesList").innerHTML=rules.map(r=>"<li>"+r+"</li>").join("");
   $("rulesList2").innerHTML=$("rulesList").innerHTML;
+  rulesTag="g|"+LANG;
   /* static market tables */
   buildParamTables();
   /* reset chart instances for the new game */
   Object.values(charts).forEach(c=>{ try{c.destroy();}catch(e){} }); charts={};
+  if(CFG.showTangent && $("tanWrap").style.display!=="none") drawTangentChart();
 }
 function metricExplain(){
-  return "the most money when the final bell rings — pure wealth, no risk adjustment.";
+  return tx("metric");
 }
 function syncSlidersToHoldings(){
   const acct=myAccount(); if(!acct||!CFG) return;
@@ -1284,31 +1886,32 @@ function corrTableHTML(){
 function buildParamTables(){
   if(!CFG) return;
   $("storyList").innerHTML=
-    '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+CASH_COLOR+'; flex:0 0 auto"></span><div><b>Money market</b><br><span style="color:var(--muted); font-size:13.5px">T-bills: the mattress that pays interest. Boring is a feature.</span></div></div>'+
+    '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+CASH_COLOR+'; flex:0 0 auto"></span><div><b>'+tx("mm")+'</b><br><span style="color:var(--muted); font-size:13.5px">'+tx("mm_blurb")+'</span></div></div>'+
     CFG.assets.map(a=>
-      '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+a.color+'; flex:0 0 auto"></span><div><b>'+esc(a.key)+' · '+esc(a.name)+'</b><br><span style="color:var(--muted); font-size:13.5px">'+esc(a.blurb||"")+'</span></div></div>'
+      '<div style="display:flex; gap:9px; margin:9px 0; align-items:baseline"><span class="dotc" style="background:'+a.color+'; flex:0 0 auto"></span><div><b>'+esc(a.key)+' · '+esc(aName(a))+'</b><br><span style="color:var(--muted); font-size:13.5px">'+esc(aBlurb(a))+'</span></div></div>'
     ).join("");
   const cf=CFG.crashFreq||0;
   $("tanCard").style.display=CFG.showTangent?"":"none";
   $("crashCard").style.display=cf>0?"":"none";
   if(cf>0){
-    const pr=CRASH_MAGS[CFG.crashMag]||CRASH_MAGS.mix;
-    const magTxt= CFG.crashMag==="mix"
-      ? "drawn from history each time — usually a correction (−7…12%), sometimes Black Monday scale (−18…23%), occasionally COVID scale (−25…35%), quoted as the blue-chip drop"
-      : pr.name+": blue chips drop "+Math.round(pr.lo*100)+"–"+Math.round(pr.hi*100)+"% in a single tick";
-    $("crashInfo").innerHTML="Expected <b>"+cf+"</b> crash"+(cf==1?"":"es")+" this game — arrivals are random, so it could be none or several, at any moment. Magnitude "+magTxt+". Every stock falls in the same instant, each in proportion to its own risk; gold usually jumps <i>up</i>. The instructor can also trigger one manually.";
-    const mMid = CFG.crashMag==="mix"? 0.15 : (pr.lo+pr.hi)/2;
+    const one=CFG.crashMag!=="mix" && CRASH_MAGS[CFG.crashMag];
+    const pr=one||CRASH_MAGS.mix;
+    const magTxt= one
+      ? tx("mag_one",{name:tx("cm_"+CFG.crashMag), lo:Math.round(pr.lo*100), hi:Math.round(pr.hi*100)})
+      : tx("mag_mix");
+    $("crashInfo").innerHTML=tx("crash_info",{n:cf, mag:magTxt});
+    const mMid = one? (pr.lo+pr.hi)/2 : 0.15;
     const sv=sevFromMag(CFG,mMid);
-    $("crashTable").innerHTML="<tr><th>If a "+Math.round(mMid*100)+"% event hits</th><th>One-tick move</th></tr>"+
+    $("crashTable").innerHTML="<tr><th>"+tx("ct_if",{m:Math.round(mMid*100)})+"</th><th>"+tx("ct_move")+"</th></tr>"+
       CFG.assets.map(a=>{ const d=1-Math.exp(-sv*(a.beta==null?1:a.beta)*a.sigma);
         return '<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+"</td><td>"+(d>0?"−":"+")+fmtPct(Math.abs(d),0)+"</td></tr>";}).join("")+
-      '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>Cash</td><td>0%</td></tr>';
+      '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>'+tx("cash")+'</td><td>0%</td></tr>';
   }
   $("paramCard").style.display=CFG.showParams?"":"none";
   $("corrCard").style.display=CFG.showParams?"":"none";
   if(!CFG.showParams) return;
-  $("assetTable").innerHTML="<tr><th>Asset</th><th>Start px</th><th>E[return]</th><th>Volatility</th></tr>"+
-    '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>T-bills</td><td>–</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
+  $("assetTable").innerHTML="<tr><th>"+tx("th_asset")+"</th><th>"+tx("th_startpx")+"</th><th>"+tx("th_er")+"</th><th>"+tx("th_vol")+"</th></tr>"+
+    '<tr><td class="nm"><span class="dotc" style="background:'+CASH_COLOR+';display:inline-block;margin-right:6px"></span>'+tx("tbills")+'</td><td>–</td><td>'+fmtPct(CFG.rf)+'</td><td>0%</td></tr>'+
     CFG.assets.map(a=>'<tr><td class="nm"><span class="dotc" style="background:'+a.color+';display:inline-block;margin-right:6px"></span>'+esc(a.key)+'</td><td>'+fmt$(a.p0||100)+'</td><td>'+fmtPct(a.mu)+'</td><td>'+fmtPct(a.sigma,0)+'</td></tr>').join("");
   $("corrTable").innerHTML=corrTableHTML();
 }
@@ -1329,30 +1932,36 @@ function render(dataChanged){
   else target = over? "scr-results" : "scr-play";
   const cur=document.querySelector(".screen.active");
   if(!cur || cur.id!==target) show(target);
+  renderUtil();
   if(target==="scr-landing") renderLanding();
   if(target==="scr-lobby") renderLobby();
   if(target==="scr-play"){ buildPlayUI(); renderPlay(dataChanged); }
   if(target==="scr-admin") renderAdmin(dataChanged);
   if(target==="scr-results"){ buildPlayUI(); renderResults(); }
 }
+/* footer: who is signed in on this device + the log-out button */
+function renderUtil(){
+  const pl = me.id && PLAYERS[me.id];
+  const key=(isAdmin?"A":pl?"P:"+pl.name:"-")+"|"+LANG;
+  if(key===utilKey) return;
+  utilKey=key;
+  $("logoutBtn").style.display = (isAdmin||pl) ? "" : "none";
+  $("whoami").innerHTML = isAdmin ? tx("who_admin") : pl ? tx("who_player",{name:esc(pl.name)}) : "";
+}
 function renderLanding(){
   const n=$("joinNotice");
-  if(LIVE && running()){ n.style.display=""; n.innerHTML="The market is already <b>live</b> — you can still join and start with fresh cash."; }
+  if(LIVE && running()){ n.style.display=""; n.innerHTML=tx("ld_live_note"); }
   else n.style.display="none";
 }
 function renderLobby(){
   $("lobbyName").textContent=me.name||"";
   const entries=Object.entries(PLAYERS).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
   $("lobbyCount").textContent=entries.length;
-  $("lobbyList").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+(pid===me.id?' <span class="pill ok">you</span>':"")+"</span></li>").join("")||"<li><span class='nm' style='color:var(--muted)'>Nobody yet.</span></li>";
-  if(CFG){ /* rules may not exist pre-config; build from defaults */ }
-  if(!$("rulesList").innerHTML){
-    const d=defaultConfig();
-    $("rulesList").innerHTML=["You start with $1,000 in a money-market account earning the T-bill rate.",
-      "Trade five stocks in real time; prices are the market's, not yours.",
-      "Winner = the most money when the final bell rings. Simple.",
-      "Any extra rules the instructor picks will be revealed for 30 seconds at kickoff.",
-      "No restarts. Everyone sees the same market and the same standings."].map(r=>"<li>"+r+"</li>").join("");
+  $("lobbyList").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+(pid===me.id?' <span class="pill ok">'+tx("you")+'</span>':"")+"</span></li>").join("")||"<li><span class='nm' style='color:var(--muted)'>"+tx("nobody")+"</span></li>";
+  /* generic rules until a game's own rules are built — or when what's there is in the other language */
+  if(rulesTag===null || rulesTag.slice(-2)!==LANG){
+    $("rulesList").innerHTML=["d1","d2","d3","d4","d5"].map(k=>"<li>"+tx(k)+"</li>").join("");
+    rulesTag="d|"+LANG;
   }
 }
 function announceShocks(cap){
@@ -1362,39 +1971,39 @@ function announceShocks(cap){
   sh.filter(s=>s.tick>lastAnnTick).forEach(s=>{
     shockFlash={s, until:Date.now()+15000};
     if(navigator.vibrate) navigator.vibrate([80,60,80]);
-    toast(s.type==="exp"?"💸 Liquidity call!":"📉 "+(s.label||"Market crash")+"!");
+    toast(s.type==="exp"? tx("to_liq") : "📉 "+crashName(s)+"!");
   });
   lastAnnTick=cap;
 }
 function briefRules(){
   const r=[];
   if((CFG.crashFreq||0)>0){
-    const pr=CRASH_MAGS[CFG.crashMag]||CRASH_MAGS.mix;
-    const magTxt = CFG.crashMag==="mix"
-      ? "sizes drawn from history — anywhere from a correction to a COVID-scale panic (blue chips −7% to −35%)"
-      : pr.name+" scale (blue chips −"+Math.round(pr.lo*100)+"% to −"+Math.round(pr.hi*100)+"%)";
-    r.push("⚡ <b>Crash risk is ON</b>: about "+CFG.crashFreq+" jump"+(CFG.crashFreq==1?"":"s")+" expected this game (the actual count is random). When one hits, every stock gaps down in the same instant — "+magTxt+". Riskier stocks fall harder; gold tends to jump <i>up</i>.");
+    const one=CFG.crashMag!=="mix" && CRASH_MAGS[CFG.crashMag];
+    const magTxt = one
+      ? tx("br_mag_one",{name:tx("cm_"+CFG.crashMag), lo:Math.round(one.lo*100), hi:Math.round(one.hi*100)})
+      : tx("br_mag_mix");
+    r.push(tx("br_crash",{n:CFG.crashFreq, mag:magTxt}));
   }
-  if(CFG.expOn) r.push("💸 <b>Liquidity calls are ON</b>: at random moments you must be holding "+fmtPct(CFG.expPct,0)+" of your wealth in cash. Come up short and the gap is fire-sold at a "+fmtPct(CFG.haircut,0)+" haircut.");
-  if(!r.length) r.push("No surprises this game — a pure market. May the best portfolio win.");
-  r.push("Full details are in the <b>Market</b> tab. Ranking: most money at the bell.");
+  if(CFG.expOn) r.push(tx("br_exp",{pct:fmtPct(CFG.expPct,0), hc:fmtPct(CFG.haircut,0)}));
+  if(!r.length) r.push(tx("br_none"));
+  r.push(tx("br_details"));
   return r;
 }
 function bannerHTML(){
   let h="";
   if(briefing()){
-    h+='<div class="banner info"><span class="t">🔔 Kickoff briefing — read fast</span><br>'+
+    h+='<div class="banner info"><span class="t">'+tx("bn_kick")+'</span><br>'+
        briefRules().map(x=>"• "+x).join("<br>")+
-       '<br><b>Market opens when the timer above hits zero.</b></div>';
+       '<br><b>'+tx("bn_opens")+'</b></div>';
   }
   if(shockFlash && Date.now()<shockFlash.until){
     const s=shockFlash.s;
-    h+= s.type==="exp"
-      ? '<div class="banner"><span class="t">💸 Liquidity call at '+fmtClock(s.tick)+':</span> show '+fmtPct(s.pct,0)+' of your wealth in cash. Anyone short just got fire-sold at a '+fmtPct(s.hc,0)+' haircut.</div>'
-      : '<div class="banner"><span class="t">📉 '+esc(s.label||"Market crash")+' at '+fmtClock(s.tick)+':</span> blue chips −'+Math.round((s.m||0)*100)+'% in one tick. Risk got punished; gold popped.</div>';
+    h+='<div class="banner">'+(s.type==="exp"
+      ? tx("bn_liq",{when:fmtClock(s.tick), pct:fmtPct(s.pct,0), hc:fmtPct(s.hc,0)})
+      : tx("bn_crash",{label:esc(crashName(s)), when:fmtClock(s.tick), m:Math.round((s.m||0)*100)}))+'</div>';
   }
   if(LIVE&&LIVE.banner&&LIVE.banner.ts>dismissedBanner){
-    h+='<div class="banner info"><span class="t">📣 '+esc(LIVE.banner.text)+'</span> <button class="btn-small btn-ghost" style="float:right" onclick="dismissB('+LIVE.banner.ts+')">ok</button></div>';
+    h+='<div class="banner info"><span class="t">📣 '+esc(LIVE.banner.text)+'</span> <button class="btn-small btn-ghost" style="float:right" onclick="dismissB('+LIVE.banner.ts+')">'+tx("ok")+'</button></div>';
   }
   return h;
 }
@@ -1429,7 +2038,7 @@ function renderPlay(dataChanged){
     return '<div class="seg" style="width:'+w+'%;background:'+a.color+'"></div>'; }).join("");
   const cw=W>0? acct.cash/W*100 : 100;
   $("allocBar").innerHTML=segs+'<div class="seg" style="width:'+cw+'%;background:'+CASH_COLOR+'"></div>';
-  $("allocCap").innerHTML="cash <b>"+cw.toFixed(0)+"%</b> · stocks <b>"+(100-cw).toFixed(0)+"%</b>";
+  $("allocCap").innerHTML=tx("alloc_cap",{c:cw.toFixed(0), s:(100-cw).toFixed(0)});
 
   /* holdings */
   $("h_cash").textContent=fmt$(acct.cash);
@@ -1442,7 +2051,7 @@ function renderPlay(dataChanged){
     $("h_v_"+i).textContent=v>0.005? fmt$(v):"–";
     if(v>0.005&&W>0){
       const cb=acct.cost[i], pr= cb>1e-9 ? v/cb-1 : null;
-      $("h_w_"+i).innerHTML=trimU(acct.sh[i])+" sh"+(pr==null?"":" · <span style='color:"+(pr>=0?"var(--gain)":"var(--loss)")+";font-weight:600'>"+fmtSign(pr)+"</span>");
+      $("h_w_"+i).innerHTML=tx("n_sh",{n:trimU(acct.sh[i])})+(pr==null?"":" · <span style='color:"+(pr>=0?"var(--gain)":"var(--loss)")+";font-weight:600'>"+fmtSign(pr)+"</span>");
     } else $("h_w_"+i).innerHTML="";
     syncSlider(i);
   }
@@ -1451,19 +2060,19 @@ function renderPlay(dataChanged){
   const active=document.querySelector(".tabpane.on");
   if(active&&active.id==="tab-trade"){ drawMarketChart("mktChart",cap,P); drawMeChart(acct); }
   if(active&&active.id==="tab-market"){ renderEventLog(cap); }
-  if(active&&active.id==="tab-ranks"){ renderMyStats(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false); 
-    $("lbNote").textContent = CFG.publicPf? "Tap a row to see that investor's current mix." : "Portfolios are private this game — only the numbers show.";
+  if(active&&active.id==="tab-ranks"){ renderMyStats(acct); renderLeaderboard("lbTable",false); drawScatter("scatterChart",false);
+    $("lbNote").textContent = CFG.publicPf? tx("lb_note_pub") : tx("lb_note_priv");
   }
 }
 function renderMyStats(acct){
   const m=acct.metrics;
   const rows=rankAll(), ri=rows.findIndex(r=>r.pid===me.id);
   const cells=[
-    [ri>=0? "#"+(ri+1)+" of "+rows.length : "–","rank (by wealth)"],
-    [fmtSign(m.ret),"return"], [fmtPct(m.sig,1),"volatility"],
-    [m.ok? m.sharpe.toFixed(2):"–","sharpe"],
-    [fmtPct(m.mdd,1),"max drawdown"],
-    [fmt$(acct.fees+acct.firesale),"fees + fire-sales"]
+    [ri>=0? tx("ms_rank_of",{i:ri+1, n:rows.length}) : "–",tx("ms_rank")],
+    [fmtSign(m.ret),tx("ms_ret")], [fmtPct(m.sig,1),tx("ms_vol")],
+    [m.ok? m.sharpe.toFixed(2):"–",tx("ms_sharpe")],
+    [fmtPct(m.mdd,1),tx("ms_mdd")],
+    [fmt$(acct.fees+acct.firesale),tx("ms_fees")]
   ];
   $("myStats").innerHTML=cells.map(c=>'<div class="stat"><div class="v">'+c[0]+'</div><div class="k">'+c[1]+'</div></div>').join("");
 }
@@ -1487,7 +2096,7 @@ function pfBarHTML(acct){
 }
 function renderLeaderboard(tableId, adminMode){
   const rows=rankAll();
-  let html="<tr><th>#</th><th>Investor</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th></tr>";
+  let html="<tr><th>#</th><th>"+tx("th_inv")+"</th><th class='hi'>"+tx("th_wealth")+"</th><th>"+tx("th_ret")+"</th><th>"+tx("th_vols")+"</th></tr>";
   rows.forEach((r,i)=>{
     html+="<tr class='metric-col"+(r.pid===me.id?" me":"")+"' "+(CFG.publicPf?'onclick="togglePf(\''+r.pid+'\')" style="cursor:pointer"':"")+">"+
       "<td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td class='hi'>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td></tr>";
@@ -1499,7 +2108,7 @@ function renderLeaderboard(tableId, adminMode){
 /* ---------- admin render ---------- */
 function renderAdmin(dataChanged){
   const inLobby=!LIVE||LIVE.phase==="lobby"||!LIVE.startAt;
-  $("aPhase").textContent=inLobby?"Lobby":(briefing()?"Briefing":(LIVE.pauseAt?"Paused":"Live"));
+  $("aPhase").textContent=inLobby?tx("ph_lobby"):(briefing()?tx("ph_brief"):(LIVE.pauseAt?tx("ph_paused"):tx("ph_live")));
   $("aCount").textContent=Object.keys(PLAYERS).length;
   $("admCfg").style.display=inLobby?"":"none";
   $("admLive").style.display=inLobby?"none":"";
@@ -1507,7 +2116,7 @@ function renderAdmin(dataChanged){
   const entries=Object.entries(PLAYERS).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0));
   if(inLobby){
     $("aClock").textContent="–";
-    $("aRoster").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+'</span><button class="btn-small btn-ghost" onclick="removePlayer(\''+pid+'\')">remove</button></li>').join("")||"<li><span class='nm' style='color:var(--muted)'>Students open this page and enter a name.</span></li>";
+    $("aRoster").innerHTML=entries.map(([pid,p])=>'<li><span class="nm">'+esc(p.name)+'</span><button class="btn-small btn-ghost" onclick="removePlayer(\''+pid+'\')">'+tx("remove")+'</button></li>').join("")||"<li><span class='nm' style='color:var(--muted)'>"+tx("ad_roster_empty")+"</span></li>";
     $("aLbTable").innerHTML=""; return;
   }
   const cap=capTick();
@@ -1517,7 +2126,7 @@ function renderAdmin(dataChanged){
   announceShocks(cap);
   buildPlayUI();
   $("aClock").textContent=fmtClock(cap);
-  $("pauseBtn").textContent=LIVE.pauseAt?"Resume":"Pause";
+  $("pauseBtn").textContent=LIVE.pauseAt?tx("resume"):tx("pause");
   $("fireExpBtn").style.display=CFG.expOn?"":"none";
   renderLeaderboard("aLbTable",true);
   drawScatter("aScatter",false);
@@ -1560,17 +2169,17 @@ function benchRows(){
   const inv=CFG.assets.map(a=>1/a.sigma); const sI=inv.reduce((a,b)=>a+b,0);
   const wRP=inv.map(x=>x/sI);
   const wEW=new Array(K).fill(1/K);
-  const defs=[
-    ["Markowitz tangency", wTanN],
-    ["Risk parity (1/σ)", wRP],
-    ["Equal weight", wEW]
+  const defs=[        /* id → display name is tx("bench_"+id), so the cache survives a language switch */
+    ["tan", wTanN],
+    ["rp", wRP],
+    ["ew", wEW]
   ];
-  const rows=defs.map(([nm,w])=>{
+  const rows=defs.map(([id,w])=>{
     const acct=reconstruct(CFG,P,shocks,roboTrades(CFG,P,shocks,w,4,cap),0,cap);
-    return {nm, w, W:acct.W[acct.W.length-1], m:metricsOf(acct.W,CFG)};
+    return {id, w, W:acct.W[acct.W.length-1], m:metricsOf(acct.W,CFG)};
   });
   const idle=reconstruct(CFG,P,shocks,[],0,cap);
-  rows.push({nm:"Money market only", w:null, W:idle.W[idle.W.length-1], m:metricsOf(idle.W,CFG)});
+  rows.push({id:"mm", w:null, W:idle.W[idle.W.length-1], m:metricsOf(idle.W,CFG)});
   rows.sort((a,b)=>b.W-a.W);
   BENCH={key, rows};
   return rows;
@@ -1581,38 +2190,38 @@ function renderResults(){
   const rows=rankAll();
   $("resAdminCard").style.display=isAdmin?"":"none";
   const yrs=(cap*CFG.dt).toFixed(1);
-  $("resSub").innerHTML="The clock ran "+cap+" ticks ≈ <b>"+yrs+" market-years</b>. Ranking metric: <b>"+metricExplain()+"</b>";
+  $("resSub").innerHTML=tx("res_sub",{cap, yrs, metric:metricExplain()});
   if(rows.length){
     const bestSharpe=rows.slice().sort((a,b)=>b.m.sharpe-a.m.sharpe)[0];
     const med=rows.slice().sort((a,b)=>a.m.ret-b.m.ret)[Math.floor(rows.length/2)];
     $("resStats").innerHTML=
-      '<div class="stat"><div class="v">'+esc(rows[0].name)+'</div><div class="k">winner</div></div>'+
-      '<div class="stat"><div class="v">'+bestSharpe.m.sharpe.toFixed(2)+'</div><div class="k">best sharpe ('+esc(bestSharpe.name)+')</div></div>'+
-      '<div class="stat"><div class="v">'+fmtSign(med? med.m.ret:0)+'</div><div class="k">median return</div></div>';
-  }
-  let html="<tr><th>#</th><th>Investor</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th></tr>";
+      '<div class="stat"><div class="v">'+esc(rows[0].name)+'</div><div class="k">'+tx("rs_winner")+'</div></div>'+
+      '<div class="stat"><div class="v">'+bestSharpe.m.sharpe.toFixed(2)+'</div><div class="k">'+tx("rs_best_sharpe",{name:esc(bestSharpe.name)})+'</div></div>'+
+      '<div class="stat"><div class="v">'+fmtSign(med? med.m.ret:0)+'</div><div class="k">'+tx("rs_median")+'</div></div>';
+  } else $("resStats").innerHTML="";
+  let html="<tr><th>#</th><th>"+tx("th_inv")+"</th><th class='hi'>"+tx("th_wealth")+"</th><th>"+tx("th_ret")+"</th><th>"+tx("th_vols")+"</th><th>"+tx("th_sharpe")+"</th><th>"+tx("th_mdd")+"</th></tr>";
   rows.forEach((r,i)=>{
     html+="<tr"+(r.pid===me.id?" class='me'":"")+"><td>"+(i+1)+"</td><td class='nm'>"+esc(r.name)+"</td><td class='hi'>"+fmt$(r.W)+"</td><td>"+fmtSign(r.m.ret)+"</td><td>"+fmtPct(r.m.sig,0)+"</td><td>"+(r.m.ok?r.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(r.m.mdd,0)+"</td></tr>";
     if(CFG.publicPf) html+="<tr><td colspan='7' style='text-align:left'>"+pfBarHTML(r.acct)+"</td></tr>";
   });
   $("resTable").innerHTML=html;
-  $("resNote").textContent="Ranking is pure final wealth. Sharpe, volatility and drawdown are shown for the debrief — ask who WOULD have won under a risk-adjusted rule. Fire-sale losses and fees are already inside these numbers.";
+  $("resNote").textContent=tx("res_note");
   /* robo benchmarks on the exact same market, same fees, same shocks */
   const bch=benchRows();
-  let bh="<tr><th>Robo strategy</th><th class='hi'>Wealth</th><th>Ret</th><th>Vol</th><th>Sharpe</th><th>MaxDD</th></tr>";
+  let bh="<tr><th>"+tx("th_robo")+"</th><th class='hi'>"+tx("th_wealth")+"</th><th>"+tx("th_ret")+"</th><th>"+tx("th_vols")+"</th><th>"+tx("th_sharpe")+"</th><th>"+tx("th_mdd")+"</th></tr>";
   bch.forEach(b=>{
-    bh+="<tr><td class='nm'>"+esc(b.nm)+"</td><td class='hi'>"+fmt$(b.W)+"</td><td>"+fmtSign(b.m.ret)+"</td><td>"+fmtPct(b.m.sig,0)+"</td><td>"+(b.m.ok?b.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(b.m.mdd,0)+"</td></tr>";
+    bh+="<tr><td class='nm'>"+esc(tx("bench_"+b.id))+"</td><td class='hi'>"+fmt$(b.W)+"</td><td>"+fmtSign(b.m.ret)+"</td><td>"+fmtPct(b.m.sig,0)+"</td><td>"+(b.m.ok?b.m.sharpe.toFixed(2):"–")+"</td><td>"+fmtPct(b.m.mdd,0)+"</td></tr>";
   });
   $("benchTable").innerHTML=bh;
-  const wLine=bch.filter(b=>b.w).map(b=>"<b>"+esc(b.nm)+"</b>: "+CFG.assets.map((a,i)=>esc(a.key)+" "+(b.w[i]*100).toFixed(0)+"%").join(" · ")).join("<br>");
-  const beatTan=rows.filter(r=>{ const t=bch.find(x=>x.nm==="Markowitz tangency"); return t && r.W>t.W; }).length;
-  $("benchNote").innerHTML="These robots played the exact same market you did — same prices, same shocks, same fees — mechanically rebalancing to fixed weights every 4 ticks, never predicting anything.<br>"+wLine+
-    "<br>Students who beat the tangency robot on wealth: <b>"+beatTan+" of "+rows.length+"</b>. Ask them how much extra risk it took — the Vol and MaxDD columns don't lie.";
+  const wLine=bch.filter(b=>b.w).map(b=>"<b>"+esc(tx("bench_"+b.id))+"</b>: "+CFG.assets.map((a,i)=>esc(a.key)+" "+(b.w[i]*100).toFixed(0)+"%").join(" · ")).join("<br>");
+  const tanRow=bch.find(x=>x.id==="tan");
+  const beatTan=rows.filter(r=> tanRow && r.W>tanRow.W).length;
+  $("benchNote").innerHTML=tx("bench_note",{w:wLine, k:beatTan, n:rows.length});
   drawScatter("resScatter",true);
   /* theory corner */
   const P=pricePath(CFG,allShocks(CFG,MANUAL),cap);
   const T=cap*CFG.dt;
-  let th="<tr><th>Asset</th><th>E[r]</th><th>Vol</th><th>Geometric</th><th>This game</th></tr>";
+  let th="<tr><th>"+tx("th_asset")+"</th><th>"+tx("th_er_s")+"</th><th>"+tx("th_vols")+"</th><th>"+tx("th_geo")+"</th><th>"+tx("th_thisgame")+"</th></tr>";
   CFG.assets.forEach((a,i)=>{
     const geo=a.mu-a.sigma*a.sigma/2;
     const real=T>0? Math.log(P[cap][i]/(a.p0||100))/T : 0;
@@ -1621,9 +2230,8 @@ function renderResults(){
   $("theoryTable").innerHTML=th;
   $("theoryCorr").innerHTML=corrTableHTML();
   const tg=tangency(CFG);
-  const mix=CFG.assets.map((a,i)=>a.key+" "+(tg.wt[i]*100).toFixed(0)+"%").join(" · ");
-  $("theoryNote").innerHTML="<b>Geometric</b> = μ − σ²/2: what compounding actually pays. That's where MoonShot's fat mean goes to die. And the correlation table is why gold earns a big portfolio weight despite a feeble return: it zigs when everything else zags.<br><br>"+
-    "Best possible Sharpe with this menu: <b>"+tg.Sstar.toFixed(2)+"</b>, achieved by one specific risky mix — <b>"+mix+"</b> — blended with T-bills to taste. Every investor, whatever their γ, should hold the <i>same</i> risky mix and only vary the cash split. That's Markowitz + Tobin's two-fund separation, and it's the gold line on the map.";
+  const mix=CFG.assets.map((a,i)=>esc(a.key)+" "+(tg.wt[i]*100).toFixed(0)+"%").join(" · ");
+  $("theoryNote").innerHTML=tx("theory_note",{s:tg.Sstar.toFixed(2), mix});
 }
 
 /* ---------- clocks ---------- */
@@ -1633,7 +2241,7 @@ function updateTimerChips(){
     const el=$(id); if(!el) return;
     if(!CFG||!LIVE||!LIVE.startAt){ el.textContent="–"; el.className="timerchip"; return; }
     if(briefing()){ const r=Math.ceil((LIVE.startAt-now())/1000); el.textContent="T–"+r+"s"; el.className="timerchip"; return; }
-    if(LIVE.pauseAt){ el.textContent="PAUSED"; el.className="timerchip paused"; return; }
+    if(LIVE.pauseAt){ el.textContent=tx("chip_paused"); el.className="timerchip paused"; return; }
     const r=Math.ceil(remainMs()/1000);
     el.textContent=Math.floor(r/60)+":"+String(r%60).padStart(2,"0");
     el.className="timerchip"+(r<=30?" hot":"");
@@ -1641,13 +2249,15 @@ function updateTimerChips(){
 }
 let endingLatch=false, wasBrief=false;
 function tickLoop(){
+  housekeeping();
   if(!CFG||!LIVE) { updateTimerChips(); return; }
   updateTimerChips();
   const scr=document.querySelector(".screen.active");
   const b=briefing();
   if(b!==wasBrief){ wasBrief=b; render(true); }
   if(scr&&(scr.id==="scr-play"||scr.id==="scr-admin")) render(false);
-  if(isAdmin && !endingLatch && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
+  /* no `touch` here on purpose: closing an old game's books must not make a dead room look fresh */
+  if(isAdmin && !endingLatch && !staleRoom() && LIVE.phase==="running" && LIVE.startAt && currentTick()>=CFG.totalTicks){
     endingLatch=true;
     roomRef.child("live").update({phase:"done", endTick:CFG.totalTicks});
   }
@@ -1658,7 +2268,7 @@ function tickLoop(){
 /* =====================================================================
    CHARTS
    ===================================================================== */
-const FONT={family:"IBM Plex Mono", size:10.5};
+const FONT={family:'"IBM Plex Mono","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",monospace', size:10.5};
 function baseOpts(){ return { responsive:true, maintainAspectRatio:false, animation:false,
   plugins:{legend:{labels:{boxWidth:12, font:{size:11}}}},
   scales:{ y:{ticks:{font:FONT}}, x:{ticks:{font:FONT, maxTicksLimit:7}} } }; }
@@ -1681,8 +2291,8 @@ function drawMeChart(acct){
     mine.push(acct.W[k]);
     bench.push(CFG.startCash*Math.exp(CFG.rf*CFG.dt*k));
   }
-  const ds=[{label:"You", data:mine, borderColor:"#1E3A5F", backgroundColor:"#1E3A5F", pointRadius:0, borderWidth:2.2, tension:0},
-            {label:"All in T-bills", data:bench, borderColor:"#C77F00", borderDash:[6,5], pointRadius:0, borderWidth:1.8, tension:0}];
+  const ds=[{label:tx("ch_you"), data:mine, borderColor:"#1E3A5F", backgroundColor:"#1E3A5F", pointRadius:0, borderWidth:2.2, tension:0},
+            {label:tx("ch_alltb"), data:bench, borderColor:"#C77F00", borderDash:[6,5], pointRadius:0, borderWidth:1.8, tension:0}];
   if(!charts[id]) charts[id]=new Chart($(id).getContext("2d"),{type:"line",data:{labels,datasets:ds},options:baseOpts()});
   else { charts[id].data.labels=labels; charts[id].data.datasets=ds; charts[id].update("none"); }
 }
@@ -1694,17 +2304,17 @@ function drawScatter(id, withAssets){
   const tg=tangency(CFG);
   const xmax=Math.max(20, ...pts.map(p=>p.x), ...assetPts.map(p=>p.x))*1.08;
   const ds=[
-    {label:"Investors", data:pts.filter(p=>!p.me), backgroundColor:"rgba(30,58,95,.55)", pointRadius:5},
-    {label:"You", data:pts.filter(p=>p.me), backgroundColor:"#C03A2B", pointRadius:7, pointStyle:"circle"},
-    {label:"T-bills", data:[{x:0,y:CFG.rf*100}], backgroundColor:"#C77F00", pointRadius:6, pointStyle:"rectRot"},
-    {label:"Best line (CML)", type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderWidth:2, borderDash:[7,5], pointRadius:0}
+    {label:tx("ch_investors"), data:pts.filter(p=>!p.me), backgroundColor:"rgba(30,58,95,.55)", pointRadius:5},
+    {label:tx("ch_you"), data:pts.filter(p=>p.me), backgroundColor:"#C03A2B", pointRadius:7, pointStyle:"circle"},
+    {label:tx("tbills"), data:[{x:0,y:CFG.rf*100}], backgroundColor:"#C77F00", pointRadius:6, pointStyle:"rectRot"},
+    {label:tx("ch_cml"), type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderWidth:2, borderDash:[7,5], pointRadius:0}
   ];
-  if(withAssets) ds.splice(2,0,{label:"Single assets", data:assetPts, backgroundColor:assetPts.map(p=>p.color), pointRadius:6, pointStyle:"rect"});
+  if(withAssets) ds.splice(2,0,{label:tx("ch_single"), data:assetPts, backgroundColor:assetPts.map(p=>p.color), pointRadius:6, pointStyle:"rect"});
   const o=baseOpts();
   o.parsing=false;
-  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:"volatility %/yr",font:{size:11}}, ticks:{font:FONT}},
-             y:{title:{display:true,text:"growth %/yr",font:{size:11}}, ticks:{font:FONT}} };
-  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return (d.name||c.dataset.label)+": vol "+d.x.toFixed(1)+"%, growth "+d.y.toFixed(1)+"%"; }}};
+  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:tx("ax_vol"),font:{size:11}}, ticks:{font:FONT}},
+             y:{title:{display:true,text:tx("ax_growth"),font:{size:11}}, ticks:{font:FONT}} };
+  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return tx("tt_vg",{name:(d.name||c.dataset.label), x:d.x.toFixed(1), y:d.y.toFixed(1)}); }}};
   if(!charts[id]) charts[id]=new Chart($(id).getContext("2d"),{type:"scatter",data:{datasets:ds},options:o});
   else { charts[id].data.datasets=ds; charts[id].options=o; charts[id].update("none"); }
 }
@@ -1725,7 +2335,7 @@ function drawTangentChart(){
   const muT=tg.wt.reduce((s,w,i)=>s+w*mu[i],0);
   let vT=0; for(let i=0;i<K;i++)for(let j=0;j<K;j++)vT+=tg.wt[i]*tg.wt[j]*Sg[i][j];
   const sgT=Math.sqrt(Math.max(0,vT));
-  if(!(D>0)||!isFinite(sgT)){ $("tanNote").textContent="Frontier is undefined for the current parameter set."; return; }
+  if(!(D>0)||!isFinite(sgT)){ $("tanNote").textContent=tx("tan_undef"); return; }
   /* frontier hyperbola, both branches around the min-variance return B/A */
   const mv=B/A, span=Math.max(...mu)-mv;
   const mLo=mv-span*1.05, mHi=Math.max(Math.max(...mu), muT)+0.02;
@@ -1738,30 +2348,30 @@ function drawTangentChart(){
   const xmax=Math.max(...sg.map(x=>x*100), sgT*100)*1.18;
   const assetPts=CFG.assets.map((a,i)=>({x:sg[i]*100, y:mu[i]*100, name:a.key}));
   const ds=[
-    {label:"Frontier (risky mixes)", type:"line", data:front, borderColor:"#5B7089", borderWidth:2, pointRadius:0, tension:0, parsing:false},
-    {label:"CAL", type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderDash:[7,5], borderWidth:2, pointRadius:0, parsing:false},
-    {label:"Single assets", data:assetPts, backgroundColor:CFG.assets.map(a=>a.color), pointStyle:"rect", pointRadius:6, parsing:false},
-    {label:"T-bills", data:[{x:0,y:CFG.rf*100,name:"T-bills"}], backgroundColor:"#C77F00", pointStyle:"rectRot", pointRadius:6, parsing:false},
-    {label:"Tangency ★", data:[{x:sgT*100,y:muT*100,name:"Tangency"}], backgroundColor:"#C03A2B", pointStyle:"star", pointRadius:9, borderColor:"#C03A2B", borderWidth:2, parsing:false}
+    {label:tx("ch_frontier"), type:"line", data:front, borderColor:"#5B7089", borderWidth:2, pointRadius:0, tension:0, parsing:false},
+    {label:tx("ch_cal"), type:"line", data:[{x:0,y:CFG.rf*100},{x:xmax,y:(CFG.rf+tg.Sstar*xmax/100)*100}], borderColor:"#C79A2A", borderDash:[7,5], borderWidth:2, pointRadius:0, parsing:false},
+    {label:tx("ch_single"), data:assetPts, backgroundColor:CFG.assets.map(a=>a.color), pointStyle:"rect", pointRadius:6, parsing:false},
+    {label:tx("tbills"), data:[{x:0,y:CFG.rf*100,name:tx("tbills")}], backgroundColor:"#C77F00", pointStyle:"rectRot", pointRadius:6, parsing:false},
+    {label:tx("ch_tan"), data:[{x:sgT*100,y:muT*100,name:tx("tan_pt")}], backgroundColor:"#C03A2B", pointStyle:"star", pointRadius:9, borderColor:"#C03A2B", borderWidth:2, parsing:false}
   ];
   const o=baseOpts();
   o.parsing=false;
-  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:"volatility %/yr",font:{size:11}}, ticks:{font:FONT}},
-             y:{title:{display:true,text:"E[return] %/yr",font:{size:11}}, ticks:{font:FONT}} };
-  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return (d.name||c.dataset.label)+": vol "+d.x.toFixed(1)+"%, E[r] "+d.y.toFixed(1)+"%"; }}};
+  o.scales={ x:{type:"linear", min:0, max:xmax, title:{display:true,text:tx("ax_vol"),font:{size:11}}, ticks:{font:FONT}},
+             y:{title:{display:true,text:tx("ax_er"),font:{size:11}}, ticks:{font:FONT}} };
+  o.plugins.tooltip={callbacks:{label:c=>{ const d=c.raw; return tx("tt_ve",{name:(d.name||c.dataset.label), x:d.x.toFixed(1), y:d.y.toFixed(1)}); }}};
   charts["tanChart"]=new Chart($("tanChart").getContext("2d"),{type:"scatter",data:{datasets:ds},options:o});
   const mix=CFG.assets.map((a,i)=>esc(a.key)+" <b>"+(tg.wt[i]*100).toFixed(0)+"%</b>").join(" · ");
-  $("tanNote").innerHTML="Tangency portfolio — the risky mix with the best possible Sharpe ("+tg.Sstar.toFixed(2)+"): "+mix+
-    ".<br>E[r] "+fmtPct(muT)+" at vol "+fmtPct(sgT,1)+". Every point on the gold CAL is this same mix blended with T-bills — pick your spot by how much cash you hold.";
+  $("tanNote").innerHTML=tx("tan_note",{s:tg.Sstar.toFixed(2), mix, mu:fmtPct(muT), vol:fmtPct(sgT,1)});
 }
 function renderEventLog(cap){
   const evs=allShocks(CFG,MANUAL).filter(s=>s.tick<=cap).map(s=>({
     when:fmtClock(s.tick),
-    txt: s.type==="exp"? "💸 Liquidity call: show "+fmtPct(s.pct,0)+" of wealth in cash; shortfalls fire-sold at "+fmtPct(s.hc,0)+" haircut" : "📉 "+(s.label||"Crash")+": blue chips −"+Math.round((s.m||0)*100)+"% in one tick"
+    txt: s.type==="exp"? tx("ev_liq",{pct:fmtPct(s.pct,0), hc:fmtPct(s.hc,0)}) : tx("ev_crash",{label:esc(crashName(s)), m:Math.round((s.m||0)*100)})
   }));
   if(LIVE&&LIVE.banner) evs.push({when:"📣", txt:esc(LIVE.banner.text)});
-  $("eventLog").innerHTML=evs.reverse().map(e=>'<li><span class="when">'+e.when+'</span><span>'+e.txt+'</span></li>').join("")||"<li><span style='color:var(--muted)'>Quiet so far. It won't last.</span></li>";
+  $("eventLog").innerHTML=evs.reverse().map(e=>'<li><span class="when">'+e.when+'</span><span>'+e.txt+'</span></li>').join("")||"<li><span style='color:var(--muted)'>"+tx("ev_quiet")+"</span></li>";
 }
+
 
 boot();
 </script>
